@@ -2,14 +2,29 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ZEYAR — Luxury Women's Fashion",
-  description: "Discover ZEYAR's exclusive collection of luxury women's fashion. Elegant dresses, abayas, casual and formal wear crafted for the modern woman.",
-  keywords: "ZEYAR, luxury fashion, women's clothing, elegant dresses, abaya, premium fashion",
+  metadataBase: new URL('https://zeyar.me'),
+  title: {
+    template: "%s | ZEYAR — Luxury Women's Fashion in Pakistan",
+    default: "ZEYAR — Luxury Women's Fashion in Pakistan",
+  },
+  description: "Discover ZEYAR's exclusive collection of luxury women's fashion in Pakistan. Elegant dresses, abayas, and premium designer wear for the modern Pakistani woman.",
+  keywords: "ZEYAR, luxury fashion Pakistan, women's clothing, elegant dresses, designer abaya Pakistan, premium fashion Karachi, Lahore, Islamabad",
   openGraph: {
-    title: "ZEYAR — Luxury Women's Fashion",
-    description: "Discover ZEYAR's exclusive collection of luxury women's fashion.",
+    title: "ZEYAR — Luxury Women's Fashion Pakistan",
+    description: "Discover ZEYAR's exclusive collection of luxury women's fashion in Pakistan.",
+    url: 'https://zeyar.me',
+    siteName: 'ZEYAR',
+    locale: 'en_PK',
     type: "website",
   },
+  twitter: {
+    card: 'summary_large_image',
+    title: "ZEYAR — Luxury Women's Fashion Pakistan",
+    description: "Discover ZEYAR's exclusive collection of luxury women's fashion in Pakistan.",
+  },
+  alternates: {
+    canonical: '/',
+  }
 };
 
 export default function RootLayout({
@@ -18,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en-PK">
       <body suppressHydrationWarning>
         {children}
       </body>
