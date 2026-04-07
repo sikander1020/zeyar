@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, Suspense } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -96,7 +96,7 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
   );
 }
 
-export default function ShopPage() {
+function ShopContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('category') || 'All';
   const initialSort = searchParams.get('sort') === 'newest' ? 'newest' : 'featured';
@@ -213,5 +213,13 @@ export default function ShopPage() {
         )}
       </div>
     </AppShell>
+  );
+}
+
+export default function ShopPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-cream flex items-center justify-center"><p className="text-brown font-inter tracking-[0.2em] uppercase text-xs">Loading...</p></div>}>
+      <ShopContent />
+    </Suspense>
   );
 }
