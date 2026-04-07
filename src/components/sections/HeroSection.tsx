@@ -42,7 +42,7 @@ export default function HeroSection() {
                 className="text-xs tracking-[0.25em] uppercase text-rose-gold font-semibold font-inter"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
-                New Season 2024
+                New Season 2026
               </span>
             </motion.div>
 
