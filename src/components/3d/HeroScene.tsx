@@ -5,25 +5,9 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment, Float, Sphere, MeshDistortMaterial, Ring, Torus } from '@react-three/drei';
 import * as THREE from 'three';
 
-function DesignerGown() {
+function DressMannequin() {
   const groupRef = useRef<THREE.Group>(null!);
   const meshRef = useRef<THREE.Mesh>(null!);
-
-  const points = useMemo(() => {
-    const pts = [];
-    // Outline of a luxury dress (top to bottom)
-    pts.push(new THREE.Vector2(0.15, 2.8));   // Neck
-    pts.push(new THREE.Vector2(0.6, 2.0));    // Bust
-    pts.push(new THREE.Vector2(0.35, 1.0));   // Waist
-    pts.push(new THREE.Vector2(0.8, -0.2));   // Hips
-    pts.push(new THREE.Vector2(1.5, -1.8));   // Lower skirt
-    pts.push(new THREE.Vector2(2.2, -3.0));   // Hemline
-    pts.push(new THREE.Vector2(0.0, -3.0));   // Close the base
-    
-    // Smooth the curve points for elegant 3D lathe
-    const curve = new THREE.SplineCurve(pts);
-    return curve.getPoints(60);
-  }, []);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
@@ -39,20 +23,62 @@ function DesignerGown() {
   });
 
   return (
-    <group ref={groupRef} position={[0, 0, 0]}>
-      {/* Flowing sculpted dress silhouette */}
-      <Float speed={1.5} rotationIntensity={0.2} floatIntensity={0.6}>
-        <mesh position={[0, -0.2, 0]} castShadow>
-          <latheGeometry args={[points, 64]} />
-          <meshPhysicalMaterial
-            color="#E6B7A9"
-            roughness={0.15}
-            metalness={0.3}
-            clearcoat={0.6}
-            clearcoatRoughness={0.2}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
+    <group position={[0, -0.5, 0]}>
+      {/* Classic Tailor's Dress Form Mannequin */}
+      <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.3}>
+        <group ref={groupRef} position={[0, 0, 0]}>
+          {/* Base Stand */}
+          <mesh position={[0, -3.0, 0]} castShadow>
+            <cylinderGeometry args={[0.9, 1.1, 0.1, 32]} />
+            <meshStandardMaterial color="#B76E79" roughness={0.2} metalness={0.8} />
+          </mesh>
+          {/* Pole */}
+          <mesh position={[0, -1.5, 0]} castShadow>
+            <cylinderGeometry args={[0.08, 0.08, 3.0, 16]} />
+            <meshStandardMaterial color="#B76E79" roughness={0.2} metalness={0.8} />
+          </mesh>
+
+          {/* Mannequin Torso */}
+          <group position={[0, 1.2, 0]}>
+            {/* Hips / Lower Body */}
+            <mesh position={[0, -1.0, 0]} scale={[1.2, 1.4, 0.9]} castShadow>
+              <sphereGeometry args={[0.7, 32, 32]} />
+              <meshPhysicalMaterial color="#E6B7A9" roughness={0.3} metalness={0.1} clearcoat={0.5} />
+            </mesh>
+            
+            {/* Waist */}
+            <mesh position={[0, -0.2, 0]} scale={[0.9, 1, 0.75]} castShadow>
+              <cylinderGeometry args={[0.65, 0.75, 0.8, 32]} />
+              <meshPhysicalMaterial color="#E6B7A9" roughness={0.3} metalness={0.1} clearcoat={0.5} />
+            </mesh>
+
+            {/* Chest / Upper Body */}
+            <mesh position={[0, 0.6, 0]} scale={[1.1, 1.1, 0.85]} castShadow>
+              <sphereGeometry args={[0.75, 32, 32]} />
+              <meshPhysicalMaterial color="#E6B7A9" roughness={0.3} metalness={0.1} clearcoat={0.5} />
+            </mesh>
+            
+            {/* Shoulders */}
+            <mesh position={[-0.75, 1.0, 0]} scale={[1, 1, 1]} castShadow>
+              <sphereGeometry args={[0.25, 16, 16]} />
+              <meshPhysicalMaterial color="#E6B7A9" roughness={0.3} metalness={0.1} clearcoat={0.5} />
+            </mesh>
+            <mesh position={[0.75, 1.0, 0]} scale={[1, 1, 1]} castShadow>
+              <sphereGeometry args={[0.25, 16, 16]} />
+              <meshPhysicalMaterial color="#E6B7A9" roughness={0.3} metalness={0.1} clearcoat={0.5} />
+            </mesh>
+
+            {/* Neck & Top Cap */}
+            <mesh position={[0, 1.5, 0]} castShadow>
+              <cylinderGeometry args={[0.22, 0.28, 0.5, 32]} />
+              <meshPhysicalMaterial color="#E6B7A9" roughness={0.3} metalness={0.1} />
+            </mesh>
+            <mesh position={[0, 1.8, 0]} castShadow>
+              <sphereGeometry args={[0.2, 16, 16]} />
+              <meshStandardMaterial color="#B76E79" roughness={0.2} metalness={0.8} />
+            </mesh>
+          </group>
+        </group>
       </Float>
 
       {/* Elegant floating accent spheres */}
@@ -152,7 +178,7 @@ export default function HeroScene() {
       />
 
       <Suspense fallback={null}>
-        <DesignerGown />
+        <DressMannequin />
         <Particles />
         <Environment preset="sunset" />
       </Suspense>
