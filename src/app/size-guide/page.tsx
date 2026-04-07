@@ -4,11 +4,11 @@ import AppShell from '@/components/layout/AppShell';
 import { motion } from 'framer-motion';
 
 const dimensions = [
-  { size: 'XS', uk: '8', shoulders: '13.5', chest: '18.5', waist: '17', hips: '19.5', length: '38' },
-  { size: 'S',  uk: '10', shoulders: '14.0', chest: '19.5', waist: '18', hips: '20.5', length: '39' },
-  { size: 'M',  uk: '12', shoulders: '14.5', chest: '20.5', waist: '19.5', hips: '22.5', length: '40' },
-  { size: 'L',  uk: '14', shoulders: '15.5', chest: '22.0', waist: '21', hips: '24.5', length: '41' },
-  { size: 'XL', uk: '16', shoulders: '16.5', chest: '23.5', waist: '22.5', hips: '26.0', length: '42' },
+  { size: 'XS', pk: '8', shoulders: '13.5', chest: '18.5', waist: '17', hips: '19.5', length: '38' },
+  { size: 'S',  pk: '10', shoulders: '14.0', chest: '19.5', waist: '18', hips: '20.5', length: '39' },
+  { size: 'M',  pk: '12', shoulders: '14.5', chest: '20.5', waist: '19.5', hips: '22.5', length: '40' },
+  { size: 'L',  pk: '14', shoulders: '15.5', chest: '22.0', waist: '21', hips: '24.5', length: '41' },
+  { size: 'XL', pk: '16', shoulders: '16.5', chest: '23.5', waist: '22.5', hips: '26.0', length: '42' },
 ];
 
 export default function SizeGuidePage() {
@@ -51,7 +51,7 @@ export default function SizeGuidePage() {
                 <thead>
                   <tr className="bg-brown text-cream text-xs uppercase tracking-[0.15em] font-inter">
                     <th className="py-5 px-6 font-semibold">Size</th>
-                    <th className="py-5 px-6 font-semibold">UK Size</th>
+                    <th className="py-5 px-6 font-semibold">PK Size</th>
                     <th className="py-5 px-6 font-semibold">Shoulder (in)</th>
                     <th className="py-5 px-6 font-semibold">Chest (in)</th>
                     <th className="py-5 px-6 font-semibold">Waist (in)</th>
@@ -63,7 +63,7 @@ export default function SizeGuidePage() {
                   {dimensions.map((row) => (
                     <tr key={row.size} className="hover:bg-cream/40 transition-colors duration-200">
                       <td className="py-5 px-6 text-brown font-playfair font-semibold text-lg">{row.size}</td>
-                      <td className="py-5 px-6 text-brown-muted font-inter text-sm">{row.uk}</td>
+                      <td className="py-5 px-6 text-brown-muted font-inter text-sm">{row.pk}</td>
                       <td className="py-5 px-6 text-brown/80 font-inter text-sm">{row.shoulders}&quot;</td>
                       <td className="py-5 px-6 text-brown/80 font-inter text-sm">{row.chest}&quot;</td>
                       <td className="py-5 px-6 text-brown/80 font-inter text-sm">{row.waist}&quot;</td>
