@@ -175,7 +175,7 @@ export default function Navbar() {
               </ul>
               <div className="mt-auto pt-8 border-t border-nude/30">
                 <p className="text-[11px] tracking-[0.15em] uppercase text-brown-muted font-inter">
-                  © 2024 ZEYAR. Luxury Defined.
+                  © 2026 ZEYAR. Luxury Defined.
                 </p>
               </div>
             </motion.div>

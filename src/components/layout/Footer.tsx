@@ -123,7 +123,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="border-t border-cream/10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-cream/30 font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-            © 2024 ZEYAR. All rights reserved.
+            © 2026 ZEYAR. All rights reserved.
           </p>
           <div className="flex gap-6">
             {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((item) => (
