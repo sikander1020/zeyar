@@ -146,7 +146,7 @@ export default function HeroSection() {
                 Velvet Reverie
               </p>
               <p className="text-xs text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                $289
+                Rs 80,920
               </p>
             </motion.div>
 
