@@ -86,7 +86,7 @@ export default function NewArrivalsSlider() {
                       {product.name}
                     </h3>
                     <p className="text-sm text-nude font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      ${product.price}
+                      Rs {(product.price * 280).toLocaleString()}
                     </p>
                   </div>
                 </div>

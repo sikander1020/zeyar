@@ -75,7 +75,7 @@ export default function WishlistPage() {
                       </div>
                     </div>
                     <p className="text-sm font-semibold text-brown font-inter mb-6" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      ${product.price}
+                      Rs {(product.price * 280).toLocaleString()}
                     </p>
 
                     <div className="mt-auto flex gap-3">

@@ -93,11 +93,11 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
           </div>
           <div className="text-right">
             <p className="text-base font-semibold text-brown font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-              ${product.price}
+              Rs {(product.price * 280).toLocaleString()}
             </p>
             {product.originalPrice && (
               <p className="text-xs text-brown-muted line-through font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                ${product.originalPrice}
+                Rs {(product.originalPrice * 280).toLocaleString()}
               </p>
             )}
           </div>

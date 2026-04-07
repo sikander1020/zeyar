@@ -85,9 +85,9 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
             ))}
           </div>
           <div className="text-right">
-            <span className="text-sm font-semibold text-brown font-inter">${product.price}</span>
+            <span className="text-sm font-semibold text-brown font-inter">Rs {(product.price * 280).toLocaleString()}</span>
             {product.originalPrice && (
-              <span className="text-xs text-brown-muted line-through font-inter ml-1">${product.originalPrice}</span>
+              <span className="text-xs text-brown-muted line-through font-inter ml-1">Rs {(product.originalPrice * 280).toLocaleString()}</span>
             )}
           </div>
         </div>

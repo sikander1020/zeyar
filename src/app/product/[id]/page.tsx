@@ -166,12 +166,12 @@ export default function ProductPage() {
               {/* Price */}
               <div className="flex items-baseline gap-3 mb-8">
                 <span className="text-3xl font-playfair font-semibold text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  ${product.price}
+                  Rs {(product.price * 280).toLocaleString()}
                 </span>
                 {product.originalPrice && (
                   <>
                     <span className="text-lg text-brown-muted line-through font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      ${product.originalPrice}
+                      Rs {(product.originalPrice * 280).toLocaleString()}
                     </span>
                     <span className="text-sm text-rose-gold font-semibold font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
                       {Math.round((1 - product.price / product.originalPrice) * 100)}% off
@@ -300,7 +300,7 @@ export default function ProductPage() {
                       <Image src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
                     </div>
                     <h3 className="text-sm font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>{p.name}</h3>
-                    <p className="text-sm text-brown-muted font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>${p.price}</p>
+                    <p className="text-sm text-brown-muted font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>Rs {(p.price * 280).toLocaleString()}</p>
                   </Link>
                 ))}
               </div>
