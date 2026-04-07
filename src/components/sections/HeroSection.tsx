@@ -97,9 +97,9 @@ export default function HeroSection() {
               className="flex gap-10 mt-14 pt-10 border-t border-nude/30"
             >
               {[
-                { value: '500+', label: 'Luxury Pieces' },
-                { value: '15K+', label: 'Happy Clients' },
-                { value: '4.9★', label: 'Average Rating' },
+                { value: '50+', label: 'Exclusive Designs' },
+                { value: '100%', label: 'Premium Quality' },
+                { value: '24/7', label: 'Client Support' },
               ].map(({ value, label }) => (
                 <div key={label}>
                   <p
@@ -163,7 +163,7 @@ export default function HeroSection() {
                 ))}
               </div>
               <p className="text-xs text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                &quot;Absolutely breathtaking quality&quot;
+                &quot;A stunning debut collection!&quot;
               </p>
             </motion.div>
           </motion.div>
