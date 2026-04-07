@@ -155,8 +155,12 @@ export default function HeroScene() {
       />
 
       <Suspense fallback={null}>
-        <ElegantDress />
-        <Particles />
+        <group scale={0.65} position={[0, -0.3, 0]}>
+          <ElegantDress />
+        </group>
+        <group scale={0.8}>
+          <Particles />
+        </group>
         <Environment preset="sunset" />
       </Suspense>
     </Canvas>
