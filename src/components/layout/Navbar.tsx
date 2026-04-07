@@ -57,7 +57,7 @@ export default function Navbar() {
               className="text-[9px] tracking-[0.35em] uppercase text-brown-muted font-inter font-light"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
-              Luxury Fashion
+              Modern and Royal Touch
             </span>
           </Link>
 

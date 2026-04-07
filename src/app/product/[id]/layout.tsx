@@ -14,10 +14,10 @@ export function generateMetadata({ params }: { params: { id: string } }): Metada
   }
   return {
     title: product.name,
-    description: `Shop the ${product.name} at ZEYAR, Pakistan's premium luxury fashion destination. ${product.description}`,
+    description: `Shop the ${product.name} at ZEYAR, Pakistan's premium modern and royal touch destination. ${product.description}`,
     openGraph: {
       title: `${product.name} | ZEYAR Pakistan`,
-      description: `Shop the ${product.name} at ZEYAR, Pakistan's premium luxury fashion destination.`,
+      description: `Shop the ${product.name} at ZEYAR, Pakistan's premium modern and royal touch destination.`,
       url: `https://zeyar.me/product/${product.id}`,
       images: [
         {
@@ -32,7 +32,7 @@ export function generateMetadata({ params }: { params: { id: string } }): Metada
     twitter: {
       card: 'summary_large_image',
       title: `${product.name} | ZEYAR Pakistan`,
-      description: `Shop the ${product.name} at ZEYAR, Pakistan's premium luxury fashion destination.`,
+      description: `Shop the ${product.name} at ZEYAR, Pakistan's premium modern and royal touch destination.`,
       images: [product.images[0] || ''],
     }
   };

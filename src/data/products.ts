@@ -342,7 +342,7 @@ export const testimonials = [
     title: 'Entrepreneur',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80',
     rating: 5,
-    text: 'The quality speaks for itself. I\'ve ordered from ZEYAR three times now and each piece is better than the last. The packaging alone feels like an experience — this is what luxury fashion should feel like.',
+    text: 'The quality speaks for itself. I\'ve ordered from ZEYAR three times now and each piece is better than the last. The packaging alone feels like an experience — this is what modern and royal touch should feel like.',
     product: 'Boardroom Blazer Set',
   },
 ];

@@ -56,7 +56,7 @@ export default function ReturnsPage() {
 
             <h2 className="text-2xl font-playfair text-brown mb-4">Non-Returnable Items</h2>
             <p className="mb-8">
-              For hygiene reasons and the bespoke nature of luxury fashion, the following items cannot be returned or exchanged:
+              For hygiene reasons and the bespoke nature of modern and royal touch, the following items cannot be returned or exchanged:
             </p>
             <ul className="list-disc pl-6 mb-8 space-y-2">
               <li>Discounted or clearance items purchased during sales.</li>

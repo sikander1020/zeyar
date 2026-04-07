@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     default: "ZEYAR — Luxury Women's Fashion in Pakistan",
   },
   description: "Discover ZEYAR's exclusive collection of luxury women's fashion in Pakistan. Elegant one-piece statement pieces, matched two-piece sets, and premium designer wear for the modern Pakistani woman.",
-  keywords: "ZEYAR, luxury fashion Pakistan, women's clothing, elegant dresses, one piece dresses, two piece suits, premium fashion Karachi, Lahore, Islamabad",
+  keywords: "ZEYAR, modern and royal touch Pakistan, women's clothing, elegant dresses, one piece dresses, two piece suits, premium fashion Karachi, Lahore, Islamabad",
   openGraph: {
     title: "ZEYAR — Luxury Women's Fashion Pakistan",
     description: "Discover ZEYAR's exclusive collection of luxury women's fashion in Pakistan.",

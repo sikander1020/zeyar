@@ -46,7 +46,7 @@ export default function Footer() {
               ZEYAR
             </span>
             <p className="text-sm leading-relaxed text-cream/60 mb-8 max-w-xs font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Born from a love of femininity and grace, ZEYAR crafts luxury fashion for the modern woman — where elegance meets authenticity.
+              Born from a love of femininity and grace, ZEYAR crafts modern and royal touch for the modern woman — where elegance meets authenticity.
             </p>
             <div className="flex gap-4">
               {socials.map(({ icon: Icon, href, label }) => (
