@@ -8,7 +8,7 @@ const footerLinks = {
   Shop: [
     { label: 'New Arrivals', href: '/shop?sort=newest' },
     { label: 'Dresses', href: '/shop?category=Dresses' },
-    { label: 'Abaya', href: '/shop?category=Abaya' },
+    { label: 'Two-Piece Sets', href: '/shop?category=Two-Piece' },
     { label: 'Casual', href: '/shop?category=Casual' },
     { label: 'Formal', href: '/shop?category=Formal' },
   ],
