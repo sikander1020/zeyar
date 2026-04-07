@@ -104,13 +104,13 @@ export default function AboutPage() {
             <div className="divider-rose" />
             <div className="space-y-6 mt-8 text-brown-muted font-inter leading-relaxed text-base" style={{ fontFamily: "'Inter', sans-serif" }}>
               <p>
-                ZEYAR began in 2018 as a small atelier in the heart of the city, where founder Nadia Zeyar spent years studying couture construction in Paris and textile art in Florence. She returned with a dream: to bring world-class luxury to women who deserved to feel extraordinary every day.
+                ZEYAR began in 2026 as a small atelier in the heart of Islamabad. Built collaboratively by three partners with a shared passion for design, the brand was born from a singular dream: to bring world-class, premium luxury to women who deserved to feel extraordinary every day.
               </p>
               <p>
                 The name ZEYAR — meaning &quot;brightness&quot; in its root tongue — was chosen intentionally. Every piece we create is designed to illuminate the woman who wears it, to highlight her individuality, her power, her grace.
               </p>
               <p>
-                Today, ZEYAR dresses women across 40 countries. From the CEO commanding a boardroom in our tailored power suits, to the bride shimmering in our crystal abaya, to the mother who simply wants to feel beautiful at school pickup — we design for all of them.
+                Today, ZEYAR dresses women across the globe. From the CEO commanding a boardroom in our tailored power suits, to the elegant woman shimmering in our premium two-piece sets, to the mother who simply wants to feel beautiful at school pickup — we design for all of them.
               </p>
             </div>
           </motion.div>
