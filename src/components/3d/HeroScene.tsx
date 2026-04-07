@@ -155,7 +155,7 @@ export default function HeroScene() {
       />
 
       <Suspense fallback={null}>
-        <group scale={0.65} position={[0, -0.3, 0]}>
+        <group scale={0.68} position={[0, 0.4, 0]}>
           <ElegantDress />
         </group>
         <group scale={0.8}>
