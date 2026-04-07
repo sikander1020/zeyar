@@ -1,123 +1,100 @@
 'use client';
 
-import { useRef, Suspense, useMemo } from 'react';
+import { useRef, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Environment, Float, Sphere, MeshDistortMaterial, Ring, Torus } from '@react-three/drei';
 import * as THREE from 'three';
 
-function DressMannequin() {
+function ElegantDress() {
   const groupRef = useRef<THREE.Group>(null!);
   const meshRef = useRef<THREE.Mesh>(null!);
 
   useFrame((state) => {
     const t = state.clock.getElapsedTime();
     if (groupRef.current) {
-      // Gentle bouncing/swaying of the mannequin
-      groupRef.current.rotation.y = Math.sin(t * 0.3) * 0.2;
+      groupRef.current.rotation.y = Math.sin(t * 0.3) * 0.15;
     }
     if (meshRef.current) {
-      // Rotate the orbiting rings around the dress
       meshRef.current.rotation.y = t * 0.4;
-      meshRef.current.rotation.x = Math.sin(t * 0.5) * 0.15;
     }
   });
 
   return (
-    <group position={[0, -0.5, 0]}>
-      {/* Classic Tailor's Dress Form Mannequin */}
-      <Float speed={1.5} rotationIntensity={0.1} floatIntensity={0.3}>
-        <group ref={groupRef} position={[0, 0, 0]}>
-          {/* Base Stand */}
-          <mesh position={[0, -3.0, 0]} castShadow>
-            <cylinderGeometry args={[0.9, 1.1, 0.1, 32]} />
-            <meshStandardMaterial color="#B76E79" roughness={0.2} metalness={0.8} />
+    <group ref={groupRef} position={[0, 0, 0]}>
+      {/* Main dress body - elongated cone shape */}
+      <Float speed={1.5} rotationIntensity={0.3} floatIntensity={0.8}>
+        <mesh position={[0, -0.5, 0]} castShadow>
+          <coneGeometry args={[1.6, 4.5, 64, 1, true]} />
+          <MeshDistortMaterial
+            color="#E6B7A9"
+            roughness={0.15}
+            metalness={0.3}
+            distort={0.08}
+            speed={1.5}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+
+        {/* Bodice */}
+        <mesh position={[0, 2, 0]} castShadow>
+          <cylinderGeometry args={[0.55, 0.75, 1.8, 32]} />
+          <meshStandardMaterial
+            color="#D4957F"
+            roughness={0.1}
+            metalness={0.5}
+          />
+        </mesh>
+
+        {/* Neckline */}
+        <mesh position={[0, 2.95, 0]}>
+          <torusGeometry args={[0.45, 0.06, 16, 64]} />
+          <meshStandardMaterial color="#B76E79" roughness={0.05} metalness={0.8} />
+        </mesh>
+
+        {/* Shoulder details */}
+        {[-0.6, 0.6].map((x, i) => (
+          <mesh key={i} position={[x, 2.7, 0]}>
+            <sphereGeometry args={[0.12, 16, 16]} />
+            <meshStandardMaterial color="#C88A75" roughness={0.1} metalness={0.6} />
           </mesh>
-          {/* Pole */}
-          <mesh position={[0, -1.5, 0]} castShadow>
-            <cylinderGeometry args={[0.08, 0.08, 3.0, 16]} />
-            <meshStandardMaterial color="#B76E79" roughness={0.2} metalness={0.8} />
-          </mesh>
-
-          {/* Mannequin Torso */}
-          <group position={[0, 1.2, 0]}>
-            {/* Hips / Lower Body */}
-            <mesh position={[0, -1.0, 0]} scale={[1.2, 1.4, 0.9]} castShadow>
-              <sphereGeometry args={[0.7, 32, 32]} />
-              <meshPhysicalMaterial color="#E6B7A9" roughness={0.3} metalness={0.1} clearcoat={0.5} />
-            </mesh>
-            
-            {/* Waist */}
-            <mesh position={[0, -0.2, 0]} scale={[0.9, 1, 0.75]} castShadow>
-              <cylinderGeometry args={[0.65, 0.75, 0.8, 32]} />
-              <meshPhysicalMaterial color="#E6B7A9" roughness={0.3} metalness={0.1} clearcoat={0.5} />
-            </mesh>
-
-            {/* Chest / Upper Body */}
-            <mesh position={[0, 0.6, 0]} scale={[1.1, 1.1, 0.85]} castShadow>
-              <sphereGeometry args={[0.75, 32, 32]} />
-              <meshPhysicalMaterial color="#E6B7A9" roughness={0.3} metalness={0.1} clearcoat={0.5} />
-            </mesh>
-            
-            {/* Shoulders */}
-            <mesh position={[-0.75, 1.0, 0]} scale={[1, 1, 1]} castShadow>
-              <sphereGeometry args={[0.25, 16, 16]} />
-              <meshPhysicalMaterial color="#E6B7A9" roughness={0.3} metalness={0.1} clearcoat={0.5} />
-            </mesh>
-            <mesh position={[0.75, 1.0, 0]} scale={[1, 1, 1]} castShadow>
-              <sphereGeometry args={[0.25, 16, 16]} />
-              <meshPhysicalMaterial color="#E6B7A9" roughness={0.3} metalness={0.1} clearcoat={0.5} />
-            </mesh>
-
-            {/* Neck & Top Cap */}
-            <mesh position={[0, 1.5, 0]} castShadow>
-              <cylinderGeometry args={[0.22, 0.28, 0.5, 32]} />
-              <meshPhysicalMaterial color="#E6B7A9" roughness={0.3} metalness={0.1} />
-            </mesh>
-            <mesh position={[0, 1.8, 0]} castShadow>
-              <sphereGeometry args={[0.2, 16, 16]} />
-              <meshStandardMaterial color="#B76E79" roughness={0.2} metalness={0.8} />
-            </mesh>
-          </group>
-        </group>
+        ))}
       </Float>
 
-      {/* Elegant floating accent spheres */}
-      {Array.from({ length: 15 }, (_, i) => {
-        const angle = (i / 15) * Math.PI * 2;
-        const r = 2.8 + Math.random() * 1.5;
+      {/* Floating fabric particles */}
+      {Array.from({ length: 12 }, (_, i) => {
+        const angle = (i / 12) * Math.PI * 2;
+        const r = 2.5 + Math.random() * 0.8;
         return (
           <Float key={i} speed={0.8 + Math.random()} floatIntensity={0.6} rotationIntensity={0.2}>
             <mesh
               position={[
                 Math.cos(angle) * r,
-                -2 + Math.random() * 5,
+                -1.5 + Math.random() * 3,
                 Math.sin(angle) * r,
               ]}
             >
-              <sphereGeometry args={[0.04 + Math.random() * 0.05, 16, 16]} />
+              <sphereGeometry args={[0.04 + Math.random() * 0.05, 8, 8]} />
               <meshStandardMaterial
                 color={i % 2 === 0 ? '#E6B7A9' : '#B76E79'}
-                roughness={0.1}
-                metalness={0.8}
+                roughness={0}
+                metalness={1}
                 emissive={i % 2 === 0 ? '#E6B7A9' : '#B76E79'}
-                emissiveIntensity={0.4}
+                emissiveIntensity={0.5}
               />
             </mesh>
           </Float>
         );
       })}
 
-      {/* The requested orbiting sci-fi rings from the original */}
-      <group ref={meshRef} position={[0, -0.8, 0]}>
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[3.2, 0.015, 16, 100]} />
-          <meshStandardMaterial color="#B76E79" roughness={0.1} metalness={1} />
-        </mesh>
-        <mesh rotation={[Math.PI / 3, 0.5, 0]}>
-          <torusGeometry args={[3.8, 0.01, 16, 100]} />
-          <meshStandardMaterial color="#E6B7A9" roughness={0.1} metalness={0.9} transparent opacity={0.6} />
-        </mesh>
-      </group>
+      {/* Rotating rings */}
+      <mesh ref={meshRef} position={[0, -0.5, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[2.8, 0.018, 8, 80]} />
+        <meshStandardMaterial color="#B76E79" roughness={0} metalness={1} />
+      </mesh>
+      <mesh position={[0, -0.5, 0]} rotation={[Math.PI / 3, 0.5, 0]}>
+        <torusGeometry args={[3.2, 0.012, 8, 80]} />
+        <meshStandardMaterial color="#E6B7A9" roughness={0} metalness={0.9} transparent opacity={0.6} />
+      </mesh>
     </group>
   );
 }
@@ -178,7 +155,7 @@ export default function HeroScene() {
       />
 
       <Suspense fallback={null}>
-        <DressMannequin />
+        <ElegantDress />
         <Particles />
         <Environment preset="sunset" />
       </Suspense>
