@@ -7,8 +7,8 @@ export const metadata: Metadata = {
     template: "%s | ZEYAR — Luxury Women's Fashion in Pakistan",
     default: "ZEYAR — Luxury Women's Fashion in Pakistan",
   },
-  description: "Discover ZEYAR's exclusive collection of luxury women's fashion in Pakistan. Elegant dresses, abayas, and premium designer wear for the modern Pakistani woman.",
-  keywords: "ZEYAR, luxury fashion Pakistan, women's clothing, elegant dresses, designer abaya Pakistan, premium fashion Karachi, Lahore, Islamabad",
+  description: "Discover ZEYAR's exclusive collection of luxury women's fashion in Pakistan. Elegant one-piece statement pieces, matched two-piece sets, and premium designer wear for the modern Pakistani woman.",
+  keywords: "ZEYAR, luxury fashion Pakistan, women's clothing, elegant dresses, one piece dresses, two piece suits, premium fashion Karachi, Lahore, Islamabad",
   openGraph: {
     title: "ZEYAR — Luxury Women's Fashion Pakistan",
     description: "Discover ZEYAR's exclusive collection of luxury women's fashion in Pakistan.",
