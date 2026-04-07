@@ -324,7 +324,7 @@ export const testimonials = [
     title: 'Fashion Editor',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80',
     rating: 5,
-    text: 'ZEYAR is unlike anything I\'ve experienced. The craftsmanship is extraordinary — you can feel the love and attention in every stitch. My Velvet Reverie Gown received more compliments in one evening than any piece I\'ve owned.',
+    text: "I was so excited to be one of the first to order from ZEYAR's launch! The craftsmanship is extraordinary — you can feel the love and attention in every stitch. My Velvet Reverie Gown received so many compliments.",
     product: 'Velvet Reverie Gown',
   },
   {
@@ -333,7 +333,7 @@ export const testimonials = [
     title: 'Interior Designer',
     avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80',
     rating: 5,
-    text: 'I discovered ZEYAR looking for modest fashion that didn\'t compromise on elegance. Their Crystal Embroidered One Piece is a masterpiece. Worth every penny — people stopped me to ask where it was from.',
+    text: "I purchased from their brand new debut collection looking for modest fashion that didn't compromise on elegance. The Crystal Embroidered piece is an absolute masterpiece. Worth every penny!",
     product: 'Crystal Embroidered One Piece',
   },
   {
@@ -342,7 +342,7 @@ export const testimonials = [
     title: 'Entrepreneur',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80',
     rating: 5,
-    text: 'The quality speaks for itself. I\'ve ordered from ZEYAR three times now and each piece is better than the last. The packaging alone feels like an experience — this is what modern and royal touch should feel like.',
+    text: "The quality of this new launch speaks for itself! The packaging alone feels like an incredible unboxing experience — this is exactly what modern and royal touch should feel like.",
     product: 'Boardroom Blazer Set',
   },
 ];

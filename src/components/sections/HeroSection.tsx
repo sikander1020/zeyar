@@ -97,7 +97,7 @@ export default function HeroSection() {
               className="flex gap-10 mt-14 pt-10 border-t border-nude/30"
             >
               {[
-                { value: '50+', label: 'Exclusive Designs' },
+                { value: 'Curated', label: 'Exclusive Designs' },
                 { value: '100%', label: 'Premium Quality' },
                 { value: '24/7', label: 'Client Support' },
               ].map(({ value, label }) => (
