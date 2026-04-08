@@ -206,6 +206,54 @@ export async function GET() {
       count:  s.count,
     }));
 
+    // ── City Stats (flat rows) ───────────────────────────────────────────
+    const cityRaw = await Order.aggregate([
+      { $match: { status: { $ne: 'cancelled' } } },
+      {
+        $group: {
+          _id:      '$customer.city',
+          orders:   { $sum: 1 },
+          revenue:  { $sum: '$total' },
+          avgSpend: { $avg: '$total' },
+        },
+      },
+      { $sort: { orders: -1 } },
+    ]);
+
+    const totalOrderCount = cityRaw.reduce((s, c) => s + c.orders, 0) || 1;
+    const cityStats = cityRaw.map((c) => ({
+      city:          c._id ?? 'Unknown',
+      orders:        c.orders,
+      revenue:       +c.revenue.toFixed(2),
+      avgSpend:      +c.avgSpend.toFixed(2),
+      pctOfOrders:   +((c.orders / totalOrderCount) * 100).toFixed(1),
+    }));
+
+    // ── Customer list (flat rows) ────────────────────────────────────────
+    const custRaw = await Order.aggregate([
+      {
+        $group: {
+          _id:        '$customer.email',
+          firstName:  { $first: '$customer.firstName' },
+          lastName:   { $first: '$customer.lastName' },
+          city:       { $first: '$customer.city' },
+          state:      { $first: '$customer.state' },
+          orderCount: { $sum: 1 },
+          totalSpend: { $sum: '$total' },
+        },
+      },
+      { $sort: { totalSpend: -1 } },
+    ]);
+
+    const customers = custRaw.map((c) => ({
+      email:      c._id ?? '',
+      name:       `${c.firstName ?? ''} ${c.lastName ?? ''}`.trim(),
+      city:       c.city ?? '',
+      state:      c.state ?? '',
+      orderCount: c.orderCount,
+      totalSpend: +c.totalSpend.toFixed(2),
+    }));
+
     // ── Inventory (flat rows) ────────────────────────────────────────────
     const rawProducts = await Product.find({})
       .select('productId name category price costPrice stock sold')
@@ -250,6 +298,8 @@ export async function GET() {
       topProducts,
       paymentSplit,
       orderStatus,
+      cityStats,
+      customers,
       inventory,
     });
   } catch (err) {
