@@ -1,9 +1,35 @@
-'use client';
+﻿'use client';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Globe, ExternalLink, Link } from 'lucide-react';
+import { Mail, Phone, MapPin } from 'lucide-react';
 import AppShell from '@/components/layout/AppShell';
+
+function IconInstagram({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="6" ry="6"/>
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+    </svg>
+  );
+}
+
+function IconTikTok({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M21 7.337a5.5 5.5 0 0 1-3.29-1.075A5.5 5.5 0 0 1 15.5 2H12v13.5a2.5 2.5 0 1 1-3.5-2.291V9.638A6.5 6.5 0 0 0 5.5 16a6.5 6.5 0 0 0 6.5 6.5A6.5 6.5 0 0 0 18.5 16V9.101A9.46 9.46 0 0 0 21 9.5V7.337z"/>
+    </svg>
+  );
+}
+
+function IconFacebook({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047v-2.66c0-3.025 1.791-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.265h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+    </svg>
+  );
+}
 
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
@@ -67,9 +93,9 @@ export default function ContactPage() {
                 </h3>
                 <div className="flex gap-3">
                   {[
-                    { icon: Globe, href: 'https://instagram.com', label: 'Instagram' },
-                    { icon: ExternalLink, href: 'https://facebook.com', label: 'Facebook' },
-                    { icon: Link, href: 'https://twitter.com', label: 'Twitter' },
+                    { icon: IconInstagram, href: 'https://instagram.com/zaybaash', label: 'Instagram' },
+                    { icon: IconTikTok,    href: 'https://tiktok.com/@zaybaash',   label: 'TikTok'    },
+                    { icon: IconFacebook,  href: 'https://facebook.com/zaybaash',  label: 'Facebook'  },
                   ].map(({ icon: Icon, href, label }) => (
                     <a
                       key={label}
@@ -79,7 +105,7 @@ export default function ContactPage() {
                       aria-label={label}
                       className="w-10 h-10 border border-nude flex items-center justify-center text-brown hover:bg-nude hover:text-white hover:border-nude transition-all duration-300"
                     >
-                      <Icon size={15} strokeWidth={1.5} />
+                      <Icon size={16} />
                     </a>
                   ))}
                 </div>
