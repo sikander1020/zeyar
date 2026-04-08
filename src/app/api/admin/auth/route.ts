@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createHash, randomBytes } from 'crypto';
+import { createHash } from 'crypto';
 
 const PASSWORD_HASH = process.env.ADMIN_PASSWORD_HASH as string;
 const TOKEN_SECRET  = process.env.ADMIN_TOKEN_SECRET  as string;
@@ -31,5 +31,4 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Suppress unused-variable warning — randomBytes used for token secret generation hint
-void randomBytes;
+

@@ -53,9 +53,13 @@ interface DashData {
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-const fmt = (n: number) =>
+const fmt  = (n: number) =>
   new Intl.NumberFormat('en-PK', { style: 'currency', currency: 'PKR', maximumFractionDigits: 0 }).format(n);
 const fmtN = (n: number) => new Intl.NumberFormat('en').format(n);
+
+// Recharts tooltip formatter — typed to avoid ValueType/NameType mismatch
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TFmt = (value: any) => [string, string] | string;
 
 function KpiCard({ label, value, sub, accent = false }: { label: string; value: string; sub?: string; accent?: boolean }) {
   return (
@@ -229,9 +233,9 @@ function OverviewTab({ data }: { data: DashData }) {
               </linearGradient>
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#F5EDE6" />
-            <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v: string) => v.slice(5)} />
-            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} />
-            <Tooltip formatter={(v: number) => [fmt(v), 'Revenue']} />
+            <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v) => String(v).slice(5)} />
+            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${(Number(v)/1000).toFixed(0)}k`} />
+            <Tooltip formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
             <Area type="monotone" dataKey="revenue" stroke={ROSE} strokeWidth={2.5} fill="url(#revGrad)" />
           </AreaChart>
         </ResponsiveContainer>
@@ -256,7 +260,7 @@ function OverviewTab({ data }: { data: DashData }) {
               <Pie data={data.paymentSplit} dataKey="revenue" nameKey="method" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
                 {data.paymentSplit.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip formatter={(v: number) => [fmt(v), 'Revenue']} />
+              <Tooltip formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -276,7 +280,7 @@ function SalesTab({ data }: { data: DashData }) {
             <CartesianGrid strokeDasharray="3 3" stroke="#F5EDE6" horizontal={false} />
             <XAxis type="number" tick={{ fontSize: 11 }} />
             <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={120} />
-            <Tooltip formatter={(v: number) => [fmtN(v), 'Units Sold']} />
+            <Tooltip formatter={((v) => [fmtN(v as number), 'Units Sold']) as TFmt} />
             <Bar dataKey="unitsSold" fill={ROSE} radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
@@ -291,7 +295,7 @@ function SalesTab({ data }: { data: DashData }) {
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine>
                 {data.categoryRevenue.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip formatter={(v: number) => [fmt(v), 'Revenue']} />
+              <Tooltip formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>
@@ -301,9 +305,9 @@ function SalesTab({ data }: { data: DashData }) {
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={data.topProducts.slice(0, 10)} layout="vertical" margin={{ left: 110 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F5EDE6" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} />
+              <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={(v) => `${(Number(v)/1000).toFixed(0)}k`} />
               <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={110} />
-              <Tooltip formatter={(v: number) => [fmt(v), 'Revenue']} />
+              <Tooltip formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
               <Bar dataKey="revenue" fill="#D4957F" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -407,7 +411,7 @@ function InventoryTab({ data }: { data: DashData }) {
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data.inventory} margin={{ left: 10 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#F5EDE6" />
-            <XAxis dataKey="name" tick={{ fontSize: 10 }} tickFormatter={(v: string) => v.split(' ').slice(0, 2).join(' ')} />
+            <XAxis dataKey="name" tick={{ fontSize: 10 }} tickFormatter={(v) => String(v).split(' ').slice(0, 2).join(' ')} />
             <YAxis tick={{ fontSize: 11 }} />
             <Tooltip />
             <Legend />
@@ -476,8 +480,8 @@ function FinanceTab({ data }: { data: DashData }) {
             <BarChart data={cogsData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F5EDE6" />
               <XAxis dataKey="label" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 11 }} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} />
-              <Tooltip formatter={(v: number) => [fmt(v)]} />
+              <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${(Number(v)/1000).toFixed(0)}k`} />
+            <Tooltip formatter={((v) => fmt(v as number)) as TFmt} />
               <Bar dataKey="value" radius={[6, 6, 0, 0]}>
                 {cogsData.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
               </Bar>
@@ -492,7 +496,7 @@ function FinanceTab({ data }: { data: DashData }) {
                 label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
                 {data.paymentSplit.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip formatter={(v: number) => [fmt(v), 'Revenue']} />
+              <Tooltip formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
               <Legend />
             </PieChart>
           </ResponsiveContainer>
@@ -511,8 +515,8 @@ function FinanceTab({ data }: { data: DashData }) {
             </defs>
             <CartesianGrid strokeDasharray="3 3" stroke="#F5EDE6" />
             <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} />
-            <Tooltip formatter={(v: number) => [fmt(v), 'Revenue']} />
+            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${(Number(v)/1000).toFixed(0)}k`} />
+            <Tooltip formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
             <Area type="monotone" dataKey="revenue" stroke={ROSE} strokeWidth={2.5} fill="url(#mRevGrad)" />
           </AreaChart>
         </ResponsiveContainer>
@@ -554,9 +558,9 @@ function LocationsTab({ data }: { data: DashData }) {
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={data.cityStats} layout="vertical" margin={{ left: 80 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F5EDE6" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} />
+              <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={(v) => `${(Number(v)/1000).toFixed(0)}k`} />
               <YAxis type="category" dataKey="city" tick={{ fontSize: 11 }} width={80} />
-              <Tooltip formatter={(v: number) => [fmt(v), 'Revenue']} />
+              <Tooltip formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
               <Bar dataKey="revenue" fill="#D4957F" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -566,9 +570,9 @@ function LocationsTab({ data }: { data: DashData }) {
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={data.cityStats} layout="vertical" margin={{ left: 80 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F5EDE6" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={(v: number) => `${(v/1000).toFixed(0)}k`} />
+              <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={(v) => `${(Number(v)/1000).toFixed(0)}k`} />
               <YAxis type="category" dataKey="city" tick={{ fontSize: 11 }} width={80} />
-              <Tooltip formatter={(v: number) => [fmt(v), 'Avg Spend']} />
+              <Tooltip formatter={((v) => [fmt(v as number), 'Avg Spend']) as TFmt} />
               <Bar dataKey="avgSpend" fill="#6B5247" radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
