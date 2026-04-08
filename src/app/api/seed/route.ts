@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Product from '@/models/Product';
 
@@ -36,7 +36,7 @@ export async function GET() {
         costPrice: Math.round(p.price * COST_RATIO),
         stock:     50,
         sold:      0,
-        isNew:     ['zaybaash-001','zaybaash-007','zaybaash-009'].includes(p.productId),
+        isNewArrival:     ['zaybaash-001','zaybaash-007','zaybaash-009'].includes(p.productId),
         isSale:    !!p.originalPrice,
         isBestseller: ['zaybaash-002','zaybaash-005','zaybaash-012'].includes(p.productId),
       });

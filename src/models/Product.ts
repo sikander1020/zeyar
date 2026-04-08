@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document } from 'mongoose';
+﻿import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IProduct extends Document {
   productId: string;
@@ -9,7 +9,7 @@ export interface IProduct extends Document {
   costPrice: number;
   stock: number;
   sold: number;
-  isNew?: boolean;
+  isNewArrival?: boolean;
   isSale?: boolean;
   isBestseller?: boolean;
 }
@@ -24,7 +24,7 @@ const ProductSchema = new Schema<IProduct>(
     costPrice:     { type: Number, required: true },
     stock:         { type: Number, default: 50 },
     sold:          { type: Number, default: 0 },
-    isNew:         { type: Boolean, default: false },
+    isNewArrival:  { type: Boolean, default: false },
     isSale:        { type: Boolean, default: false },
     isBestseller:  { type: Boolean, default: false },
   },
