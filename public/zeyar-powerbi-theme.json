@@ -17,31 +17,5 @@
   "tableAccent": "#B76E79",
   "good": "#6B8E6B",
   "neutral": "#9A7B72",
-  "bad": "#C0504D",
-  "maximum": "#B76E79",
-  "center": "#E6B7A9",
-  "minimum": "#F5EDE6",
-  "null": "#EBD9CC",
-  "textClasses": {
-    "callout": {
-      "fontSize": 45,
-      "fontFace": "Segoe UI",
-      "color": "#B76E79"
-    },
-    "header": {
-      "fontSize": 12,
-      "fontFace": "Segoe UI",
-      "color": "#3A2E2A"
-    },
-    "body": {
-      "fontSize": 11,
-      "fontFace": "Segoe UI",
-      "color": "#6B5247"
-    },
-    "label": {
-      "fontSize": 10,
-      "fontFace": "Segoe UI",
-      "color": "#9A7B72"
-    }
-  }
+  "bad": "#C0504D"
 }
