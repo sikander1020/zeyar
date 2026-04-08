@@ -68,7 +68,7 @@ export default function HeroSection() {
               className="text-base text-brown-muted font-inter leading-relaxed mb-10 max-w-md"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
-              Discover the new ZEYAR collection — where every piece tells a story of feminine grace, 
+              Discover the new ZAYBAASH collection — where every piece tells a story of feminine grace, 
               luxurious craftsmanship, and timeless sophistication.
             </motion.p>
 

@@ -20,6 +20,6 @@ export const useWishlistStore = create<WishlistStore>()(
       },
       isWishlisted: (productId) => get().items.includes(productId),
     }),
-    { name: 'zeyar-wishlist' }
+    { name: 'zaybaash-wishlist' }
   )
 );

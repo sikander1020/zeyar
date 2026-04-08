@@ -43,7 +43,7 @@ export default function ContactPage() {
                 </h2>
                 <div className="space-y-6">
                   {[
-                    { icon: Mail, label: 'Email', value: 'hello@zeyar.com' },
+                    { icon: Mail, label: 'Email', value: 'hello@zaybaash.com' },
                     { icon: Phone, label: 'Phone', value: '+92 300 123 4567' },
                     { icon: MapPin, label: 'Address', value: '24 Fashion District, Suite 301, Karachi, Pakistan' },
                   ].map(({ icon: Icon, label, value }) => (
@@ -63,7 +63,7 @@ export default function ContactPage() {
               {/* Social */}
               <div>
                 <h3 className="text-xs tracking-[0.2em] uppercase text-brown-muted font-inter mb-5" style={{ fontFamily: "'Inter', sans-serif" }}>
-                  Follow ZEYAR
+                  Follow ZAYBAASH
                 </h3>
                 <div className="flex gap-3">
                   {[

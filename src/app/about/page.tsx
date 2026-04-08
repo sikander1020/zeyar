@@ -11,7 +11,7 @@ const values = [
   {
     icon: '✦',
     title: 'Uncompromising Quality',
-    description: 'Every ZEYAR piece is crafted from the finest globally-sourced fabrics — Italian silk, French lace, and premium cashmeres.'
+    description: 'Every ZAYBAASH piece is crafted from the finest globally-sourced fabrics — Italian silk, French lace, and premium cashmeres.'
   },
   {
     icon: '♡',
@@ -68,7 +68,7 @@ export default function AboutPage() {
                 className="text-cream/60 font-inter leading-relaxed text-lg max-w-lg"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
-                ZEYAR was founded with a singular vision: to create fashion that makes every woman feel like the 
+                ZAYBAASH was founded with a singular vision: to create fashion that makes every woman feel like the 
                 heroine of her own story. Softer than a whisper, stronger than silk.
               </motion.p>
             </div>
@@ -81,7 +81,7 @@ export default function AboutPage() {
               <div className="relative w-full aspect-[4/5] max-w-md ml-auto overflow-hidden">
                 <Image
                   src="https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=800&q=80"
-                  alt="ZEYAR Brand Story"
+                  alt="ZAYBAASH Brand Story"
                   fill
                   className="object-cover"
                 />
@@ -104,13 +104,13 @@ export default function AboutPage() {
             <div className="divider-rose" />
             <div className="space-y-6 mt-8 text-brown-muted font-inter leading-relaxed text-base" style={{ fontFamily: "'Inter', sans-serif" }}>
               <p>
-                ZEYAR began in 2026 as a small atelier in the heart of Islamabad. Built collaboratively by three partners with a shared passion for design, the brand was born from a singular dream: to bring world-class, premium luxury to women who deserved to feel extraordinary every day.
+                ZAYBAASH began in 2026 as a small atelier in the heart of Islamabad. Built collaboratively by three partners with a shared passion for design, the brand was born from a singular dream: to bring world-class, premium luxury to women who deserved to feel extraordinary every day.
               </p>
               <p>
-                The name ZEYAR — meaning &quot;brightness&quot; in its root tongue — was chosen intentionally. Every piece we create is designed to illuminate the woman who wears it, to highlight her individuality, her power, her grace.
+                The name ZAYBAASH — meaning &quot;brightness&quot; in its root tongue — was chosen intentionally. Every piece we create is designed to illuminate the woman who wears it, to highlight her individuality, her power, her grace.
               </p>
               <p>
-                Today, ZEYAR dresses women across the globe. From the CEO commanding a boardroom in our tailored power suits, to the elegant woman shimmering in our premium two-piece sets, to the mother who simply wants to feel beautiful at school pickup — we design for all of them.
+                Today, ZAYBAASH dresses women across the globe. From the CEO commanding a boardroom in our tailored power suits, to the elegant woman shimmering in our premium two-piece sets, to the mother who simply wants to feel beautiful at school pickup — we design for all of them.
               </p>
             </div>
           </motion.div>

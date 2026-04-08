@@ -43,10 +43,10 @@ export default function Footer() {
               className="text-4xl font-playfair font-bold tracking-[0.2em] text-nude block mb-4"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
-              ZEYAR
+              ZAYBAASH
             </span>
             <p className="text-sm leading-relaxed text-cream/60 mb-8 max-w-xs font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Born from a love of femininity and grace, ZEYAR crafts modern and royal touch for the modern woman — where elegance meets authenticity.
+              Born from a love of femininity and grace, ZAYBAASH crafts beauty with style for the modern woman — where elegance meets authenticity.
             </p>
             <div className="flex gap-4">
               {socials.map(({ icon: Icon, href, label }) => (
@@ -99,7 +99,7 @@ export default function Footer() {
                 className="text-xl font-playfair text-nude mb-1"
                 style={{ fontFamily: "'Playfair Display', serif" }}
               >
-                Join the ZEYAR Circle
+                Join the ZAYBAASH Circle
               </h4>
               <p className="text-sm text-cream/50 font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
                 Get exclusive access to new arrivals and private sales.
@@ -122,7 +122,7 @@ export default function Footer() {
         {/* Bottom */}
         <div className="border-t border-cream/10 pt-8 flex flex-col sm:flex-row justify-between items-center gap-4">
           <p className="text-xs text-cream/30 font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-            © 2026 ZEYAR. All rights reserved.
+            © 2026 ZAYBAASH. All rights reserved.
           </p>
           <div className="flex gap-6">
             {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((item) => (

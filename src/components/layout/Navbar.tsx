@@ -11,8 +11,8 @@ import { products } from '@/data/products';
 const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/shop', label: 'Shop' },
-  { href: '/shop?category=Dresses', label: 'Dresses' },
-  { href: '/shop?category=One Piece', label: 'One Piece' },
+  { href: '/dresses', label: 'Dresses' },
+  { href: '/dresses?category=One Piece', label: 'One Piece' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ];
@@ -51,13 +51,13 @@ export default function Navbar() {
               className="text-3xl font-playfair font-bold tracking-[0.2em] gradient-rose-text transition-all duration-300"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
-              ZEYAR
+              ZAYBAASH
             </span>
             <span
               className="text-[9px] tracking-[0.35em] uppercase text-brown-muted font-inter font-light"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
-              Modern and Royal Touch
+              Beauty with Style
             </span>
           </Link>
 
@@ -148,7 +148,7 @@ export default function Navbar() {
                   className="text-2xl font-playfair gradient-rose-text"
                   style={{ fontFamily: "'Playfair Display', serif" }}
                 >
-                  ZEYAR
+                  ZAYBAASH
                 </span>
                 <button onClick={() => setMobileOpen(false)} className="p-2 text-brown">
                   <X size={20} strokeWidth={1.5} />
@@ -175,7 +175,7 @@ export default function Navbar() {
               </ul>
               <div className="mt-auto pt-8 border-t border-nude/30">
                 <p className="text-[11px] tracking-[0.15em] uppercase text-brown-muted font-inter">
-                  © 2026 ZEYAR. Luxury Defined.
+                  © 2026 ZAYBAASH. Beauty with Style.
                 </p>
               </div>
             </motion.div>

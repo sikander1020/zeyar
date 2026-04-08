@@ -19,7 +19,7 @@ export interface Product {
 
 export const products: Product[] = [
   {
-    id: 'zeyar-001',
+    id: 'zaybaash-001',
     name: 'Velvet Reverie Gown',
     price: 289,
     originalPrice: 380,
@@ -43,7 +43,7 @@ export const products: Product[] = [
     tags: ['velvet', 'gown', 'evening', 'luxury'],
   },
   {
-    id: 'zeyar-002',
+    id: 'zaybaash-002',
     name: 'Aurora Silk Midi',
     price: 195,
     category: 'Dresses',
@@ -65,7 +65,7 @@ export const products: Product[] = [
     tags: ['silk', 'midi', 'daywear', 'feminine'],
   },
   {
-    id: 'zeyar-003',
+    id: 'zaybaash-003',
     name: 'Noir Elegance One Piece',
     price: 320,
     category: 'One Piece',
@@ -87,7 +87,7 @@ export const products: Product[] = [
     tags: ['modest', 'elegant', 'embroidered'],
   },
   {
-    id: 'zeyar-004',
+    id: 'zaybaash-004',
     name: 'Desert Rose One Piece',
     price: 275,
     originalPrice: 340,
@@ -110,7 +110,7 @@ export const products: Product[] = [
     tags: ['lace', 'romantic', 'modest'],
   },
   {
-    id: 'zeyar-005',
+    id: 'zaybaash-005',
     name: 'Linen Weekend Set',
     price: 165,
     category: 'Casual',
@@ -132,7 +132,7 @@ export const products: Product[] = [
     tags: ['linen', 'casual', 'co-ord', 'weekend'],
   },
   {
-    id: 'zeyar-006',
+    id: 'zaybaash-006',
     name: 'Knit Whisper Dress',
     price: 145,
     category: 'Casual',
@@ -154,7 +154,7 @@ export const products: Product[] = [
     tags: ['knit', 'cashmere', 'cozy', 'midi'],
   },
   {
-    id: 'zeyar-007',
+    id: 'zaybaash-007',
     name: 'Boardroom Blazer Set',
     price: 345,
     category: 'Formal',
@@ -175,7 +175,7 @@ export const products: Product[] = [
     tags: ['blazer', 'formal', 'professional', 'power-dressing'],
   },
   {
-    id: 'zeyar-008',
+    id: 'zaybaash-008',
     name: 'Evening Satin Jumpsuit',
     price: 225,
     originalPrice: 290,
@@ -198,7 +198,7 @@ export const products: Product[] = [
     tags: ['satin', 'jumpsuit', 'evening', 'glamorous'],
   },
   {
-    id: 'zeyar-009',
+    id: 'zaybaash-009',
     name: 'Floral Chiffon Maxi',
     price: 175,
     category: 'Dresses',
@@ -220,7 +220,7 @@ export const products: Product[] = [
     tags: ['floral', 'chiffon', 'maxi', 'summer'],
   },
   {
-    id: 'zeyar-010',
+    id: 'zaybaash-010',
     name: 'Crystal Embroidered One Piece',
     price: 485,
     category: 'One Piece',
@@ -242,7 +242,7 @@ export const products: Product[] = [
     tags: ['crystal', 'luxury', 'couture'],
   },
   {
-    id: 'zeyar-011',
+    id: 'zaybaash-011',
     name: 'Minimalist Linen Shift',
     price: 120,
     category: 'Casual',
@@ -263,7 +263,7 @@ export const products: Product[] = [
     tags: ['linen', 'shift', 'minimalist', 'everyday'],
   },
   {
-    id: 'zeyar-012',
+    id: 'zaybaash-012',
     name: 'Power Suit in Ivory',
     price: 395,
     category: 'Formal',
@@ -324,7 +324,7 @@ export const testimonials = [
     title: 'Fashion Editor',
     avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80',
     rating: 5,
-    text: "I was so excited to be one of the first to order from ZEYAR's launch! The craftsmanship is extraordinary — you can feel the love and attention in every stitch. My Velvet Reverie Gown received so many compliments.",
+    text: "I was so excited to be one of the first to order from ZAYBAASH's launch! The craftsmanship is extraordinary — you can feel the love and attention in every stitch. My Velvet Reverie Gown received so many compliments.",
     product: 'Velvet Reverie Gown',
   },
   {
@@ -342,7 +342,7 @@ export const testimonials = [
     title: 'Entrepreneur',
     avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80',
     rating: 5,
-    text: "The quality of this new launch speaks for itself! The packaging alone feels like an incredible unboxing experience — this is exactly what modern and royal touch should feel like.",
+    text: "The quality of this new launch speaks for itself! The packaging alone feels like an incredible unboxing experience — this is exactly what beauty with style should feel like.",
     product: 'Boardroom Blazer Set',
   },
 ];

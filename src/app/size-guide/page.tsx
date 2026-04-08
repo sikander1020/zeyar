@@ -34,7 +34,7 @@ export default function SizeGuidePage() {
               className="text-brown-muted font-inter max-w-2xl mx-auto"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
-              Find your perfect ZEYAR fit. Our signature ready-to-wear silhouettes reflect standard Eastern 
+              Find your perfect ZAYBAASH fit. Our signature ready-to-wear silhouettes reflect standard Eastern 
               sizing (commonly adopted by premium Pakistani brands) designed for elegant draping and maximum comfort.
             </motion.p>
           </div>

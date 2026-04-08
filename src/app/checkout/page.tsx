@@ -43,7 +43,7 @@ export default function CheckoutPage() {
             </h1>
             <div className="divider-rose" />
             <p className="text-brown-muted font-inter my-6 leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Thank you for choosing ZEYAR. Your order has been confirmed and will be beautifully packaged and dispatched within 2-3 business days.
+              Thank you for choosing ZAYBAASH. Your order has been confirmed and will be beautifully packaged and dispatched within 2-3 business days.
             </p>
             <p className="text-sm text-brown-muted font-inter mb-8" style={{ fontFamily: "'Inter', sans-serif" }}>
               A confirmation has been sent to your email.

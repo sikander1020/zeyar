@@ -143,7 +143,7 @@ export default function FeaturedCollections() {
           </h2>
           <div className="divider-rose" />
           <p className="text-brown-muted font-inter max-w-md mx-auto mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>
-            Handpicked from our latest collection — pieces that define the ZEYAR woman.
+            Handpicked from our latest collection — pieces that define the ZAYBAASH woman.
           </p>
         </motion.div>
 

@@ -38,25 +38,25 @@ export default function ReturnsPage() {
           >
             <h2 className="text-2xl font-playfair text-brown mb-4">Our Commitment</h2>
             <p className="mb-8">
-              At ZEYAR, we take immense pride in the craftsmanship and quality of our pieces. We want you to love your 
+              At ZAYBAASH, we take immense pride in the craftsmanship and quality of our pieces. We want you to love your 
               purchase completely. If for any reason you are not entirely satisfied, we proudly offer a transparent and 
               hassle-free exchange and return policy tailored for our clients globally and across Pakistan.
             </p>
 
             <h2 className="text-2xl font-playfair text-brown mb-4">14-Day Exchange & Return Policy</h2>
             <p className="mb-4">
-              Items purchased from ZEYAR are eligible for a return or exchange within <strong>14 days of delivery</strong>, 
+              Items purchased from ZAYBAASH are eligible for a return or exchange within <strong>14 days of delivery</strong>, 
               provided they meet our strict quality criteria:
             </p>
             <ul className="list-disc pl-6 mb-8 space-y-2">
               <li>The garment must be unworn, unwashed, and completely unaltered.</li>
-              <li>All original ZEYAR tags, security ribbons, and packaging must remain completely intact and attached.</li>
+              <li>All original ZAYBAASH tags, security ribbons, and packaging must remain completely intact and attached.</li>
               <li>A valid receipt or proof of purchase must be presented.</li>
             </ul>
 
             <h2 className="text-2xl font-playfair text-brown mb-4">Non-Returnable Items</h2>
             <p className="mb-8">
-              For hygiene reasons and the bespoke nature of modern and royal touch, the following items cannot be returned or exchanged:
+              For hygiene reasons and the bespoke nature of beauty with style, the following items cannot be returned or exchanged:
             </p>
             <ul className="list-disc pl-6 mb-8 space-y-2">
               <li>Discounted or clearance items purchased during sales.</li>

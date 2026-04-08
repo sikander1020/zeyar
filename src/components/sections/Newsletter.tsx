@@ -34,11 +34,11 @@ export default function Newsletter() {
           </span>
           <h2 className="text-5xl font-playfair text-brown mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
             Join the{' '}
-            <span className="italic gradient-rose-text">ZEYAR Circle</span>
+            <span className="italic gradient-rose-text">ZAYBAASH Circle</span>
           </h2>
           <div className="divider-rose" />
           <p className="text-brown-muted font-inter max-w-md mx-auto my-6 leading-relaxed" style={{ fontFamily: "'Inter', sans-serif" }}>
-            Be the first to know about exclusive drops, private sales, and behind-the-scenes stories from the house of ZEYAR.
+            Be the first to know about exclusive drops, private sales, and behind-the-scenes stories from the house of ZAYBAASH.
           </p>
         </motion.div>
 
