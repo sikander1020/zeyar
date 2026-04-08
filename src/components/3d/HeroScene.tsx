@@ -5,30 +5,23 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { Float, Environment } from '@react-three/drei';
 import * as THREE from 'three';
 
-/* ─── ZAYBAASH Palette ─── */
-const GOLD    = '#C9956A';
-const ROSE    = '#D4957F';
-const DEEP    = '#8B4E5C';
-const SKIN    = '#C68642';
-const HAIR    = '#1A0E0A';
-const BEIGE   = '#F0E0D6';
-const CREAM   = '#FAF0EA';
+/* === ZAYBAASH Palette === */
+const TEAL   = '#3EC8D8'; // woman outfit
+const PINK   = '#F07AB0'; // left dress
+const ORANGE = '#F4A028'; // right dress
+const SKIN   = '#C17A50';
+const HAIR   = '#1A0C06';
+const BEIGE  = '#FCCEC8'; // pink backdrop circle
+const CREAM  = '#FAF0EA';
+const HANGER = '#2A2820'; // dark charcoal hangers
 
-/* ════════════════════════════════════════
-   ANIMATED BREEZE SKIRT
-   Vertex-level cloth simulation using
-   sinusoidal displacement per frame.
-════════════════════════════════════════ */
-function BreezeSkirt({
-  color,
-  phase = 0,
-}: {
-  color: string;
-  phase?: number;
-}) {
+/*
+  ANIMATED BREEZE SKIRT
+  Vertex-level cloth simulation using sinusoidal displacement per frame.
+*/
+function BreezeSkirt({ color, phase = 0 }: { color: string; phase?: number }) {
   const meshRef = useRef<THREE.Mesh>(null!);
 
-  /* Geometry + stored original positions */
   const { geo, orig } = useMemo(() => {
     const geo = new THREE.ConeGeometry(1.28, 2.1, 72, 16, true);
     geo.computeVertexNormals();
@@ -40,8 +33,7 @@ function BreezeSkirt({
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
     const t = clock.getElapsedTime();
-    const pos = meshRef.current.geometry.attributes
-      .position as THREE.BufferAttribute;
+    const pos = meshRef.current.geometry.attributes.position as THREE.BufferAttribute;
 
     for (let i = 0; i < pos.count; i++) {
       const ox = orig[i * 3];
@@ -50,14 +42,11 @@ function BreezeSkirt({
 
       if (oy < 0.1) {
         const angle = Math.atan2(oz, ox);
-        const depth = Math.min((-oy) / 2.1, 1); // 0→top  1→hem
-
-        // Three overlapping waves = rich fabric motion
-        const w1 = Math.sin(t * 2.2 + phase + angle * 2.5) * 0.26 * depth;
-        const w2 = Math.sin(t * 3.4 + phase * 1.4 + angle * 4.0) * 0.10 * depth;
-        const sway = Math.sin(t * 1.1 + phase) * 0.14 * depth;       // whole-skirt sway
+        const depth = Math.min((-oy) / 2.1, 1);
+        const w1   = Math.sin(t * 2.2 + phase + angle * 2.5) * 0.26 * depth;
+        const w2   = Math.sin(t * 3.4 + phase * 1.4 + angle * 4.0) * 0.10 * depth;
+        const sway = Math.sin(t * 1.1 + phase) * 0.14 * depth;
         const total = w1 + w2;
-
         pos.setX(i, ox + total * Math.cos(angle) + sway);
         pos.setZ(i, oz + total * Math.sin(angle));
       }
@@ -68,98 +57,78 @@ function BreezeSkirt({
 
   return (
     <mesh ref={meshRef} geometry={geo}>
-      <meshStandardMaterial
-        color={color}
-        roughness={0.22}
-        metalness={0.12}
-        side={THREE.DoubleSide}
-      />
+      <meshStandardMaterial color={color} roughness={0.22} metalness={0.12} side={THREE.DoubleSide} />
     </mesh>
   );
 }
 
-/* ════════════════════════════════════════
-   DRESS + HANGER UNIT
-   Self-contained with gentle hanger swing
-════════════════════════════════════════ */
-function DressUnit({
-  pos,
-  dressCol,
-  phase = 0,
-}: {
-  pos: [number, number, number];
-  dressCol: string;
-  phase?: number;
-}) {
+/*
+  DRESS + HANGER UNIT � dark charcoal hanger with animated swing
+*/
+function DressUnit({ pos, dressCol, phase = 0 }: { pos: [number, number, number]; dressCol: string; phase?: number }) {
   const ref = useRef<THREE.Group>(null!);
 
   useFrame(({ clock }) => {
     if (!ref.current) return;
-    const t = clock.getElapsedTime();
-    ref.current.rotation.z = Math.sin(t * 1.15 + phase) * 0.03;
+    ref.current.rotation.z = Math.sin(clock.getElapsedTime() * 1.15 + phase) * 0.03;
   });
 
-  const goldProps = {
-    color: GOLD,
-    roughness: 0.05,
-    metalness: 1.0,
-  } as const;
+  const hangerProps = { color: HANGER, roughness: 0.5, metalness: 0.3 } as const;
 
   return (
     <group ref={ref} position={pos}>
-      {/* ── Hanger ── */}
-      {/* Hook (open half-torus) */}
+      {/* Hook */}
       <mesh position={[0, 1.45, 0]} rotation={[0, 0, Math.PI]}>
         <torusGeometry args={[0.155, 0.032, 12, 36, Math.PI]} />
-        <meshStandardMaterial {...goldProps} />
+        <meshStandardMaterial {...hangerProps} />
       </mesh>
       {/* Crossbar */}
       <mesh position={[0, 1.08, 0]} rotation={[0, 0, Math.PI / 2]}>
         <cylinderGeometry args={[0.024, 0.024, 2.1, 16]} />
-        <meshStandardMaterial {...goldProps} />
+        <meshStandardMaterial {...hangerProps} />
       </mesh>
       {/* Left arm */}
       <mesh position={[-0.66, 0.76, 0]} rotation={[0, 0, Math.PI / 4.6]}>
         <cylinderGeometry args={[0.02, 0.02, 1.0, 12]} />
-        <meshStandardMaterial {...goldProps} />
+        <meshStandardMaterial {...hangerProps} />
       </mesh>
       {/* Right arm */}
       <mesh position={[0.66, 0.76, 0]} rotation={[0, 0, -Math.PI / 4.6]}>
         <cylinderGeometry args={[0.02, 0.02, 1.0, 12]} />
-        <meshStandardMaterial {...goldProps} />
+        <meshStandardMaterial {...hangerProps} />
       </mesh>
       {/* Centre neck drop */}
       <mesh position={[0, 0.38, 0]}>
         <cylinderGeometry args={[0.022, 0.022, 0.34, 12]} />
-        <meshStandardMaterial {...goldProps} />
+        <meshStandardMaterial {...hangerProps} />
       </mesh>
       {/* End caps */}
       {([-1.05, 1.05] as number[]).map((x, i) => (
         <mesh key={i} position={[x, 1.08, 0]}>
           <sphereGeometry args={[0.042, 12, 12]} />
-          <meshStandardMaterial {...goldProps} />
+          <meshStandardMaterial {...hangerProps} />
         </mesh>
       ))}
 
-      {/* ── Dress bodice ── */}
+      {/* Dress bodice */}
       <mesh position={[0, 0.14, 0]}>
         <cylinderGeometry args={[0.36, 0.43, 0.7, 40]} />
-        <meshStandardMaterial color={dressCol} roughness={0.15} metalness={0.2} />
+        <meshStandardMaterial color={dressCol} roughness={0.15} metalness={0.05} />
       </mesh>
       {/* Straps */}
       {([-0.18, 0.18] as number[]).map((x, i) => (
         <mesh key={i} position={[x, 0.56, 0.28]} rotation={[0.22, 0, 0]}>
           <cylinderGeometry args={[0.028, 0.028, 0.44, 8]} />
-          <meshStandardMaterial color={dressCol} roughness={0.15} metalness={0.2} />
+          <meshStandardMaterial color={dressCol} roughness={0.15} metalness={0.05} />
         </mesh>
       ))}
-      {/* Gold waist band */}
+      {/* Waist band */}
       <mesh position={[0, -0.21, 0]}>
         <cylinderGeometry args={[0.44, 0.44, 0.08, 40]} />
-        <meshStandardMaterial {...goldProps} />
+        <meshStandardMaterial color={dressCol} roughness={0.3} metalness={0.1} />
       </mesh>
 
-      {/* ── Breeze Skirt ── */}
+      {/* Breeze Skirt */}
       <group position={[0, -1.28, 0]}>
         <BreezeSkirt color={dressCol} phase={phase} />
       </group>
@@ -167,14 +136,13 @@ function DressUnit({
   );
 }
 
-/* ════════════════════════════════════════
-   WOMAN FIGURE  (stylised primitives)
-════════════════════════════════════════ */
+/*
+  WOMAN FIGURE � stylised primitives
+*/
 function Woman() {
-  /* Shared material helpers */
-  const skin = { color: SKIN,  roughness: 0.45, metalness: 0 } as const;
-  const hair = { color: HAIR,  roughness: 0.7,  metalness: 0 } as const;
-  const out  = { color: DEEP,  roughness: 0.3,  metalness: 0.05 } as const; // her outfit
+  const skin = { color: SKIN, roughness: 0.45, metalness: 0 } as const;
+  const hair = { color: HAIR, roughness: 0.7,  metalness: 0 } as const;
+  const out  = { color: TEAL, roughness: 0.3,  metalness: 0.05 } as const;
 
   return (
     <group>
@@ -196,17 +164,17 @@ function Woman() {
         <meshStandardMaterial {...skin} />
       </mesh>
 
-      {/* Hair — back volume */}
+      {/* Hair � back volume */}
       <mesh position={[0, 1.27, -0.07]}>
         <sphereGeometry args={[0.41, 22, 22]} />
         <meshStandardMaterial {...hair} />
       </mesh>
-      {/* Hair — top */}
+      {/* Hair � top */}
       <mesh position={[0, 1.5, 0.04]}>
         <sphereGeometry args={[0.3, 18, 18]} />
         <meshStandardMaterial {...hair} />
       </mesh>
-      {/* Hair — flowing left side */}
+      {/* Hair � flowing left side */}
       <mesh position={[-0.22, 1.1, -0.15]} rotation={[0.2, 0.1, 0.3]}>
         <capsuleGeometry args={[0.1, 0.55, 8, 12]} />
         <meshStandardMaterial {...hair} />
@@ -219,7 +187,7 @@ function Woman() {
           <meshStandardMaterial color="#111" roughness={1} metalness={0} />
         </mesh>
       ))}
-      {/* Subtle smile — two small dots */}
+      {/* Smile corners */}
       {([-0.08, 0.08] as number[]).map((x, i) => (
         <mesh key={i} position={[x, 1.06, 0.35]}>
           <sphereGeometry args={[0.022, 8, 8]} />
@@ -227,7 +195,6 @@ function Woman() {
         </mesh>
       ))}
 
-      {/* ── Arms ── single cylinder shoulder→hand ── */}
       {/* Left arm */}
       <mesh position={[-1.22, 1.0, 0]} rotation={[0, 0, 0.85]}>
         <cylinderGeometry args={[0.095, 0.085, 2.0, 16]} />
@@ -253,27 +220,17 @@ function Woman() {
   );
 }
 
-/* ════════════════════════════════════════
-   SOFT BACKGROUND GLOW CIRCLE
-════════════════════════════════════════ */
+/* SOFT PINK BACKGROUND CIRCLE */
 function GlowCircle() {
   return (
     <mesh position={[0, 0.2, -1.8]}>
       <circleGeometry args={[3.6, 64]} />
-      <meshStandardMaterial
-        color={BEIGE}
-        roughness={1}
-        metalness={0}
-        transparent
-        opacity={0.55}
-      />
+      <meshStandardMaterial color={BEIGE} roughness={1} metalness={0} transparent opacity={0.65} />
     </mesh>
   );
 }
 
-/* ════════════════════════════════════════
-   GOLD SPARKLE PARTICLES
-════════════════════════════════════════ */
+/* SPARKLE PARTICLES */
 function Sparkles() {
   const ref = useRef<THREE.Points>(null!);
 
@@ -289,7 +246,7 @@ function Sparkles() {
       pos[i * 3]     = Math.cos(a) * r;
       pos[i * 3 + 1] = -2.5 + Math.random() * 6.5;
       pos[i * 3 + 2] = -0.5 + Math.random() * 0.8;
-      const c = new THREE.Color(Math.random() > 0.5 ? GOLD : BEIGE);
+      const c = new THREE.Color(Math.random() > 0.5 ? PINK : BEIGE);
       col[i * 3] = c.r; col[i * 3 + 1] = c.g; col[i * 3 + 2] = c.b;
     }
     g.setAttribute('position', new THREE.BufferAttribute(pos, 3));
@@ -308,9 +265,7 @@ function Sparkles() {
   );
 }
 
-/* ════════════════════════════════════════
-   ROOT CANVAS
-════════════════════════════════════════ */
+/* ROOT CANVAS */
 export default function HeroScene() {
   return (
     <Canvas
@@ -318,11 +273,10 @@ export default function HeroScene() {
       style={{ background: 'transparent' }}
       gl={{ antialias: true, alpha: true }}
     >
-      {/* Lighting */}
       <ambientLight intensity={0.4} />
       <directionalLight position={[5, 10, 6]}  intensity={1.9} color={CREAM} castShadow />
       <pointLight       position={[-6, 4, 3]}  intensity={1.3} color="#F0D5C8" />
-      <pointLight       position={[6, -2, 4]}  intensity={0.9} color={ROSE}   />
+      <pointLight       position={[6, -2, 4]}  intensity={0.9} color={PINK} />
       <spotLight
         position={[0, 14, 3]}
         angle={0.38}
@@ -337,11 +291,10 @@ export default function HeroScene() {
           <group scale={0.82} position={[0, 0.25, 0]}>
             <GlowCircle />
             <Woman />
-            {/* LEFT dress — ROSE, held by left hand at [-2.02, 1.72] */}
-            {/* Hook y=1.45 relative → group y = 1.72-1.45 = 0.27 */}
-            <DressUnit pos={[-2.02, 0.27, 0]} dressCol={ROSE} phase={0} />
-            {/* RIGHT dress — GOLD, held by right hand at [2.02, 1.72] */}
-            <DressUnit pos={[2.02, 0.27, 0]} dressCol={GOLD} phase={Math.PI * 0.65} />
+            {/* LEFT dress � PINK, held by left hand at [-2.02, 1.72] */}
+            <DressUnit pos={[-2.02, 0.27, 0]} dressCol={PINK} phase={0} />
+            {/* RIGHT dress � ORANGE, held by right hand at [2.02, 1.72] */}
+            <DressUnit pos={[2.02, 0.27, 0]} dressCol={ORANGE} phase={Math.PI * 0.65} />
           </group>
         </Float>
         <Sparkles />
