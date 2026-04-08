@@ -2,14 +2,11 @@
 
 import { useRef, useMemo, Suspense } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
-import { Float, Environment } from '@react-three/drei';
+import { Float, Environment, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 
-const TEAL   = '#3EC8D8';
 const PINK   = '#F07AB0';
 const ORANGE = '#F4A028';
-const SKIN   = '#C17A50';
-const HAIR   = '#1A0C06';
 const BEIGE  = '#FCCEC8';
 const CREAM  = '#FAF0EA';
 const HANGER = '#2A2820';
@@ -105,167 +102,20 @@ function DressUnit({ pos, dressCol, phase = 0 }: { pos: [number,number,number]; 
   );
 }
 
-function Woman() {
-  const skin = { color: SKIN, roughness: 0.4, metalness: 0 } as const;
-  const hair = { color: HAIR, roughness: 0.65, metalness: 0 } as const;
-  const out  = { color: TEAL, roughness: 0.3, metalness: 0.05 } as const;
+// Michelle.glb - Mixamo rigged female character
+// Native size: 1.662m tall, T-pose hands at (+-0.560, 1.271)
+// At scale 2.0 + position y=-1.66: hands land at (+-1.12, 0.882) in group space
+function WomanModel() {
+  const { scene } = useGLTF('/models/woman.glb');
   return (
-    <group>
-      {/* Body */}
-      <mesh position={[0,-0.5,0]}>
-        <cylinderGeometry args={[0.42,0.52,2.3,36]} />
-        <meshStandardMaterial {...out} />
-      </mesh>
-      {/* Neck */}
-      <mesh position={[0,0.78,0]}>
-        <cylinderGeometry args={[0.12,0.14,0.26,16]} />
-        <meshStandardMaterial {...skin} />
-      </mesh>
-      {/* Head */}
-      <mesh position={[0,1.17,0]}>
-        <sphereGeometry args={[0.36,32,32]} />
-        <meshStandardMaterial {...skin} />
-      </mesh>
-
-      {/* === FLOWING OPEN HAIR === */}
-      {/* Scalp cap */}
-      <mesh position={[0,1.46,0]}>
-        <sphereGeometry args={[0.385,22,22]} />
-        <meshStandardMaterial {...hair} />
-      </mesh>
-      {/* Back volume - long flowing */}
-      <mesh position={[0,0.7,-0.22]}>
-        <capsuleGeometry args={[0.29,1.55,10,14]} />
-        <meshStandardMaterial {...hair} />
-      </mesh>
-      {/* Back lower taper */}
-      <mesh position={[0,-0.12,-0.26]} rotation={[0.1,0,0]}>
-        <capsuleGeometry args={[0.17,0.95,8,12]} />
-        <meshStandardMaterial {...hair} />
-      </mesh>
-      {/* Left front strand - frames face */}
-      <mesh position={[-0.3,1.1,0.15]} rotation={[0.12,-0.15,0.2]}>
-        <capsuleGeometry args={[0.07,0.68,6,10]} />
-        <meshStandardMaterial {...hair} />
-      </mesh>
-      {/* Left lower strand */}
-      <mesh position={[-0.38,0.5,0.04]} rotation={[0.05,0,0.1]}>
-        <capsuleGeometry args={[0.08,1.05,6,10]} />
-        <meshStandardMaterial {...hair} />
-      </mesh>
-      {/* Right front strand */}
-      <mesh position={[0.28,1.12,0.14]} rotation={[0.1,0.12,-0.18]}>
-        <capsuleGeometry args={[0.065,0.62,6,10]} />
-        <meshStandardMaterial {...hair} />
-      </mesh>
-      {/* Right lower strand */}
-      <mesh position={[0.34,0.58,0.04]} rotation={[0.04,0,-0.08]}>
-        <capsuleGeometry args={[0.07,0.88,6,10]} />
-        <meshStandardMaterial {...hair} />
-      </mesh>
-
-      {/* === FACE === */}
-      {/* Eye whites */}
-      {([-0.12,0.12] as number[]).map((x,i) => (
-        <mesh key={i} position={[x,1.19,0.32]}>
-          <sphereGeometry args={[0.052,12,12]} />
-          <meshStandardMaterial color='#F5F0EB' roughness={0.8} metalness={0} />
-        </mesh>
-      ))}
-      {/* Pupils */}
-      {([-0.12,0.12] as number[]).map((x,i) => (
-        <mesh key={i} position={[x,1.19,0.345]}>
-          <sphereGeometry args={[0.032,10,10]} />
-          <meshStandardMaterial color='#1A0A08' roughness={0.5} metalness={0} />
-        </mesh>
-      ))}
-      {/* Eyebrows */}
-      {([-0.12,0.12] as number[]).map((x,i) => (
-        <mesh key={i} position={[x,1.28,0.34]} rotation={[0,0,i===0?0.18:-0.18]}>
-          <boxGeometry args={[0.1,0.018,0.012]} />
-          <meshStandardMaterial {...hair} />
-        </mesh>
-      ))}
-      {/* Nose */}
-      <mesh position={[0,1.12,0.37]}>
-        <sphereGeometry args={[0.028,8,8]} />
-        <meshStandardMaterial color='#A8623A' roughness={0.6} metalness={0} />
-      </mesh>
-      {/* Smile arc */}
-      <mesh position={[0,1.06,0.355]} rotation={[0,0,Math.PI]}>
-        <torusGeometry args={[0.072,0.013,8,22,Math.PI*0.65]} />
-        <meshStandardMaterial color='#8B3A3A' roughness={1} metalness={0} />
-      </mesh>
-
-      {/* === ARMS with elbow joints === */}
-      {/* Left upper arm */}
-      <mesh position={[-0.88,0.92,0]} rotation={[0,0,0.96]}>
-        <cylinderGeometry args={[0.09,0.085,0.95,14]} />
-        <meshStandardMaterial {...skin} />
-      </mesh>
-      {/* Left elbow */}
-      <mesh position={[-1.28,1.2,0]}>
-        <sphereGeometry args={[0.1,12,12]} />
-        <meshStandardMaterial {...skin} />
-      </mesh>
-      {/* Left forearm */}
-      <mesh position={[-1.67,1.48,0]} rotation={[0,0,0.93]}>
-        <cylinderGeometry args={[0.08,0.075,0.88,14]} />
-        <meshStandardMaterial {...skin} />
-      </mesh>
-      {/* Left hand */}
-      <group position={[-2.02,1.72,0]} rotation={[0.25,0,0.93]}>
-        <mesh>
-          <boxGeometry args={[0.13,0.19,0.07]} />
-          <meshStandardMaterial {...skin} />
-        </mesh>
-        {([-0.045,-0.015,0.015,0.045] as number[]).map((x,i) => (
-          <mesh key={i} position={[x,0.14,0]}>
-            <capsuleGeometry args={[0.018,0.1,4,6]} />
-            <meshStandardMaterial {...skin} />
-          </mesh>
-        ))}
-        <mesh position={[-0.1,0.04,0]} rotation={[0,0,0.9]}>
-          <capsuleGeometry args={[0.018,0.08,4,6]} />
-          <meshStandardMaterial {...skin} />
-        </mesh>
-      </group>
-
-      {/* Right upper arm */}
-      <mesh position={[0.88,0.92,0]} rotation={[0,0,-0.96]}>
-        <cylinderGeometry args={[0.09,0.085,0.95,14]} />
-        <meshStandardMaterial {...skin} />
-      </mesh>
-      {/* Right elbow */}
-      <mesh position={[1.28,1.2,0]}>
-        <sphereGeometry args={[0.1,12,12]} />
-        <meshStandardMaterial {...skin} />
-      </mesh>
-      {/* Right forearm */}
-      <mesh position={[1.67,1.48,0]} rotation={[0,0,-0.93]}>
-        <cylinderGeometry args={[0.08,0.075,0.88,14]} />
-        <meshStandardMaterial {...skin} />
-      </mesh>
-      {/* Right hand */}
-      <group position={[2.02,1.72,0]} rotation={[0.25,0,-0.93]}>
-        <mesh>
-          <boxGeometry args={[0.13,0.19,0.07]} />
-          <meshStandardMaterial {...skin} />
-        </mesh>
-        {([-0.045,-0.015,0.015,0.045] as number[]).map((x,i) => (
-          <mesh key={i} position={[x,0.14,0]}>
-            <capsuleGeometry args={[0.018,0.1,4,6]} />
-            <meshStandardMaterial {...skin} />
-          </mesh>
-        ))}
-        <mesh position={[0.1,0.04,0]} rotation={[0,0,-0.9]}>
-          <capsuleGeometry args={[0.018,0.08,4,6]} />
-          <meshStandardMaterial {...skin} />
-        </mesh>
-      </group>
-    </group>
+    <primitive
+      object={scene}
+      scale={2.0}
+      position={[0, -1.66, 0]}
+    />
   );
 }
+useGLTF.preload('/models/woman.glb');
 
 function GlowCircle() {
   return (
@@ -309,24 +159,26 @@ function Sparkles() {
 export default function HeroScene() {
   return (
     <Canvas camera={{ position:[0,0,10], fov:44 }} style={{ background:'transparent' }} gl={{ antialias:true, alpha:true }}>
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[5,10,6]} intensity={2.0} color={CREAM} castShadow />
-      <pointLight position={[-6,4,3]} intensity={1.4} color='#F0D5C8' />
-      <pointLight position={[6,-2,4]} intensity={0.9} color={PINK} />
-      <pointLight position={[0,6,6]} intensity={1.0} color='#FFFFFF' />
-      <spotLight position={[0,14,3]} angle={0.38} penumbra={0.9} intensity={2.2} color={CREAM} castShadow />
+      <ambientLight intensity={0.6} />
+      <directionalLight position={[5,10,6]} intensity={2.4} color={CREAM} castShadow />
+      <pointLight position={[-6,4,3]} intensity={1.8} color='#F0D5C8' />
+      <pointLight position={[6,-2,4]} intensity={1.2} color={PINK} />
+      <pointLight position={[0,6,6]} intensity={1.4} color='#FFFFFF' />
+      <spotLight position={[0,14,3]} angle={0.38} penumbra={0.9} intensity={2.8} color={CREAM} castShadow />
       <Suspense fallback={null}>
         <Float speed={0.55} floatIntensity={0.18} rotationIntensity={0.015}>
           <group scale={0.82} position={[0,0.25,0]}>
             <GlowCircle />
-            <Woman />
-            <DressUnit pos={[-2.02,0.27,0]} dressCol={PINK} phase={0} />
-            <DressUnit pos={[2.02,0.27,0]} dressCol={ORANGE} phase={Math.PI*0.65} />
+            <WomanModel />
+            {/* Hook at y=1.45 relative -> group_y = hand_y - 1.45 = 0.882 - 1.45 = -0.568 */}
+            <DressUnit pos={[-1.12,-0.568,0]} dressCol={PINK} phase={0} />
+            <DressUnit pos={[1.12,-0.568,0]} dressCol={ORANGE} phase={Math.PI*0.65} />
           </group>
         </Float>
         <Sparkles />
-        <Environment preset='sunset' />
+        <Environment preset='studio' />
       </Suspense>
     </Canvas>
   );
 }
+
