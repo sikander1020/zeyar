@@ -1,0 +1,158 @@
+{
+  "name": "ZEYAR Fashion",
+  "dataColors": [
+    "#B76E79",
+    "#E6B7A9",
+    "#3A2E2A",
+    "#D4957F",
+    "#6B5247",
+    "#F0C9BF",
+    "#9A7B72",
+    "#EBD9CC",
+    "#FAF7F4",
+    "#D4919A"
+  ],
+  "background": "#FAF7F4",
+  "foreground": "#3A2E2A",
+  "tableAccent": "#B76E79",
+  "good": "#6B8E6B",
+  "neutral": "#9A7B72",
+  "bad": "#C0504D",
+  "maximum": "#B76E79",
+  "center": "#E6B7A9",
+  "minimum": "#F5EDE6",
+  "null": "#EBD9CC",
+  "visualStyles": {
+    "*": {
+      "*": {
+        "background": [{ "color": { "solid": { "color": "#FAF7F4" } } }],
+        "border": [{ "color": { "solid": { "color": "#EBD9CC" } } }],
+        "fontFamily": [{ "fontFamily": "Segoe UI" }],
+        "fontSize": [{ "fontSize": 12 }],
+        "fontBold": [{ "fontBold": false }],
+        "color": [{ "color": { "solid": { "color": "#3A2E2A" } } }]
+      }
+    },
+    "page": {
+      "*": {
+        "background": [{ "color": { "solid": { "color": "#FAF7F4" } }, "transparency": 0 }],
+        "outspace": [{ "color": { "solid": { "color": "#F5EDE6" } } }]
+      }
+    },
+    "card": {
+      "*": {
+        "calloutValue": [{
+          "fontSize": 28,
+          "fontBold": true,
+          "color": { "solid": { "color": "#B76E79" } },
+          "fontFamily": "Segoe UI"
+        }],
+        "label": [{
+          "fontSize": 11,
+          "color": { "solid": { "color": "#9A7B72" } },
+          "fontFamily": "Segoe UI"
+        }],
+        "background": [{ "show": true, "color": { "solid": { "color": "#FFFFFF" } }, "transparency": 0 }],
+        "border": [{ "show": true, "color": { "solid": { "color": "#EBD9CC" } }, "radius": 8 }],
+        "dropShadow": [{ "show": true }]
+      }
+    },
+    "lineChart": {
+      "*": {
+        "lineColor": [{ "color": { "solid": { "color": "#B76E79" } } }],
+        "strokeWidth": [{ "strokeWidth": 2.5 }],
+        "background": [{ "show": true, "color": { "solid": { "color": "#FFFFFF" } }, "transparency": 0 }],
+        "border": [{ "show": true, "color": { "solid": { "color": "#EBD9CC" } }, "radius": 8 }],
+        "dropShadow": [{ "show": true }]
+      }
+    },
+    "barChart": {
+      "*": {
+        "background": [{ "show": true, "color": { "solid": { "color": "#FFFFFF" } }, "transparency": 0 }],
+        "border": [{ "show": true, "color": { "solid": { "color": "#EBD9CC" } }, "radius": 8 }],
+        "dropShadow": [{ "show": true }]
+      }
+    },
+    "columnChart": {
+      "*": {
+        "background": [{ "show": true, "color": { "solid": { "color": "#FFFFFF" } }, "transparency": 0 }],
+        "border": [{ "show": true, "color": { "solid": { "color": "#EBD9CC" } }, "radius": 8 }],
+        "dropShadow": [{ "show": true }]
+      }
+    },
+    "donutChart": {
+      "*": {
+        "background": [{ "show": true, "color": { "solid": { "color": "#FFFFFF" } }, "transparency": 0 }],
+        "border": [{ "show": true, "color": { "solid": { "color": "#EBD9CC" } }, "radius": 8 }],
+        "dropShadow": [{ "show": true }]
+      }
+    },
+    "pieChart": {
+      "*": {
+        "background": [{ "show": true, "color": { "solid": { "color": "#FFFFFF" } }, "transparency": 0 }],
+        "border": [{ "show": true, "color": { "solid": { "color": "#EBD9CC" } }, "radius": 8 }],
+        "dropShadow": [{ "show": true }]
+      }
+    },
+    "tableEx": {
+      "*": {
+        "background": [{ "show": true, "color": { "solid": { "color": "#FFFFFF" } }, "transparency": 0 }],
+        "border": [{ "show": true, "color": { "solid": { "color": "#EBD9CC" } }, "radius": 8 }],
+        "dropShadow": [{ "show": true }],
+        "gridHorizontal": [{ "show": true, "color": { "solid": { "color": "#F5EDE6" } }, "weight": 1 }],
+        "columnHeaders": [{
+          "fontBold": true,
+          "backColor": { "solid": { "color": "#B76E79" } },
+          "fontColor": { "solid": { "color": "#FFFFFF" } }
+        }],
+        "values": [{
+          "backColor": { "solid": { "color": "#FFFFFF" } },
+          "fontColor": { "solid": { "color": "#3A2E2A" } },
+          "urlIcon": true
+        }],
+        "total": [{
+          "backColor": { "solid": { "color": "#F5EDE6" } },
+          "fontColor": { "solid": { "color": "#3A2E2A" } },
+          "fontBold": true
+        }]
+      }
+    },
+    "slicer": {
+      "*": {
+        "background": [{ "show": true, "color": { "solid": { "color": "#FFFFFF" } }, "transparency": 0 }],
+        "border": [{ "show": true, "color": { "solid": { "color": "#EBD9CC" } }, "radius": 8 }]
+      }
+    },
+    "title": {
+      "*": {
+        "color": [{ "color": { "solid": { "color": "#3A2E2A" } } }],
+        "background": [{ "color": { "solid": { "color": "transparent" } } }],
+        "fontSize": [{ "fontSize": 13 }],
+        "fontBold": [{ "fontBold": true }],
+        "fontFamily": [{ "fontFamily": "Segoe UI" }]
+      }
+    }
+  },
+  "textClasses": {
+    "callout": {
+      "fontSize": 45,
+      "fontFace": "Segoe UI",
+      "color": "#B76E79"
+    },
+    "header": {
+      "fontSize": 12,
+      "fontFace": "Segoe UI",
+      "color": "#3A2E2A"
+    },
+    "body": {
+      "fontSize": 11,
+      "fontFace": "Segoe UI",
+      "color": "#6B5247"
+    },
+    "label": {
+      "fontSize": 10,
+      "fontFace": "Segoe UI",
+      "color": "#9A7B72"
+    }
+  }
+}
