@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { ShieldCheck, Lock, CreditCard } from 'lucide-react';
 import AppShell from '@/components/layout/AppShell';
@@ -22,10 +22,42 @@ export default function CheckoutPage() {
 
   const update = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
-  const handlePlaceOrder = () => {
-    setPlaced(true);
-    clearCart();
-  };
+  const handlePlaceOrder = useCallback(async () => {
+    try {
+      const payload = {
+        customer: {
+          firstName: form.firstName, lastName: form.lastName,
+          email: form.email,         phone: form.phone,
+          address: form.address,     city: form.city,
+          state: form.state,         zip: form.zip,
+          country: form.country,
+        },
+        items: items.map(i => ({
+          productId: i.product.id,
+          name:      i.product.name,
+          category:  i.product.category ?? '',
+          qty:       i.quantity,
+          price:     i.product.price,
+          size:      i.selectedSize ?? '',
+          color:     i.selectedColor?.name ?? '',
+        })),
+        subtotal: total(),
+        discount: 0,
+        total:    total(),
+        paymentMethod: form.cardNumber ? 'card' : 'COD',
+      };
+      await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+    } catch (e) {
+      console.error('Order save failed:', e);
+    } finally {
+      setPlaced(true);
+      clearCart();
+    }
+  }, [form, items, total, clearCart]);
 
   if (placed) {
     return (
