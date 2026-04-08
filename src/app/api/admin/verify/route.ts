@@ -1,12 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createHash } from 'crypto';
 
-const TOKEN_SECRET   = process.env.ADMIN_TOKEN_SECRET as string;
 const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
 
-function makeToken(ts: number): string {
+function makeToken(ts: number, secret: string): string {
   return createHash('sha256')
-    .update(`${ts}:${TOKEN_SECRET}`)
+    .update(`${ts}:${secret}`)
     .digest('hex');
 }
 
@@ -22,7 +21,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ valid: false, reason: 'expired' }, { status: 401 });
     }
 
-    const expected = makeToken(ts);
+    const secret = (process.env.ADMIN_TOKEN_SECRET ?? '').trim();
+    if (!secret) {
+      return NextResponse.json({ valid: false }, { status: 500 });
+    }
+
+    const expected = makeToken(ts, secret);
     if (token !== expected) {
       return NextResponse.json({ valid: false }, { status: 401 });
     }
