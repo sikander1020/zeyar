@@ -246,7 +246,7 @@ function OverviewTab({ data }: { data: DashData }) {
           <SectionTitle>Order Status</SectionTitle>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={data.orderStatus} dataKey="count" nameKey="status" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
+              <Pie data={data.orderStatus} dataKey="count" nameKey="status" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false}>
                 {data.orderStatus.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
               <Tooltip />
@@ -257,7 +257,7 @@ function OverviewTab({ data }: { data: DashData }) {
           <SectionTitle>Payment Methods</SectionTitle>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={data.paymentSplit} dataKey="revenue" nameKey="method" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine={false}>
+              <Pie data={data.paymentSplit} dataKey="revenue" nameKey="method" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false}>
                 {data.paymentSplit.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
               <Tooltip formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
@@ -292,7 +292,7 @@ function SalesTab({ data }: { data: DashData }) {
           <ResponsiveContainer width="100%" height={240}>
             <PieChart>
               <Pie data={data.categoryRevenue} dataKey="revenue" nameKey="category" cx="50%" cy="50%" outerRadius={90}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`} labelLine>
+                label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine>
                 {data.categoryRevenue.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
               <Tooltip formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
@@ -493,7 +493,7 @@ function FinanceTab({ data }: { data: DashData }) {
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
               <Pie data={data.paymentSplit} dataKey="revenue" nameKey="method" cx="50%" cy="50%" outerRadius={80}
-                label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}>
+                label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`}>
                 {data.paymentSplit.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
               <Tooltip formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
