@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectDB } from '@/lib/mongodb';
 import Order from '@/models/Order';
+import Product from '@/models/Product';
 
 // Generate a short readable order ID
 function generateOrderId(): string {
@@ -26,19 +28,48 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
     }
 
-    const order = await Order.create({
-      orderId: generateOrderId(),
-      customer,
-      items,
-      subtotal,
-      discount,
-      total,
-      paymentMethod,
-      paymentStatus: paymentMethod === 'COD' ? 'unpaid' : 'paid',
-      status: 'pending',
-    });
+    const orderId = generateOrderId();
+    const session = await mongoose.startSession();
 
-    return NextResponse.json({ success: true, orderId: order.orderId }, { status: 201 });
+    try {
+      await session.withTransaction(async () => {
+        for (const item of items as { productId: string; qty: number }[]) {
+          const updated = await Product.findOneAndUpdate(
+            { productId: item.productId, stock: { $gte: item.qty } },
+            { $inc: { stock: -item.qty, sold: item.qty } },
+            { session, new: true },
+          );
+          if (!updated) {
+            throw new Error(`INSUFFICIENT_STOCK:${item.productId}`);
+          }
+        }
+
+        await Order.create([{
+          orderId,
+          customer,
+          items,
+          subtotal,
+          discount,
+          total,
+          paymentMethod,
+          paymentStatus: paymentMethod === 'COD' ? 'unpaid' : 'paid',
+          status: 'pending',
+        }], { session });
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : '';
+      if (msg.startsWith('INSUFFICIENT_STOCK:')) {
+        return NextResponse.json(
+          { error: 'One or more items are out of stock. Please refresh and try again.' },
+          { status: 409 },
+        );
+      }
+      throw e;
+    } finally {
+      await session.endSession();
+    }
+
+    return NextResponse.json({ success: true, orderId }, { status: 201 });
   } catch (err) {
     console.error('POST /api/orders error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

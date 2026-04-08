@@ -14,6 +14,9 @@ const CREAM  = '#FAF7F4';
 const BEIGE  = '#F5EDE6';
 const MUTED  = '#9A7B72';
 
+/** How often to pull fresh data from MongoDB (orders, inventory, stats). */
+const POLL_MS = 15_000;
+
 // ── Types ─────────────────────────────────────────────────────────────────────
 interface Summary {
   totalRevenue: number; totalOrders: number; avgOrderValue: number;
@@ -656,6 +659,7 @@ export default function DashboardPage() {
   const [data,    setData]    = useState<DashData | null>(null);
   const [loading, setLoading] = useState(false);
   const [lastRef, setLastRef] = useState('');
+  const [liveOn, setLiveOn]   = useState(true);
 
   const verify = useCallback(async () => {
     const token = localStorage.getItem('zeyar_admin_token');
@@ -673,19 +677,48 @@ export default function DashboardPage() {
     } catch { setAuthed(false); }
   }, []);
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
+  const fetchData = useCallback(async (opts?: { silent?: boolean }) => {
+    const silent = opts?.silent === true;
+    if (!silent) setLoading(true);
     try {
-      const res = await fetch('/api/powerbi');
-      const d   = await res.json() as DashData;
-      setData(d);
+      const res = await fetch('/api/powerbi', {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache' },
+      });
+      const d = await res.json() as DashData & { error?: string };
+      if (!res.ok || d.error) return;
+      setData(d as DashData);
       setLastRef(new Date().toLocaleTimeString());
-    } catch { /* show stale data */ }
-    finally { setLoading(false); }
+    } catch { /* keep previous data */ }
+    finally {
+      if (!silent) setLoading(false);
+    }
   }, []);
 
   useEffect(() => { verify(); }, [verify]);
   useEffect(() => { if (authed) fetchData(); }, [authed, fetchData]);
+
+  // Live updates: poll MongoDB on an interval; pause when tab is in background
+  useEffect(() => {
+    if (!authed || !liveOn) return;
+
+    const id = window.setInterval(() => {
+      if (document.visibilityState !== 'visible') return;
+      void fetchData({ silent: true });
+    }, POLL_MS);
+
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') void fetchData({ silent: true });
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+
+    return () => {
+      window.clearInterval(id);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+    };
+  }, [authed, liveOn, fetchData]);
 
   function handleLock() {
     localStorage.removeItem('zeyar_admin_token');
@@ -747,16 +780,46 @@ export default function DashboardPage() {
             <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: BROWN }}>
               {TABS.find((t) => t.id === tab)?.label}
             </h1>
-            {lastRef && <p style={{ margin: '4px 0 0', fontSize: 12, color: MUTED }}>Last refreshed: {lastRef}</p>}
+            {lastRef && (
+              <p style={{ margin: '4px 0 0', fontSize: 12, color: MUTED }}>
+                Last updated: {lastRef}
+                {liveOn ? ` · Auto-refresh every ${Math.round(POLL_MS / 1000)}s (while tab is visible)` : ' · Auto-refresh off'}
+              </p>
+            )}
           </div>
-          <button onClick={fetchData} disabled={loading}
-            style={{
-              padding: '10px 20px', background: loading ? MUTED : ROSE, color: '#fff',
-              border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600,
-              cursor: loading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', gap: 8,
-            }}>
-            {loading ? '⟳ Loading…' : '⟳ Refresh'}
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: MUTED, cursor: 'pointer', userSelect: 'none' }}>
+              <input
+                type="checkbox"
+                checked={liveOn}
+                onChange={(e) => setLiveOn(e.target.checked)}
+                style={{ accentColor: ROSE }}
+              />
+              Live ({Math.round(POLL_MS / 1000)}s)
+            </label>
+            {liveOn && (
+              <span style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                fontSize: 11, fontWeight: 600, color: '#fff', background: '#6B8E6B',
+                padding: '4px 10px', borderRadius: 20,
+              }}>
+                <span style={{
+                  width: 6, height: 6, borderRadius: '50%', background: '#fff',
+                  animation: 'pulse 1.5s ease-in-out infinite',
+                }} />
+                Active
+              </span>
+            )}
+            <style>{`@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }`}</style>
+            <button type="button" onClick={() => fetchData()} disabled={loading}
+              style={{
+                padding: '10px 20px', background: loading ? MUTED : ROSE, color: '#fff',
+                border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600,
+                cursor: loading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+              {loading ? '⟳ Loading…' : '⟳ Refresh now'}
+            </button>
+          </div>
         </div>
 
         {/* Tab content */}

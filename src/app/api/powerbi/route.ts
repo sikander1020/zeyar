@@ -288,20 +288,27 @@ export async function GET() {
       profitMargin:    +(profit?.profitMargin ?? 0).toFixed(1),
     }];
 
-    return NextResponse.json({
-      summary,
-      orders,
-      orderItems,
-      dailyRevenue:    dailyRevenueFlat,
-      monthlyRevenue:  monthlyRevenueFlat,
-      categoryRevenue,
-      topProducts,
-      paymentSplit,
-      orderStatus,
-      cityStats,
-      customers,
-      inventory,
-    });
+    return NextResponse.json(
+      {
+        summary,
+        orders,
+        orderItems,
+        dailyRevenue:    dailyRevenueFlat,
+        monthlyRevenue:  monthlyRevenueFlat,
+        categoryRevenue,
+        topProducts,
+        paymentSplit,
+        orderStatus,
+        cityStats,
+        customers,
+        inventory,
+      },
+      {
+        headers: {
+          'Cache-Control': 'private, no-store, max-age=0, must-revalidate',
+        },
+      },
+    );
   } catch (err) {
     console.error('GET /api/powerbi error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
