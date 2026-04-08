@@ -84,7 +84,7 @@ export default function Footer() {
                   whileHover={{ scale: 1.15, y: -2 }}
                   className="w-9 h-9 rounded-full border border-nude/30 flex items-center justify-center text-nude/70 hover:text-nude hover:border-nude transition-colors duration-300"
                 >
-                  <Icon size={15} strokeWidth={1.5} />
+                  <Icon size={15} />
                 </motion.a>
               ))}
             </div>
