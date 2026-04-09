@@ -75,7 +75,7 @@ export default function CheckoutPage() {
     }
     setPlaced(true);
     clearCart();
-  }, [form, items, total, clearCart]);
+  }, [form, items, total, paymentMethod, router, clearCart]);
 
   if (placed) {
     return (
@@ -233,9 +233,22 @@ export default function CheckoutPage() {
                           Bank transfer instructions
                         </span>
                       </div>
-                      <p className="text-sm text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        After you place the order, you’ll be redirected to upload your payment screenshot + transaction reference.
+                      <p className="text-sm text-brown-muted font-inter mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Send payment to the account below. After you place the order, you’ll be redirected to upload your payment screenshot + transaction reference.
                       </p>
+                      <div className="glass p-4 border border-nude/20">
+                        <p className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          Bank Account
+                        </p>
+                        <div className="text-sm text-brown font-inter space-y-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          <div><span className="text-brown-muted">Bank:</span> (add your bank name)</div>
+                          <div><span className="text-brown-muted">Account Title:</span> (add title)</div>
+                          <div><span className="text-brown-muted">Account / IBAN:</span> (add number)</div>
+                        </div>
+                        <p className="text-xs text-brown-muted font-inter mt-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          Note: Use your Order ID as reference if your bank app allows it.
+                        </p>
+                      </div>
                     </div>
                   )}
 

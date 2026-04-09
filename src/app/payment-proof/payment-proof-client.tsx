@@ -61,6 +61,20 @@ export default function PaymentProofClient() {
             <p className="font-mono text-brown text-sm">{orderId || '—'}</p>
           </div>
 
+          <div className="bg-white border border-nude/30 rounded-lg p-6 mb-8">
+            <p className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Where to pay
+            </p>
+            <div className="text-sm text-brown font-inter space-y-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+              <div><span className="text-brown-muted">Bank:</span> (add your bank name)</div>
+              <div><span className="text-brown-muted">Account Title:</span> (add title)</div>
+              <div><span className="text-brown-muted">Account / IBAN:</span> (add number)</div>
+            </div>
+            <p className="text-xs text-brown-muted font-inter mt-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+              After paying, upload the screenshot below and enter the transaction reference.
+            </p>
+          </div>
+
           {done ? (
             <div className="bg-white border border-nude/30 rounded-lg p-8 text-center">
               <div className="text-5xl mb-4">✅</div>
