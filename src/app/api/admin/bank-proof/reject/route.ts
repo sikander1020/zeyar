@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectDB } from '@/lib/mongodb';
 import Order from '@/models/Order';
+import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/adminAuth';
 
 export async function POST(req: NextRequest) {
@@ -13,25 +15,48 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
 
-    const res = await Order.updateOne(
-      {
+    const session = await mongoose.startSession();
+    const now = new Date();
+    const res = await session.withTransaction(async () => {
+      const order = await Order.findOne({
         orderId,
         paymentMethod: 'bank',
         paymentStatus: 'unpaid',
         'bankTransfer.status': 'proof_submitted',
-      },
-      {
-        $set: {
-          'bankTransfer.status': 'rejected',
-          'bankTransfer.reviewedAt': new Date(),
-          'bankTransfer.proofUrl': '',
-          'bankTransfer.transactionId': '',
-          'bankTransfer.submittedAt': null,
-        },
-      },
-    );
+      })
+        .select('items')
+        .session(session);
 
-    if (res.matchedCount === 0) {
+      if (!order) return { ok: false as const };
+
+      // Restore inventory (reverse the sold/stock changes made at order time)
+      for (const item of order.items ?? []) {
+        await Product.updateOne(
+          { productId: item.productId },
+          { $inc: { stock: item.qty, sold: -item.qty } },
+          { session },
+        );
+      }
+
+      await Order.updateOne(
+        { orderId },
+        {
+          $set: {
+            status: 'cancelled',
+            'bankTransfer.status': 'rejected',
+            'bankTransfer.reviewedAt': now,
+            'bankTransfer.proofUrl': '',
+            'bankTransfer.transactionId': '',
+            'bankTransfer.submittedAt': null,
+          },
+        },
+        { session },
+      );
+
+      return { ok: true as const };
+    });
+
+    if (!res.ok) {
       return NextResponse.json({ error: 'Order not found or not pending proof' }, { status: 404 });
     }
 

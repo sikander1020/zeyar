@@ -15,7 +15,8 @@ export async function GET(req: NextRequest) {
       {
         $group: {
           _id: null,
-          totalRevenue:    { $sum: '$total' },
+          // Revenue should reflect money actually received
+          totalRevenue:    { $sum: { $cond: [{ $eq: ['$paymentStatus', 'paid'] }, '$total', 0] } },
           totalOrders:     { $sum: 1 },
           avgOrderValue:   { $avg: '$total' },
           totalDiscount:   { $sum: '$discount' },
@@ -34,7 +35,7 @@ export async function GET(req: NextRequest) {
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
     const dailyRevenue = await Order.aggregate([
-      { $match: { createdAt: { $gte: thirtyDaysAgo }, status: { $ne: 'cancelled' } } },
+      { $match: { createdAt: { $gte: thirtyDaysAgo }, status: { $ne: 'cancelled' }, paymentStatus: 'paid' } },
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
@@ -47,6 +48,7 @@ export async function GET(req: NextRequest) {
 
     // ── Top products ────────────────────────────────────────────────────
     const topProducts = await Order.aggregate([
+      { $match: { status: { $ne: 'cancelled' }, paymentStatus: 'paid' } },
       { $unwind: '$items' },
       {
         $group: {
@@ -63,6 +65,7 @@ export async function GET(req: NextRequest) {
 
     // ── Revenue by category ─────────────────────────────────────────────
     const categoryRevenue = await Order.aggregate([
+      { $match: { status: { $ne: 'cancelled' }, paymentStatus: 'paid' } },
       { $unwind: '$items' },
       {
         $group: {
@@ -76,11 +79,13 @@ export async function GET(req: NextRequest) {
 
     // ── Payment method split ────────────────────────────────────────────
     const paymentSplit = await Order.aggregate([
+      { $match: { status: { $ne: 'cancelled' }, paymentStatus: 'paid' } },
       { $group: { _id: '$paymentMethod', count: { $sum: 1 }, revenue: { $sum: '$total' } } },
     ]);
 
     // ── Profit (uses costPrice from products collection) ────────────────
     const profitData = await Order.aggregate([
+      { $match: { status: { $ne: 'cancelled' }, paymentStatus: 'paid' } },
       { $unwind: '$items' },
       {
         $lookup: {

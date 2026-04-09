@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
       {
         $group: {
           _id: null,
-          totalRevenue:    { $sum: '$total' },
+          totalRevenue:    { $sum: { $cond: [{ $eq: ['$paymentStatus', 'paid'] }, '$total', 0] } },
           totalOrders:     { $sum: 1 },
           avgOrderValue:   { $avg: '$total' },
           totalDiscount:   { $sum: '$discount' },
@@ -33,6 +33,7 @@ export async function GET(req: NextRequest) {
 
     // ── Profit summary ──────────────────────────────────────────────────
     const [profit] = await Order.aggregate([
+      { $match: { status: { $ne: 'cancelled' }, paymentStatus: 'paid' } },
       { $unwind: '$items' },
       {
         $lookup: {
@@ -109,7 +110,7 @@ export async function GET(req: NextRequest) {
     ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
 
     const dailyRevenue = await Order.aggregate([
-      { $match: { createdAt: { $gte: ninetyDaysAgo }, status: { $ne: 'cancelled' } } },
+      { $match: { createdAt: { $gte: ninetyDaysAgo }, status: { $ne: 'cancelled' }, paymentStatus: 'paid' } },
       {
         $group: {
           _id:     { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
@@ -128,7 +129,7 @@ export async function GET(req: NextRequest) {
 
     // ── Monthly Revenue (flat rows) ──────────────────────────────────────
     const monthlyRevenue = await Order.aggregate([
-      { $match: { status: { $ne: 'cancelled' } } },
+      { $match: { status: { $ne: 'cancelled' }, paymentStatus: 'paid' } },
       {
         $group: {
           _id:     { $dateToString: { format: '%Y-%m', date: '$createdAt' } },
@@ -147,6 +148,7 @@ export async function GET(req: NextRequest) {
 
     // ── Category Revenue (flat rows) ─────────────────────────────────────
     const catRev = await Order.aggregate([
+      { $match: { status: { $ne: 'cancelled' }, paymentStatus: 'paid' } },
       { $unwind: '$items' },
       {
         $group: {
@@ -166,6 +168,7 @@ export async function GET(req: NextRequest) {
 
     // ── Top Products (flat rows) ─────────────────────────────────────────
     const topProds = await Order.aggregate([
+      { $match: { status: { $ne: 'cancelled' }, paymentStatus: 'paid' } },
       { $unwind: '$items' },
       {
         $group: {
@@ -190,6 +193,7 @@ export async function GET(req: NextRequest) {
 
     // ── Payment Split (flat rows) ────────────────────────────────────────
     const paySplit = await Order.aggregate([
+      { $match: { status: { $ne: 'cancelled' }, paymentStatus: 'paid' } },
       { $group: { _id: '$paymentMethod', count: { $sum: 1 }, revenue: { $sum: '$total' } } },
     ]);
 
@@ -211,7 +215,7 @@ export async function GET(req: NextRequest) {
 
     // ── City Stats (flat rows) ───────────────────────────────────────────
     const cityRaw = await Order.aggregate([
-      { $match: { status: { $ne: 'cancelled' } } },
+      { $match: { status: { $ne: 'cancelled' }, paymentStatus: 'paid' } },
       {
         $group: {
           _id:      '$customer.city',
@@ -234,6 +238,7 @@ export async function GET(req: NextRequest) {
 
     // ── Customer list (flat rows) ────────────────────────────────────────
     const custRaw = await Order.aggregate([
+      { $match: { status: { $ne: 'cancelled' }, paymentStatus: 'paid' } },
       {
         $group: {
           _id:        '$customer.email',
