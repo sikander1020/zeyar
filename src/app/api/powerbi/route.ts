@@ -71,9 +71,9 @@ export async function GET(req: NextRequest) {
 
     const orders = rawOrders.map((o) => ({
       orderId:       o.orderId,
-      customerName:  o.customer?.name ?? '',
+      customerName:  `${o.customer?.firstName ?? ''} ${o.customer?.lastName ?? ''}`.trim(),
       customerEmail: o.customer?.email ?? '',
-      customerCity:  o.customer?.address?.city ?? '',
+      customerCity:  o.customer?.city ?? '',
       total:         o.total,
       discount:      o.discount ?? 0,
       paymentMethod: o.paymentMethod,

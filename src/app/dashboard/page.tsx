@@ -361,6 +361,20 @@ function OrdersTab({ data }: { data: DashData }) {
     return matchSearch && matchStatus && matchMonth;
   });
 
+  const authHeaders = useCallback(() => {
+    const token = localStorage.getItem('zeyar_admin_token') ?? '';
+    const ts = localStorage.getItem('zeyar_admin_ts') ?? '';
+    return { 'x-admin-token': token, 'x-admin-ts': ts };
+  }, []);
+
+  async function markCodReceived(orderId: string) {
+    await fetch('/api/admin/orders/cod-received', {
+      method: 'POST',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId }),
+    });
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
@@ -382,14 +396,14 @@ function OrdersTab({ data }: { data: DashData }) {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ background: ROSE, color: '#fff' }}>
-              {['Order ID','Customer','City','Total','Status','Payment','Placed'].map((h) => (
+              {['Order ID','Customer','City','Total','Status','Payment','Placed','Actions'].map((h) => (
                 <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {filtered.length === 0 && (
-              <tr><td colSpan={7} style={{ padding: 32, textAlign: 'center', color: MUTED }}>No orders match your filters.</td></tr>
+              <tr><td colSpan={8} style={{ padding: 32, textAlign: 'center', color: MUTED }}>No orders match your filters.</td></tr>
             )}
             {filtered.map((o, i) => (
               <tr key={o.orderId} style={{ background: i % 2 === 0 ? '#fff' : BEIGE }}>
@@ -411,6 +425,19 @@ function OrdersTab({ data }: { data: DashData }) {
                 </td>
                 <td style={{ padding: '10px 14px', color: MUTED }}>
                   {o.date}{o.time ? ` ${o.time}` : ''}
+                </td>
+                <td style={{ padding: '10px 14px' }}>
+                  {o.paymentMethod === 'COD' && o.paymentStatus !== 'paid' && o.status === 'pending' ? (
+                    <button
+                      onClick={() => markCodReceived(o.orderId)}
+                      style={{ padding: '6px 10px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}
+                      title="Mark payment received and confirm order"
+                    >
+                      Mark received
+                    </button>
+                  ) : (
+                    <span style={{ color: MUTED, fontSize: 12 }}>—</span>
+                  )}
                 </td>
               </tr>
             ))}
