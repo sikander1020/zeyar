@@ -47,6 +47,12 @@ interface InventoryItem {
   costPrice: number; margin: number; stock: number; sold: number;
   stockValue: number; revenueValue: number;
 }
+interface BankProofRow {
+  orderId: string;
+  customer: { firstName?: string; lastName?: string; email?: string; city?: string };
+  total: number;
+  bankTransfer?: { transactionId?: string; proofUrl?: string; submittedAt?: string };
+}
 interface DashData {
   summary: Summary[]; orders: Order[]; orderItems: OrderItem[];
   dailyRevenue: DailyRevenue[]; monthlyRevenue: MonthlyRevenue[];
@@ -105,6 +111,7 @@ const TABS = [
   { id: 'inventory',  label: 'Inventory',       icon: '▤' },
   { id: 'finance',    label: 'Finance',         icon: '₨' },
   { id: 'locations',  label: 'Locations',       icon: '⊙' },
+  { id: 'bankProofs', label: 'Bank Proofs',     icon: '✓' },
 ];
 
 // ── Login Wall ────────────────────────────────────────────────────────────────
@@ -652,6 +659,148 @@ function LocationsTab({ data }: { data: DashData }) {
   );
 }
 
+// ── Bank Proofs Tab ───────────────────────────────────────────────────────────
+function BankProofsTab() {
+  const [rows, setRows] = useState<BankProofRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState('');
+
+  const authHeaders = useCallback(() => {
+    const token = localStorage.getItem('zeyar_admin_token') ?? '';
+    const ts = localStorage.getItem('zeyar_admin_ts') ?? '';
+    return { 'x-admin-token': token, 'x-admin-ts': ts };
+  }, []);
+
+  const load = useCallback(async () => {
+    setErr('');
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/bank-proof/list', {
+        cache: 'no-store',
+        headers: { ...authHeaders(), 'Cache-Control': 'no-cache' },
+      });
+      const data = await res.json() as { orders?: BankProofRow[]; error?: string };
+      if (!res.ok) { setErr(data.error ?? 'Failed to load'); return; }
+      setRows(data.orders ?? []);
+    } catch {
+      setErr('Failed to load');
+    } finally {
+      setLoading(false);
+    }
+  }, [authHeaders]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  async function approve(orderId: string) {
+    const res = await fetch('/api/admin/bank-proof/approve', {
+      method: 'POST',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId }),
+    });
+    if (res.ok) void load();
+  }
+
+  async function reject(orderId: string) {
+    const res = await fetch('/api/admin/bank-proof/reject', {
+      method: 'POST',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId }),
+    });
+    if (res.ok) void load();
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>
+          Pending proofs: {rows.length}
+        </p>
+        <button
+          onClick={() => load()}
+          disabled={loading}
+          style={{
+            padding: '10px 14px',
+            background: loading ? MUTED : ROSE,
+            color: '#fff',
+            border: 'none',
+            borderRadius: 8,
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: loading ? 'default' : 'pointer',
+          }}
+        >
+          {loading ? 'Loading…' : 'Refresh'}
+        </button>
+      </div>
+
+      {err && (
+        <div style={{ padding: 12, borderRadius: 10, background: '#fff', border: '1px solid #EBD9CC', color: '#C0504D' }}>
+          {err}
+        </div>
+      )}
+
+      <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 0, overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ background: ROSE, color: '#fff' }}>
+                {['Order ID', 'Customer', 'City', 'Total', 'Transaction ID', 'Proof', 'Actions'].map((h) => (
+                  <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.length === 0 && (
+                <tr>
+                  <td colSpan={7} style={{ padding: 28, textAlign: 'center', color: MUTED }}>
+                    No pending bank transfer proofs.
+                  </td>
+                </tr>
+              )}
+              {rows.map((o, i) => {
+                const name = `${o.customer?.firstName ?? ''} ${o.customer?.lastName ?? ''}`.trim() || '—';
+                const proofUrl = o.bankTransfer?.proofUrl ?? '';
+                return (
+                  <tr key={o.orderId} style={{ background: i % 2 === 0 ? '#fff' : BEIGE }}>
+                    <td style={{ padding: '10px 14px', fontFamily: 'monospace', fontSize: 12 }}>{o.orderId}</td>
+                    <td style={{ padding: '10px 14px' }}>{name}</td>
+                    <td style={{ padding: '10px 14px' }}>{o.customer?.city ?? '—'}</td>
+                    <td style={{ padding: '10px 14px', fontWeight: 600 }}>{fmt(o.total)}</td>
+                    <td style={{ padding: '10px 14px', fontFamily: 'monospace', fontSize: 12 }}>{o.bankTransfer?.transactionId ?? '—'}</td>
+                    <td style={{ padding: '10px 14px' }}>
+                      {proofUrl ? (
+                        <a href={proofUrl} target="_blank" rel="noreferrer" style={{ color: ROSE, fontWeight: 600 }}>
+                          View
+                        </a>
+                      ) : '—'}
+                    </td>
+                    <td style={{ padding: '10px 14px' }}>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button
+                          onClick={() => approve(o.orderId)}
+                          style={{ padding: '6px 10px', background: '#6B8E6B', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          onClick={() => reject(o.orderId)}
+                          style={{ padding: '6px 10px', background: '#C0504D', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Main Dashboard ────────────────────────────────────────────────────────────
 export default function DashboardPage() {
   const [authed,  setAuthed]  = useState<boolean | null>(null); // null = checking
@@ -681,9 +830,15 @@ export default function DashboardPage() {
     const silent = opts?.silent === true;
     if (!silent) setLoading(true);
     try {
+      const token = localStorage.getItem('zeyar_admin_token') ?? '';
+      const ts    = localStorage.getItem('zeyar_admin_ts') ?? '';
       const res = await fetch('/api/powerbi', {
         cache: 'no-store',
-        headers: { 'Cache-Control': 'no-cache' },
+        headers: {
+          'Cache-Control': 'no-cache',
+          'x-admin-token': token,
+          'x-admin-ts': ts,
+        },
       });
       const d = await res.json() as DashData & { error?: string };
       if (!res.ok || d.error) return;
@@ -835,6 +990,7 @@ export default function DashboardPage() {
             {tab === 'inventory' && <InventoryTab  data={data} />}
             {tab === 'finance'   && <FinanceTab    data={data} />}
             {tab === 'locations' && <LocationsTab  data={data} />}
+            {tab === 'bankProofs' && <BankProofsTab />}
           </>
         )}
       </main>

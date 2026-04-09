@@ -1,6 +1,7 @@
-﻿import { NextResponse } from 'next/server';
+﻿import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Product from '@/models/Product';
+import { requireAdmin } from '@/lib/adminAuth';
 
 // Cost price = roughly 45% of selling price (typical fashion margin)
 const COST_RATIO = 0.45;
@@ -20,8 +21,10 @@ const seedProducts = [
   { productId: 'zaybaash-012', name: 'Champagne Soirée Gown',        category: 'Formal',  price: 38500 },
 ];
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const guard = requireAdmin(req);
+    if (guard) return guard;
     await connectDB();
 
     let inserted = 0;

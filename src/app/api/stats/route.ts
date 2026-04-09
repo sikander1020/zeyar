@@ -1,10 +1,13 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
+import { requireAdmin } from '@/lib/adminAuth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const guard = requireAdmin(req);
+    if (guard) return guard;
     await connectDB();
 
     // ── Revenue & order counts ──────────────────────────────────────────

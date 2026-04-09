@@ -1,13 +1,16 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
+import { requireAdmin } from '@/lib/adminAuth';
 
 // Flat-table endpoint optimised for Power BI "Web" connector.
 // Each key is a table that Power BI can import directly — no manual
 // JSON expansion needed.
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const guard = requireAdmin(req);
+    if (guard) return guard;
     await connectDB();
 
     // ── KPI Summary (single-row table) ──────────────────────────────────

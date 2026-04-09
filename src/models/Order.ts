@@ -31,6 +31,14 @@ export interface IOrder extends Document {
   paymentMethod: 'COD' | 'card' | 'bank';
   paymentStatus: 'unpaid' | 'paid';
   status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled';
+  bankTransfer?: {
+    uploadToken: string;
+    transactionId?: string;
+    proofUrl?: string;
+    submittedAt?: Date;
+    status: 'awaiting_proof' | 'proof_submitted' | 'approved' | 'rejected';
+    reviewedAt?: Date;
+  };
 }
 
 const OrderItemSchema = new Schema<IOrderItem>({
@@ -60,6 +68,14 @@ const OrderSchema = new Schema<IOrder>(
     paymentMethod: { type: String, enum: ['COD', 'card', 'bank'], default: 'COD' },
     paymentStatus: { type: String, enum: ['unpaid', 'paid'],       default: 'unpaid' },
     status:        { type: String, enum: ['pending','confirmed','shipped','delivered','cancelled'], default: 'pending' },
+    bankTransfer: {
+      uploadToken:    { type: String, default: '' },
+      transactionId:  { type: String, default: '' },
+      proofUrl:       { type: String, default: '' },
+      submittedAt:    { type: Date },
+      status:         { type: String, enum: ['awaiting_proof', 'proof_submitted', 'approved', 'rejected'] },
+      reviewedAt:     { type: Date },
+    },
   },
   { timestamps: true }
 );
