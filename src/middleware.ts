@@ -1,21 +1,28 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { SITE_ORIGIN } from '@/lib/siteUrl';
 
-const CANONICAL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://zaybaash.com';
-
-/** Send production *.vercel.app traffic to the custom domain (same path + query). */
+/** Production-only: apex → www, *.vercel.app → canonical origin. */
 export function middleware(request: NextRequest) {
   if (process.env.VERCEL_ENV !== 'production') {
     return NextResponse.next();
   }
 
   const host = request.headers.get('host') ?? '';
+
+  if (host === 'zaybaash.com') {
+    const url = request.nextUrl.clone();
+    url.hostname = 'www.zaybaash.com';
+    url.protocol = 'https:';
+    return NextResponse.redirect(url, 308);
+  }
+
   if (!host.endsWith('.vercel.app')) {
     return NextResponse.next();
   }
 
   try {
-    const base = new URL(CANONICAL);
+    const base = new URL(SITE_ORIGIN);
     const target = new URL(request.nextUrl.pathname + request.nextUrl.search, base);
     return NextResponse.redirect(target, 308);
   } catch {

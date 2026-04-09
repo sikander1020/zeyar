@@ -1,4 +1,5 @@
 import { MetadataRoute } from 'next'
+import { SITE_ORIGIN } from '@/lib/siteUrl';
 
 export const dynamic = 'force-static';
 
@@ -8,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://zaybaash.com/sitemap.xml',
+    sitemap: `${SITE_ORIGIN}/sitemap.xml`,
   }
 }

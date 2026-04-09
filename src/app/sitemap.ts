@@ -1,10 +1,11 @@
 import { products } from '@/data/products';
 import { MetadataRoute } from 'next';
+import { SITE_ORIGIN } from '@/lib/siteUrl';
 
 export const dynamic = 'force-static';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = 'https://zaybaash.com';
+  const base = SITE_ORIGIN;
   
   const staticRoutes = ['', '/shop', '/dresses', '/about', '/wishlist', '/cart', '/size-guide', '/returns'].map((route) => ({
     url: `${base}${route}`,

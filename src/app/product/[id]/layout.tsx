@@ -1,5 +1,6 @@
 import { products } from '@/data/products';
 import { Metadata } from 'next';
+import { SITE_ORIGIN } from '@/lib/siteUrl';
 
 export function generateStaticParams() {
   return products.map((product) => ({
@@ -18,7 +19,7 @@ export function generateMetadata({ params }: { params: { id: string } }): Metada
     openGraph: {
       title: `${product.name} | ZAYBAASH Pakistan`,
       description: `Shop the ${product.name} at ZAYBAASH, Pakistan's premium beauty with style destination.`,
-      url: `https://zaybaash.com/product/${product.id}`,
+      url: `${SITE_ORIGIN}/product/${product.id}`,
       images: [
         {
           url: product.images[0] || '',
