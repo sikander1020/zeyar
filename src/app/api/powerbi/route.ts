@@ -79,6 +79,8 @@ export async function GET(req: NextRequest) {
       paymentStatus: o.paymentStatus,
       status:        o.status,
       date:          o.createdAt ? new Date(o.createdAt).toISOString().slice(0, 10) : '',
+      time:          o.createdAt ? new Date(o.createdAt).toISOString().slice(11, 19) : '',
+      placedAt:      o.createdAt ? new Date(o.createdAt).toISOString() : '',
       month:         o.createdAt ? new Date(o.createdAt).toISOString().slice(0, 7) : '',
     }));
 

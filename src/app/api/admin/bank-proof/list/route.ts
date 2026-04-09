@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
     })
       .sort({ 'bankTransfer.submittedAt': -1 })
       .limit(200)
-      .select('orderId customer total bankTransfer')
+      .select('orderId customer total bankTransfer createdAt')
       .lean();
 
     return NextResponse.json({ orders });

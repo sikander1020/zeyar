@@ -28,7 +28,7 @@ interface Order {
   orderId: string; customerName: string; customerEmail: string;
   customerCity: string; total: number; discount: number;
   paymentMethod: string; paymentStatus: string; status: string;
-  date: string; month: string;
+  date: string; time?: string; placedAt?: string; month: string;
 }
 interface OrderItem {
   orderId: string; productId: string; name: string; category: string;
@@ -50,6 +50,7 @@ interface InventoryItem {
 interface BankProofRow {
   orderId: string;
   customer: { firstName?: string; lastName?: string; email?: string; city?: string };
+  createdAt?: string;
   total: number;
   bankTransfer?: { transactionId?: string; proofUrl?: string; submittedAt?: string };
 }
@@ -375,7 +376,7 @@ function OrdersTab({ data }: { data: DashData }) {
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ background: ROSE, color: '#fff' }}>
-              {['Order ID','Customer','City','Total','Status','Payment','Date'].map((h) => (
+              {['Order ID','Customer','City','Total','Status','Payment','Placed'].map((h) => (
                 <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
               ))}
             </tr>
@@ -392,7 +393,9 @@ function OrdersTab({ data }: { data: DashData }) {
                 <td style={{ padding: '10px 14px', fontWeight: 600 }}>{fmt(o.total)}</td>
                 <td style={{ padding: '10px 14px' }}><StatusBadge status={o.status} /></td>
                 <td style={{ padding: '10px 14px', textTransform: 'uppercase', fontSize: 11 }}>{o.paymentMethod}</td>
-                <td style={{ padding: '10px 14px', color: MUTED }}>{o.date}</td>
+                <td style={{ padding: '10px 14px', color: MUTED }}>
+                  {o.date}{o.time ? ` ${o.time}` : ''}
+                </td>
               </tr>
             ))}
           </tbody>
@@ -744,7 +747,7 @@ function BankProofsTab() {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
             <thead>
               <tr style={{ background: ROSE, color: '#fff' }}>
-                {['Order ID', 'Customer', 'City', 'Total', 'Transaction ID', 'Proof', 'Actions'].map((h) => (
+                {['Order ID', 'Placed', 'Customer', 'City', 'Total', 'Transaction ID', 'Proof', 'Actions'].map((h) => (
                   <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
@@ -752,7 +755,7 @@ function BankProofsTab() {
             <tbody>
               {rows.length === 0 && (
                 <tr>
-                  <td colSpan={7} style={{ padding: 28, textAlign: 'center', color: MUTED }}>
+                  <td colSpan={8} style={{ padding: 28, textAlign: 'center', color: MUTED }}>
                     No pending bank transfer proofs.
                   </td>
                 </tr>
@@ -760,9 +763,11 @@ function BankProofsTab() {
               {rows.map((o, i) => {
                 const name = `${o.customer?.firstName ?? ''} ${o.customer?.lastName ?? ''}`.trim() || '—';
                 const proofUrl = o.bankTransfer?.proofUrl ?? '';
+                const placed = o.createdAt ? new Date(o.createdAt).toISOString().slice(0, 19).replace('T', ' ') : '—';
                 return (
                   <tr key={o.orderId} style={{ background: i % 2 === 0 ? '#fff' : BEIGE }}>
                     <td style={{ padding: '10px 14px', fontFamily: 'monospace', fontSize: 12 }}>{o.orderId}</td>
+                    <td style={{ padding: '10px 14px', color: MUTED, fontSize: 12 }}>{placed}</td>
                     <td style={{ padding: '10px 14px' }}>{name}</td>
                     <td style={{ padding: '10px 14px' }}>{o.customer?.city ?? '—'}</td>
                     <td style={{ padding: '10px 14px', fontWeight: 600 }}>{fmt(o.total)}</td>
