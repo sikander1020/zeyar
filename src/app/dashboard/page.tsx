@@ -367,6 +367,17 @@ function OrdersTab({ data }: { data: DashData }) {
     return { 'x-admin-token': token, 'x-admin-ts': ts };
   }, []);
 
+  async function resetTestData() {
+    const ok = window.confirm('This will DELETE ALL orders and reset inventory. Type OK to continue.');
+    if (!ok) return;
+    await fetch('/api/admin/reset-test', {
+      method: 'POST',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ confirm: 'RESET_TEST_DATA' }),
+    });
+    window.location.reload();
+  }
+
   async function markCodReceived(orderId: string) {
     await fetch('/api/admin/orders/cod-received', {
       method: 'POST',
@@ -390,6 +401,14 @@ function OrdersTab({ data }: { data: DashData }) {
           <option value="all">All Months</option>
           {months.map((m) => <option key={m} value={m}>{m}</option>)}
         </select>
+        <button
+          type="button"
+          onClick={resetTestData}
+          style={{ padding: '10px 14px', borderRadius: 8, border: '1px solid #EBD9CC', background: '#fff', color: '#C0504D', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+          title="Delete all dummy orders and reset inventory"
+        >
+          Clear test data
+        </button>
       </div>
       <p style={{ margin: 0, fontSize: 12, color: MUTED }}>{filtered.length} orders found</p>
       <div style={{ overflowX: 'auto' }}>
