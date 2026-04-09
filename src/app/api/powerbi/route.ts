@@ -65,7 +65,8 @@ export async function GET(req: NextRequest) {
 
     // ── Orders (flat rows) ───────────────────────────────────────────────
     const rawOrders = await Order.find({})
-      .select('orderId customer total discount paymentMethod paymentStatus status createdAt')
+      .sort({ createdAt: -1 })
+      .select('orderId customer total discount paymentMethod paymentStatus status createdAt bankTransfer')
       .lean();
 
     const orders = rawOrders.map((o) => ({
@@ -78,6 +79,7 @@ export async function GET(req: NextRequest) {
       paymentMethod: o.paymentMethod,
       paymentStatus: o.paymentStatus,
       status:        o.status,
+      bankTransferStatus: o.bankTransfer?.status ?? '',
       date:          o.createdAt ? new Date(o.createdAt).toISOString().slice(0, 10) : '',
       time:          o.createdAt ? new Date(o.createdAt).toISOString().slice(11, 19) : '',
       placedAt:      o.createdAt ? new Date(o.createdAt).toISOString() : '',

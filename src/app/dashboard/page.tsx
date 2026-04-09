@@ -28,6 +28,7 @@ interface Order {
   orderId: string; customerName: string; customerEmail: string;
   customerCity: string; total: number; discount: number;
   paymentMethod: string; paymentStatus: string; status: string;
+  bankTransferStatus?: string;
   date: string; time?: string; placedAt?: string; month: string;
 }
 interface OrderItem {
@@ -96,6 +97,7 @@ function StatusBadge({ status }: { status: string }) {
   const map: Record<string, string> = {
     pending: '#F0C9BF', confirmed: '#B7D7C0', shipped: '#B7C9D7',
     delivered: '#6B8E6B', cancelled: '#D7B7B7',
+    rejected: '#C0504D',
   };
   return (
     <span style={{
@@ -349,8 +351,12 @@ function OrdersTab({ data }: { data: DashData }) {
 
   const months = Array.from(new Set(data.orders.map((o) => o.month))).sort().reverse();
   const filtered = data.orders.filter((o) => {
+    const effectiveStatus =
+      o.paymentMethod === 'bank' && o.bankTransferStatus === 'rejected'
+        ? 'rejected'
+        : o.status;
     const matchSearch = !search || o.orderId.toLowerCase().includes(search.toLowerCase()) || o.customerName.toLowerCase().includes(search.toLowerCase()) || o.customerCity.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusF === 'all' || o.status === statusF;
+    const matchStatus = statusF === 'all' || effectiveStatus === statusF;
     const matchMonth  = monthF  === 'all' || o.month  === monthF;
     return matchSearch && matchStatus && matchMonth;
   });
@@ -363,7 +369,7 @@ function OrdersTab({ data }: { data: DashData }) {
         <select value={statusF} onChange={(e) => setStatusF(e.target.value)}
           style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: '#fff', outline: 'none' }}>
           <option value="all">All Statuses</option>
-          {['pending','confirmed','shipped','delivered','cancelled'].map((s) => <option key={s} value={s}>{s}</option>)}
+          {['pending','confirmed','shipped','delivered','cancelled','rejected'].map((s) => <option key={s} value={s}>{s}</option>)}
         </select>
         <select value={monthF} onChange={(e) => setMonthF(e.target.value)}
           style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: '#fff', outline: 'none' }}>
@@ -391,8 +397,18 @@ function OrdersTab({ data }: { data: DashData }) {
                 <td style={{ padding: '10px 14px' }}>{o.customerName || '—'}</td>
                 <td style={{ padding: '10px 14px' }}>{o.customerCity || '—'}</td>
                 <td style={{ padding: '10px 14px', fontWeight: 600 }}>{fmt(o.total)}</td>
-                <td style={{ padding: '10px 14px' }}><StatusBadge status={o.status} /></td>
-                <td style={{ padding: '10px 14px', textTransform: 'uppercase', fontSize: 11 }}>{o.paymentMethod}</td>
+                <td style={{ padding: '10px 14px' }}>
+                  <StatusBadge
+                    status={
+                      o.paymentMethod === 'bank' && o.bankTransferStatus === 'rejected'
+                        ? 'rejected'
+                        : o.status
+                    }
+                  />
+                </td>
+                <td style={{ padding: '10px 14px', textTransform: 'uppercase', fontSize: 11 }}>
+                  {o.paymentMethod}{o.paymentStatus === 'paid' ? ' (paid)' : ''}
+                </td>
                 <td style={{ padding: '10px 14px', color: MUTED }}>
                   {o.date}{o.time ? ` ${o.time}` : ''}
                 </td>
