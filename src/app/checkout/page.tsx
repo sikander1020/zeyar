@@ -2,10 +2,11 @@
 
 import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { ShieldCheck, Lock, CreditCard } from 'lucide-react';
+import { ShieldCheck, Lock, CreditCard, Landmark, Truck } from 'lucide-react';
 import AppShell from '@/components/layout/AppShell';
 import { useCartStore } from '@/store/useCartStore';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const steps = ['Shipping', 'Payment', 'Review'];
 
@@ -13,17 +14,21 @@ export default function CheckoutPage() {
   const [step, setStep] = useState(0);
   const [placed, setPlaced] = useState(false);
   const { items, total, clearCart } = useCartStore();
+  const router = useRouter();
+  const [submitError, setSubmitError] = useState('');
 
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', phone: '',
     address: '', city: '', state: '', zip: '', country: 'Pakistan',
     cardName: '', cardNumber: '', expiry: '', cvv: '',
   });
+  const [paymentMethod, setPaymentMethod] = useState<'COD' | 'bank'>('COD');
 
   const update = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
   const handlePlaceOrder = useCallback(async () => {
     try {
+      setSubmitError('');
       const payload = {
         customer: {
           firstName: form.firstName, lastName: form.lastName,
@@ -37,26 +42,39 @@ export default function CheckoutPage() {
           name:      i.product.name,
           category:  i.product.category ?? '',
           qty:       i.quantity,
-          price:     i.product.price,
+          // price is recalculated server-side
           size:      i.selectedSize ?? '',
           color:     i.selectedColor?.name ?? '',
         })),
         subtotal: total(),
         discount: 0,
         total:    total(),
-        paymentMethod: form.cardNumber ? 'card' : 'COD',
+        paymentMethod,
       };
-      await fetch('/api/orders', {
+      const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
+      const data = await res.json() as { success?: boolean; orderId?: string; uploadToken?: string; error?: string };
+      if (!res.ok || !data.success || !data.orderId) {
+        setSubmitError(data.error ?? 'Order failed. Please try again.');
+        return;
+      }
+
+      // Bank transfer: redirect to secure proof upload page
+      if (paymentMethod === 'bank') {
+        router.push(`/payment-proof?orderId=${encodeURIComponent(data.orderId)}&token=${encodeURIComponent(data.uploadToken ?? '')}`);
+        clearCart();
+        return;
+      }
     } catch (e) {
       console.error('Order save failed:', e);
-    } finally {
-      setPlaced(true);
-      clearCart();
+      setSubmitError('Order failed. Please try again.');
+      return;
     }
+    setPlaced(true);
+    clearCart();
   }, [form, items, total, clearCart]);
 
   if (placed) {
@@ -175,35 +193,55 @@ export default function CheckoutPage() {
                   <h2 className="text-xl font-playfair text-brown mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>
                     Payment Details
                   </h2>
-                  <div className="glass p-6 mb-6 border border-nude/20">
-                    <div className="flex items-center gap-3 mb-4">
-                      <CreditCard size={18} className="text-rose-gold" strokeWidth={1.5} />
-                      <span className="text-sm font-inter text-brown" style={{ fontFamily: "'Inter', sans-serif" }}>Credit / Debit Card</span>
-                    </div>
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Name on Card</label>
-                        <input value={form.cardName} onChange={e => update('cardName', e.target.value)} className="input-luxury" placeholder="Layla Al-Rashid" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('COD')}
+                      className={`glass p-6 border transition-all ${paymentMethod === 'COD' ? 'border-rose-gold/60' : 'border-nude/20'}`}
+                      style={{ textAlign: 'left' }}
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <Truck size={18} className="text-rose-gold" strokeWidth={1.5} />
+                        <span className="text-sm font-inter text-brown" style={{ fontFamily: "'Inter', sans-serif" }}>Cash on Delivery (COD)</span>
                       </div>
-                      <div>
-                        <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Card Number</label>
-                        <input value={form.cardNumber} onChange={e => update('cardNumber', e.target.value)} className="input-luxury" placeholder="4242 4242 4242 4242" maxLength={19} />
+                      <p className="text-xs text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Pay when the parcel is delivered.
+                      </p>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setPaymentMethod('bank')}
+                      className={`glass p-6 border transition-all ${paymentMethod === 'bank' ? 'border-rose-gold/60' : 'border-nude/20'}`}
+                      style={{ textAlign: 'left' }}
+                    >
+                      <div className="flex items-center gap-3 mb-2">
+                        <Landmark size={18} className="text-rose-gold" strokeWidth={1.5} />
+                        <span className="text-sm font-inter text-brown" style={{ fontFamily: "'Inter', sans-serif" }}>Bank Transfer</span>
                       </div>
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Expiry</label>
-                          <input value={form.expiry} onChange={e => update('expiry', e.target.value)} className="input-luxury" placeholder="MM / YY" />
-                        </div>
-                        <div>
-                          <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>CVV</label>
-                          <input value={form.cvv} onChange={e => update('cvv', e.target.value)} className="input-luxury" placeholder="•••" maxLength={4} />
-                        </div>
-                      </div>
-                    </div>
+                      <p className="text-xs text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Place order, then upload payment proof to confirm.
+                      </p>
+                    </button>
                   </div>
+
+                  {paymentMethod === 'bank' && (
+                    <div className="bg-white border border-nude/30 rounded-lg p-6 mb-6">
+                      <div className="flex items-center gap-3 mb-3">
+                        <CreditCard size={18} className="text-rose-gold" strokeWidth={1.5} />
+                        <span className="text-sm font-inter text-brown" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          Bank transfer instructions
+                        </span>
+                      </div>
+                      <p className="text-sm text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        After you place the order, you’ll be redirected to upload your payment screenshot + transaction reference.
+                      </p>
+                    </div>
+                  )}
+
                   <div className="flex items-center gap-2 text-xs text-brown-muted font-inter mb-8" style={{ fontFamily: "'Inter', sans-serif" }}>
                     <Lock size={13} className="text-rose-gold" strokeWidth={1.5} />
-                    Your payment information is encrypted and secure.
+                    Your order data is encrypted and secure.
                   </div>
                   <div className="flex gap-3">
                     <button onClick={() => setStep(0)} className="btn-luxury btn-outline">
@@ -241,6 +279,11 @@ export default function CheckoutPage() {
                       Place Order — ${(total() * 1.08).toFixed(0)}
                     </motion.button>
                   </div>
+                  {submitError && (
+                    <div className="mt-4 p-3 rounded-md bg-red-50 border border-red-200 text-red-700 text-sm">
+                      {submitError}
+                    </div>
+                  )}
                 </motion.div>
               )}
             </div>
