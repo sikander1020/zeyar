@@ -17,7 +17,7 @@ async function uploadToCloudinary(opts: { orderId: string; bytes: Buffer; conten
   const ext = opts.contentType === 'image/png' ? 'png' : opts.contentType === 'image/webp' ? 'webp' : 'jpg';
   const dataUri = `data:${opts.contentType};base64,${opts.bytes.toString('base64')}`;
   const res = await cloudinary.uploader.upload(dataUri, {
-    folder: 'zeyar/bank-proofs',
+    folder: 'zaybaash/bank-proofs',
     public_id: `${opts.orderId}-${Date.now()}.${ext}`,
     resource_type: 'image',
     overwrite: true,

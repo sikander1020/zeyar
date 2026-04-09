@@ -8,6 +8,6 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: '*',
       allow: '/',
     },
-    sitemap: 'https://zeyar.me/sitemap.xml',
+    sitemap: 'https://zaybaash.com/sitemap.xml',
   }
 }

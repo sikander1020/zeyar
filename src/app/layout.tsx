@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://zeyar.me'),
+  metadataBase: new URL('https://zaybaash.com'),
   title: {
     template: "%s | ZAYBAASH — Beauty with Style in Pakistan",
     default: "ZAYBAASH — Beauty with Style in Pakistan",
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "ZAYBAASH — Beauty with Style Pakistan",
     description: "Discover ZAYBAASH's exclusive collection of beauty with style in Pakistan.",
-    url: 'https://zeyar.me',
+    url: 'https://zaybaash.com',
     siteName: 'ZAYBAASH',
     locale: 'en_PK',
     type: "website",

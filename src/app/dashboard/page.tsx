@@ -140,8 +140,8 @@ function LoginWall({ onLogin }: { onLogin: () => void }) {
         setShake(true);
         setTimeout(() => setShake(false), 600);
       } else {
-        localStorage.setItem('zeyar_admin_token', data.token);
-        localStorage.setItem('zeyar_admin_ts',    String(data.ts));
+        localStorage.setItem('zaybaash_admin_token', data.token);
+        localStorage.setItem('zaybaash_admin_ts',    String(data.ts));
         onLogin();
       }
     } catch {
@@ -172,7 +172,7 @@ function LoginWall({ onLogin }: { onLogin: () => void }) {
         `}</style>
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
           <div style={{ fontSize: 32, marginBottom: 8 }}>🔐</div>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: BROWN }}>ZEYAR Admin</h1>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: BROWN }}>ZAYBAASH Admin</h1>
           <p style={{ margin: '8px 0 0', fontSize: 13, color: MUTED }}>Dashboard access is restricted</p>
         </div>
         <form onSubmit={handleSubmit}>
@@ -362,8 +362,8 @@ function OrdersTab({ data }: { data: DashData }) {
   });
 
   const authHeaders = useCallback(() => {
-    const token = localStorage.getItem('zeyar_admin_token') ?? '';
-    const ts = localStorage.getItem('zeyar_admin_ts') ?? '';
+    const token = localStorage.getItem('zaybaash_admin_token') ?? '';
+    const ts = localStorage.getItem('zaybaash_admin_ts') ?? '';
     return { 'x-admin-token': token, 'x-admin-ts': ts };
   }, []);
 
@@ -731,8 +731,8 @@ function BankProofsTab() {
   const [err, setErr] = useState('');
 
   const authHeaders = useCallback(() => {
-    const token = localStorage.getItem('zeyar_admin_token') ?? '';
-    const ts = localStorage.getItem('zeyar_admin_ts') ?? '';
+    const token = localStorage.getItem('zaybaash_admin_token') ?? '';
+    const ts = localStorage.getItem('zaybaash_admin_ts') ?? '';
     return { 'x-admin-token': token, 'x-admin-ts': ts };
   }, []);
 
@@ -878,8 +878,8 @@ export default function DashboardPage() {
   const [liveOn, setLiveOn]   = useState(true);
 
   const verify = useCallback(async () => {
-    const token = localStorage.getItem('zeyar_admin_token');
-    const ts    = localStorage.getItem('zeyar_admin_ts');
+    const token = localStorage.getItem('zaybaash_admin_token');
+    const ts    = localStorage.getItem('zaybaash_admin_ts');
     if (!token || !ts) { setAuthed(false); return; }
     try {
       const res = await fetch('/api/admin/verify', {
@@ -889,7 +889,7 @@ export default function DashboardPage() {
       });
       const d = await res.json() as { valid: boolean };
       setAuthed(d.valid);
-      if (!d.valid) { localStorage.removeItem('zeyar_admin_token'); localStorage.removeItem('zeyar_admin_ts'); }
+      if (!d.valid) { localStorage.removeItem('zaybaash_admin_token'); localStorage.removeItem('zaybaash_admin_ts'); }
     } catch { setAuthed(false); }
   }, []);
 
@@ -897,8 +897,8 @@ export default function DashboardPage() {
     const silent = opts?.silent === true;
     if (!silent) setLoading(true);
     try {
-      const token = localStorage.getItem('zeyar_admin_token') ?? '';
-      const ts    = localStorage.getItem('zeyar_admin_ts') ?? '';
+      const token = localStorage.getItem('zaybaash_admin_token') ?? '';
+      const ts    = localStorage.getItem('zaybaash_admin_ts') ?? '';
       const res = await fetch('/api/powerbi', {
         cache: 'no-store',
         headers: {
@@ -943,8 +943,8 @@ export default function DashboardPage() {
   }, [authed, liveOn, fetchData]);
 
   function handleLock() {
-    localStorage.removeItem('zeyar_admin_token');
-    localStorage.removeItem('zeyar_admin_ts');
+    localStorage.removeItem('zaybaash_admin_token');
+    localStorage.removeItem('zaybaash_admin_ts');
     setAuthed(false);
     setData(null);
   }
@@ -967,7 +967,7 @@ export default function DashboardPage() {
         flexDirection: 'column', padding: '28px 0', position: 'sticky', top: 0, height: '100vh', flexShrink: 0,
       }}>
         <div style={{ padding: '0 20px 28px', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
-          <p style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: '0.04em' }}>ZEYAR</p>
+          <p style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: '0.04em' }}>ZAYBAASH</p>
           <p style={{ margin: '4px 0 0', fontSize: 11, color: '#9A7B72', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Admin Dashboard</p>
         </div>
         <nav style={{ flex: 1, padding: '16px 0' }}>

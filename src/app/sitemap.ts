@@ -4,7 +4,7 @@ import { MetadataRoute } from 'next';
 export const dynamic = 'force-static';
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = 'https://zeyar.me';
+  const base = 'https://zaybaash.com';
   
   const staticRoutes = ['', '/shop', '/dresses', '/about', '/wishlist', '/cart', '/size-guide', '/returns'].map((route) => ({
     url: `${base}${route}`,

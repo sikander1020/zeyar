@@ -79,7 +79,7 @@ export default function ReturnsPage() {
               <p className="text-sm">
                 Our support partners are available virtually from Monday to Saturday, 10:00 AM — 6:00 PM (PKT).
                 <br /><br />
-                <strong>Email:</strong> care@zeyar.me<br />
+                <strong>Email:</strong> care@zaybaash.com<br />
               </p>
             </div>
           </motion.div>

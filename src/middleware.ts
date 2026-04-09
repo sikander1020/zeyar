@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const CANONICAL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://zeyar.me';
+const CANONICAL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://zaybaash.com';
 
 /** Send production *.vercel.app traffic to the custom domain (same path + query). */
 export function middleware(request: NextRequest) {

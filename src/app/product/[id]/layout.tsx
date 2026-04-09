@@ -18,7 +18,7 @@ export function generateMetadata({ params }: { params: { id: string } }): Metada
     openGraph: {
       title: `${product.name} | ZAYBAASH Pakistan`,
       description: `Shop the ${product.name} at ZAYBAASH, Pakistan's premium beauty with style destination.`,
-      url: `https://zeyar.me/product/${product.id}`,
+      url: `https://zaybaash.com/product/${product.id}`,
       images: [
         {
           url: product.images[0] || '',
