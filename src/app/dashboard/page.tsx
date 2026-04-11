@@ -1185,9 +1185,27 @@ function ProductsTab() {
 
   const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= lowStockThreshold && p.isActive !== false).length;
   const outOfStockCount = products.filter((p) => p.outOfStock || p.stock <= 0).length;
+  const inactiveCount = products.filter((p) => p.isActive === false).length;
   const filteredProducts = showLowStockOnly
     ? products.filter((p) => p.stock > 0 && p.stock <= lowStockThreshold && p.isActive !== false)
     : products;
+
+  async function activateAllInactive() {
+    if (!confirm(`Activate all ${inactiveCount} hidden products? They will appear in the store.`)) return;
+    try {
+      const res = await fetch('/api/admin/activate-all', {
+        method: 'POST',
+        headers: authHeaders(),
+      });
+      const data = await res.json() as { success?: boolean; message?: string };
+      if (data.success) {
+        alert(`✓ ${data.message}`);
+        void loadProducts();
+      }
+    } catch (err) {
+      alert('Failed to activate products');
+    }
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -1200,6 +1218,11 @@ function ProductsTab() {
           <span style={{ fontSize: 12, color: '#8A3A38', background: '#FDECEC', border: '1px solid #F3CACA', borderRadius: 999, padding: '4px 10px' }}>
             Out of stock: {outOfStockCount}
           </span>
+          {inactiveCount > 0 && (
+            <span style={{ fontSize: 12, color: '#6B5247', background: '#F5E8E0', border: '1px solid #E8D7C8', borderRadius: 999, padding: '4px 10px' }}>
+              Hidden: {inactiveCount}
+            </span>
+          )}
         </div>
         <button onClick={() => { setShowForm(!showForm); setEditing(null); resetForm(); }}
           style={{ padding: '10px 16px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
@@ -1222,6 +1245,14 @@ function ProductsTab() {
         >
           {showLowStockOnly ? 'Showing Low Stock Only' : 'Show Low Stock Only'}
         </button>
+        {inactiveCount > 0 && (
+          <button
+            onClick={activateAllInactive}
+            style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #3E7B4E', background: '#E8F5E9', color: '#2E5C3E', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
+          >
+            Activate All {inactiveCount} Hidden
+          </button>
+        )}
       </div>
 
       {showForm && (
