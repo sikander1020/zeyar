@@ -972,6 +972,8 @@ function ProductsTab() {
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<ProductRow | null>(null);
+  const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -1034,6 +1036,33 @@ function ProductsTab() {
       isSale: false,
       isBestseller: false,
     });
+    setUploadedImages([]);
+  }
+
+  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.currentTarget.files;
+    if (!files) return;
+    
+    setUploadingImage(true);
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      try {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const dataUrl = event.target?.result as string;
+          setUploadedImages((prev) => [...(prev ?? []), dataUrl]);
+        };
+        reader.readAsDataURL(file);
+      } catch (err) {
+        console.error('Error reading file:', err);
+      }
+    }
+    setUploadingImage(false);
+    e.currentTarget.value = '';
+  }
+
+  function removeUploadedImage(index: number) {
+    setUploadedImages((prev) => prev.filter((_, i) => i !== index));
   }
 
   const authHeaders = useCallback(() => {
@@ -1071,7 +1100,7 @@ function ProductsTab() {
         costPrice: Number(formData.costPrice) || 0,
         stock: Number(formData.stock) || 0,
         description: formData.description,
-        images: parseCsvOrLines(formData.imageUrls),
+        images: uploadedImages.length > 0 ? uploadedImages : parseCsvOrLines(formData.imageUrls),
         details: parseCsvOrLines(formData.detailsText),
         sizes: parseCsvOrLines(formData.sizesText),
         colors: parseColors(formData.colorsText),
@@ -1150,6 +1179,7 @@ function ProductsTab() {
       isSale: prod.isSale,
       isBestseller: prod.isBestseller,
     });
+    setUploadedImages(prod.images ?? []);
     setShowForm(true);
   }
 
@@ -1211,8 +1241,38 @@ function ProductsTab() {
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
             <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Description"
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1', minHeight: 90 }} />
-            <textarea value={formData.imageUrls} onChange={(e) => setFormData({ ...formData, imageUrls: e.target.value })} placeholder="Image URLs (one per line)"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 90 }} />
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 8, fontWeight: 600 }}>Product Images</label>
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={handleImageUpload}
+                disabled={uploadingImage}
+                style={{ display: 'block', width: '100%', padding: '8px 10px', border: '2px dashed #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: CREAM, cursor: uploadingImage ? 'not-allowed' : 'pointer' }}
+              />
+              {uploadedImages.length > 0 && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 10, marginTop: 12 }}>
+                  {uploadedImages.map((img, i) => (
+                    <div key={i} style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', border: '1px solid #EBD9CC' }}>
+                      <img src={img} alt={`Product ${i}`} style={{ width: '100%', height: '100px', objectFit: 'cover' }} />
+                      <button
+                        type="button"
+                        onClick={() => removeUploadedImage(i)}
+                        style={{ position: 'absolute', top: 4, right: 4, background: '#C0504D', color: '#fff', border: 'none', borderRadius: 4, padding: '4px 8px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              {uploadedImages.length === 0 && (
+                <p style={{ fontSize: 12, color: MUTED, marginTop: 8 }}>No images uploaded. You can also paste image URLs below as fallback.</p>
+              )}
+            </div>
+            <textarea value={formData.imageUrls} onChange={(e) => setFormData({ ...formData, imageUrls: e.target.value })} placeholder="Image URLs as fallback (one per line)"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 60, gridColumn: '1 / -1' }} />
             <textarea value={formData.detailsText} onChange={(e) => setFormData({ ...formData, detailsText: e.target.value })} placeholder="Details (comma or line separated)"
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 90 }} />
             <input value={formData.sizesText} onChange={(e) => setFormData({ ...formData, sizesText: e.target.value })} placeholder="Sizes (e.g. XS,S,M,L)"
