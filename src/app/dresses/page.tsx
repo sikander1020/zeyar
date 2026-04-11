@@ -160,7 +160,17 @@ function DressesContent() {
     let result = [...products];
     if (activeCategory !== 'All') {
       const target = normalizeCategory(activeCategory);
-      result = result.filter((p) => normalizeCategory(p.category) === target);
+      const exact = result.filter((p) => normalizeCategory(p.category) === target);
+      if (exact.length > 0) {
+        result = exact;
+      } else if (target === 'one piece' || target === 'onepiece') {
+        result = result.filter((p) => {
+          const c = normalizeCategory(p.category);
+          return c === 'dress' || c === 'dresses' || c.includes('one piece') || c.includes('onepiece');
+        });
+      } else {
+        result = exact;
+      }
     }
     result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1] * 1000);
     if (sortBy === 'newest') result = result.filter(p => p.isNew).concat(result.filter(p => !p.isNew));
