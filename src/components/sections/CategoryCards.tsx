@@ -12,6 +12,7 @@ export default function CategoryCards() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const [categories, setCategories] = useState<StoreCategory[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
@@ -22,6 +23,9 @@ export default function CategoryCards() {
       })
       .catch(() => {
         if (mounted) setCategories([]);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
       });
     return () => {
       mounted = false;
@@ -47,46 +51,63 @@ export default function CategoryCards() {
           <div className="divider-rose" />
         </motion.div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {categories.map((cat, i) => (
-            <motion.div
-              key={cat.id}
-              initial={{ opacity: 0, y: 40 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.12 }}
-            >
-              <Link
-                href={`/dresses?category=${encodeURIComponent(cat.name)}`}
-                className="group relative block overflow-hidden aspect-[3/4] bg-nude/20"
-              >
-                <Image
-                  src={cat.image}
-                  alt={cat.name}
-                  fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                {/* Overlay */}
-                <div className="absolute inset-0 overlay-dark opacity-60 group-hover:opacity-75 transition-opacity duration-400" />
+        {loading && (
+          <div className="text-center py-10 text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+            Loading categories...
+          </div>
+        )}
 
-                {/* Content */}
-                <div className="absolute inset-0 flex flex-col justify-end p-6">
-                  <p className="text-xs tracking-[0.18em] uppercase text-nude/70 font-inter mb-2 group-hover:text-nude transition-colors" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    {cat.count} pieces
-                  </p>
-                  <h3 className="text-2xl font-playfair text-white mb-3 group-hover:text-nude transition-colors duration-300" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    {cat.name}
-                  </h3>
-                  <p className="text-xs text-white/60 font-inter mb-4 opacity-0 group-hover:opacity-100 transition-all duration-400 translate-y-2 group-hover:translate-y-0" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    {cat.description}
-                  </p>
-                  <div className="flex items-center gap-2 text-nude text-xs tracking-[0.15em] uppercase font-inter group-hover:gap-3 transition-all duration-300" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Shop Now <ArrowRight size={13} strokeWidth={2} />
+        {!loading && categories.length === 0 && (
+          <div className="text-center py-10">
+            <p className="text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Categories are being prepared. Browse all dresses for now.
+            </p>
+            <Link href="/dresses" className="btn-luxury btn-outline mt-4 inline-block">Browse Dresses</Link>
+          </div>
+        )}
+
+        {!loading && categories.length > 0 && (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {categories.map((cat, i) => (
+              <motion.div
+                key={cat.id}
+                initial={{ opacity: 0, y: 40 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: i * 0.12 }}
+              >
+                <Link
+                  href={`/dresses?category=${encodeURIComponent(cat.name)}`}
+                  className="group relative block overflow-hidden aspect-[3/4] bg-nude/20"
+                >
+                  <Image
+                    src={cat.image}
+                    alt={cat.name}
+                    fill
+                    className="object-cover transition-transform duration-700 group-hover:scale-110"
+                  />
+                  {/* Overlay */}
+                  <div className="absolute inset-0 overlay-dark opacity-60 group-hover:opacity-75 transition-opacity duration-400" />
+
+                  {/* Content */}
+                  <div className="absolute inset-0 flex flex-col justify-end p-6">
+                    <p className="text-xs tracking-[0.18em] uppercase text-nude/70 font-inter mb-2 group-hover:text-nude transition-colors" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      {cat.count} pieces
+                    </p>
+                    <h3 className="text-2xl font-playfair text-white mb-3 group-hover:text-nude transition-colors duration-300" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      {cat.name}
+                    </h3>
+                    <p className="text-xs text-white/60 font-inter mb-4 opacity-0 group-hover:opacity-100 transition-all duration-400 translate-y-2 group-hover:translate-y-0" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      {cat.description}
+                    </p>
+                    <div className="flex items-center gap-2 text-nude text-xs tracking-[0.15em] uppercase font-inter group-hover:gap-3 transition-all duration-300" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      Shop Now <ArrowRight size={13} strokeWidth={2} />
+                    </div>
                   </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );

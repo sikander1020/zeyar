@@ -909,6 +909,10 @@ function CategoriesTab() {
         </button>
       </div>
 
+      {loading && (
+        <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>Loading categories...</p>
+      )}
+
       {showForm && (
         <form onSubmit={handleSubmit} style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
@@ -943,6 +947,11 @@ function CategoriesTab() {
             </tr>
           </thead>
           <tbody>
+            {!loading && categories.length === 0 && (
+              <tr>
+                <td colSpan={5} style={{ padding: 24, textAlign: 'center', color: MUTED }}>No categories found.</td>
+              </tr>
+            )}
             {categories.map((c, i) => (
               <tr key={c.categoryId} style={{ background: i % 2 === 0 ? '#fff' : BEIGE }}>
                 <td style={{ padding: '10px 14px', fontWeight: 500 }}>{c.name}</td>
@@ -1255,6 +1264,10 @@ function ProductsTab() {
         )}
       </div>
 
+      {loading && (
+        <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>Loading products...</p>
+      )}
+
       {showForm && (
         <form onSubmit={handleSubmit} style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
@@ -1351,6 +1364,11 @@ function ProductsTab() {
             </tr>
           </thead>
           <tbody>
+            {!loading && filteredProducts.length === 0 && (
+              <tr>
+                <td colSpan={9} style={{ padding: 24, textAlign: 'center', color: MUTED }}>No products found.</td>
+              </tr>
+            )}
             {filteredProducts.map((p, i) => (
               <tr key={p.productId} style={{ background: i % 2 === 0 ? '#fff' : BEIGE }}>
                 <td style={{ padding: '10px 14px', fontWeight: 500 }}>{p.name}</td>
@@ -1464,6 +1482,10 @@ function CouponsTab() {
         </button>
       </div>
 
+      {loading && (
+        <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>Loading coupons...</p>
+      )}
+
       {showForm && (
         <form onSubmit={handleSubmit} style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24 }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
@@ -1509,6 +1531,11 @@ function CouponsTab() {
             </tr>
           </thead>
           <tbody>
+            {!loading && coupons.length === 0 && (
+              <tr>
+                <td colSpan={7} style={{ padding: 24, textAlign: 'center', color: MUTED }}>No coupons found.</td>
+              </tr>
+            )}
             {coupons.map((c, i) => (
               <tr key={c._id} style={{ background: i % 2 === 0 ? '#fff' : BEIGE }}>
                 <td style={{ padding: '10px 14px', fontFamily: 'monospace', fontWeight: 600 }}>{c.code}</td>
@@ -1593,6 +1620,10 @@ function ReviewsTab() {
           ))}
         </div>
       </div>
+
+      {loading && (
+        <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>Loading reviews...</p>
+      )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
         {filtered.map((r) => (

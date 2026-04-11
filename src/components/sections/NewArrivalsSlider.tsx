@@ -12,6 +12,7 @@ export default function NewArrivalsSlider() {
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const [start, setStart] = useState(0);
   const [products, setProducts] = useState<StoreProduct[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
@@ -22,6 +23,9 @@ export default function NewArrivalsSlider() {
       })
       .catch(() => {
         if (mounted) setProducts([]);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
       });
 
     return () => {
@@ -77,48 +81,62 @@ export default function NewArrivalsSlider() {
           </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {sliderProducts.slice(start, start + visible).map((product, i) => (
-            <motion.div
-              key={product.id}
-              initial={{ opacity: 0, y: 30 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
-              className="product-card group"
-            >
-              <Link href={`/product/${product.id}`}>
-                <div className="relative overflow-hidden bg-beige aspect-[3/4]">
-                  <Image
-                    src={product.images[0]}
-                    alt={product.name}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  <div className="absolute top-4 left-4">
-                    <span className="badge-new">{product.isNew ? "New" : "Featured"}</span>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-brown/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-400">
-                    <p className="text-xs text-cream font-inter tracking-[0.15em] uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      {product.category}
-                    </p>
-                    <h3 className="text-lg font-playfair text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      {product.name}
-                    </h3>
-                    <p className="text-sm text-nude font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      Rs {product.price.toLocaleString()}
-                    </p>
-                    {(product.outOfStock || product.stock <= 0) && (
-                      <p className="text-xs text-rose-gold font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        Out of stock
+        {loading && (
+          <div className="text-center py-10 text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+            Loading arrivals...
+          </div>
+        )}
+
+        {!loading && sliderProducts.length === 0 && (
+          <div className="text-center py-10 text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+            New arrivals will appear here once products are available.
+          </div>
+        )}
+
+        {!loading && sliderProducts.length > 0 && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {sliderProducts.slice(start, start + visible).map((product, i) => (
+              <motion.div
+                key={product.id}
+                initial={{ opacity: 0, y: 30 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: i * 0.1 }}
+                className="product-card group"
+              >
+                <Link href={`/product/${product.id}`}>
+                  <div className="relative overflow-hidden bg-beige aspect-[3/4]">
+                    <Image
+                      src={product.images[0]}
+                      alt={product.name}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover:scale-110"
+                    />
+                    <div className="absolute top-4 left-4">
+                      <span className="badge-new">{product.isNew ? "New" : "Featured"}</span>
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-brown/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
+                    <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-400">
+                      <p className="text-xs text-cream font-inter tracking-[0.15em] uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        {product.category}
                       </p>
-                    )}
+                      <h3 className="text-lg font-playfair text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+                        {product.name}
+                      </h3>
+                      <p className="text-sm text-nude font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Rs {product.price.toLocaleString()}
+                      </p>
+                      {(product.outOfStock || product.stock <= 0) && (
+                        <p className="text-xs text-rose-gold font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          Out of stock
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </Link>
-            </motion.div>
-          ))}
-        </div>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
+        )}
 
         <div className="text-center mt-12">
           <Link href="/dresses?sort=newest" className="btn-luxury btn-outline">

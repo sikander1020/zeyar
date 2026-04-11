@@ -142,11 +142,16 @@ function DressesContent() {
 
   useEffect(() => {
     if (activeCategory === 'All') return;
-    const names = new Set(categories.map((c) => c.name));
-    if (categories.length > 0 && !names.has(activeCategory)) {
+    const fixed = ['All', 'Dresses', 'Formal', 'Casual', 'One Piece'];
+    const names = new Set<string>([
+      ...fixed,
+      ...categories.map((c) => c.name),
+      ...products.map((p) => p.category),
+    ]);
+    if (names.size > 0 && !names.has(activeCategory)) {
       setActiveCategory('All');
     }
-  }, [categories, activeCategory]);
+  }, [categories, products, activeCategory]);
 
   const categoryPills = useMemo(() => {
     const fixed = ['All', 'Dresses', 'Formal', 'Casual', 'One Piece'];

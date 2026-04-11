@@ -125,6 +125,7 @@ export default function FeaturedCollections() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const [products, setProducts] = useState<StoreProduct[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
@@ -135,6 +136,9 @@ export default function FeaturedCollections() {
       })
       .catch(() => {
         if (mounted) setProducts([]);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
       });
 
     return () => {
@@ -168,11 +172,25 @@ export default function FeaturedCollections() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-          {featured.map((product, index) => (
-            <ProductCard key={product.id} product={product} index={index} />
-          ))}
-        </div>
+        {loading && (
+          <div className="text-center py-10 text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+            Loading featured pieces...
+          </div>
+        )}
+
+        {!loading && featured.length === 0 && (
+          <div className="text-center py-10 text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+            Featured products will appear here once products are added.
+          </div>
+        )}
+
+        {!loading && featured.length > 0 && (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {featured.map((product, index) => (
+              <ProductCard key={product.id} product={product} index={index} />
+            ))}
+          </div>
+        )}
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
