@@ -79,6 +79,8 @@ interface ProductRow {
   details?: string[];
   sizes?: string[];
   colors?: Array<{ name: string; hex: string }>;
+  rating?: number;
+  reviewCount?: number;
   tags?: string[];
   isActive: boolean;
   outOfStock: boolean;

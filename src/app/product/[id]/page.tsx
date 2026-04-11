@@ -142,6 +142,10 @@ export default function ProductPage() {
   };
 
   async function submitReview() {
+    if (!product) {
+      setReviewMsg('Product is not loaded yet.');
+      return;
+    }
     setReviewMsg('');
     setReviewSubmitting(true);
     try {
