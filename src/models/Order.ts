@@ -27,6 +27,11 @@ export interface IOrder extends Document {
   items: IOrderItem[];
   subtotal: number;
   discount: number;
+  coupon?: {
+    code: string;
+    amount: number;
+    couponId?: string;
+  };
   total: number;
   paymentMethod: 'COD' | 'card' | 'bank';
   paymentStatus: 'unpaid' | 'paid';
@@ -64,6 +69,11 @@ const OrderSchema = new Schema<IOrder>(
     items:         { type: [OrderItemSchema], required: true },
     subtotal:      { type: Number, required: true },
     discount:      { type: Number, default: 0 },
+    coupon: {
+      code:      { type: String, default: '' },
+      amount:    { type: Number, default: 0 },
+      couponId:  { type: String, default: '' },
+    },
     total:         { type: Number, required: true },
     paymentMethod: { type: String, enum: ['COD', 'card', 'bank'], default: 'COD' },
     paymentStatus: { type: String, enum: ['unpaid', 'paid'],       default: 'unpaid' },

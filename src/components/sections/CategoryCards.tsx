@@ -1,15 +1,32 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useInView } from 'framer-motion';
-import { categories } from '@/data/products';
 import { ArrowRight } from 'lucide-react';
+import type { StoreCategory } from '@/types/storefront';
 
 export default function CategoryCards() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
+  const [categories, setCategories] = useState<StoreCategory[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    fetch('/api/categories', { cache: 'no-store' })
+      .then((res) => res.json() as Promise<{ categories?: StoreCategory[] }>)
+      .then((data) => {
+        if (mounted) setCategories(data.categories ?? []);
+      })
+      .catch(() => {
+        if (mounted) setCategories([]);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <section className="section-padding bg-beige">

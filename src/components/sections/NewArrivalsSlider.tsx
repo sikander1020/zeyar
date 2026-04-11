@@ -1,21 +1,40 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useInView } from 'framer-motion';
-import { products } from '@/data/products';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import type { StoreProduct } from '@/types/storefront';
 
 export default function NewArrivalsSlider() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const [start, setStart] = useState(0);
+  const [products, setProducts] = useState<StoreProduct[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    fetch('/api/products?sort=newest', { cache: 'no-store' })
+      .then((res) => res.json() as Promise<{ products?: StoreProduct[] }>)
+      .then((data) => {
+        if (mounted) setProducts(data.products ?? []);
+      })
+      .catch(() => {
+        if (mounted) setProducts([]);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   const newProducts = products.filter(p => p.isNew);
   const visible = 3;
+  const maxStart = Math.max(0, newProducts.length - visible);
 
   const prev = () => setStart(s => Math.max(0, s - 1));
-  const next = () => setStart(s => Math.min(newProducts.length - visible, s + 1));
+  const next = () => setStart(s => Math.min(maxStart, s + 1));
 
   return (
     <section className="section-padding bg-cream-dark overflow-hidden">
@@ -49,7 +68,7 @@ export default function NewArrivalsSlider() {
             </button>
             <button
               onClick={next}
-              disabled={start >= newProducts.length - visible}
+              disabled={start >= maxStart}
               className="w-11 h-11 border border-nude flex items-center justify-center text-brown hover:bg-nude hover:text-white transition-all duration-300 disabled:opacity-30"
             >
               <ChevronRight size={18} strokeWidth={1.5} />
@@ -86,8 +105,13 @@ export default function NewArrivalsSlider() {
                       {product.name}
                     </h3>
                     <p className="text-sm text-nude font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      Rs {(product.price * 280).toLocaleString()}
+                      Rs {product.price.toLocaleString()}
                     </p>
+                    {(product.outOfStock || product.stock <= 0) && (
+                      <p className="text-xs text-rose-gold font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Out of stock
+                      </p>
+                    )}
                   </div>
                 </div>
               </Link>

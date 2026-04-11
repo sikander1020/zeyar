@@ -5,11 +5,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, ShoppingBag, ChevronDown } from 'lucide-react';
-import { products, categories } from '@/data/products';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import { useSearchParams } from 'next/navigation';
 import AppShell from '@/components/layout/AppShell';
+import type { StoreCategory, StoreProduct } from '@/types/storefront';
 
 const sortOptions = [
   { value: 'featured', label: 'Featured' },
@@ -19,7 +19,7 @@ const sortOptions = [
   { value: 'rating', label: 'Top Rated' },
 ];
 
-function ProductCard({ product, index }: { product: typeof products[0]; index: number }) {
+function ProductCard({ product, index }: { product: StoreProduct; index: number }) {
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, isWishlisted } = useWishlistStore();
   const wishlisted = isWishlisted(product.id);
@@ -48,6 +48,7 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
             {product.isNew && <span className="badge-new">New</span>}
             {product.isSale && <span className="badge-sale">Sale</span>}
             {product.isBestseller && <span className="badge-new" style={{ backgroundColor: '#9B4F5C' }}>Best</span>}
+            {(product.outOfStock || product.stock <= 0) && <span className="badge-sale">Out</span>}
           </div>
           <div className="absolute top-3 right-3 flex flex-col gap-2">
             <button
@@ -57,8 +58,9 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
               <Heart size={12} className={wishlisted ? 'fill-current' : ''} strokeWidth={1.5} />
             </button>
             <button
+              disabled={product.outOfStock || product.stock <= 0}
               onClick={(e) => { e.preventDefault(); addItem(product, product.sizes[1] || product.sizes[0], product.colors[0]); }}
-              className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-brown hover:bg-brown hover:text-white transition-all opacity-0 group-hover:opacity-100"
+              className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-brown hover:bg-brown hover:text-white transition-all opacity-0 group-hover:opacity-100 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <ShoppingBag size={12} strokeWidth={1.5} />
             </button>
@@ -80,9 +82,12 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
             ))}
           </div>
           <div className="text-right">
-            <span className="text-sm font-semibold text-brown font-inter">Rs {(product.price * 280).toLocaleString()}</span>
+            <span className="text-sm font-semibold text-brown font-inter">Rs {product.price.toLocaleString()}</span>
+            {(product.outOfStock || product.stock <= 0) && (
+              <span className="text-xs text-rose-gold font-inter ml-2">Out of stock</span>
+            )}
             {product.originalPrice && (
-              <span className="text-xs text-brown-muted line-through font-inter ml-1">Rs {(product.originalPrice * 280).toLocaleString()}</span>
+              <span className="text-xs text-brown-muted line-through font-inter ml-1">Rs {product.originalPrice.toLocaleString()}</span>
             )}
           </div>
         </div>
@@ -95,25 +100,47 @@ function DressesContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get('category') || 'All';
 
+  const [products, setProducts] = useState<StoreProduct[]>([]);
+  const [categories, setCategories] = useState<StoreCategory[]>([]);
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [sortBy, setSortBy] = useState('featured');
   const [priceRange] = useState([0, 600]);
 
   useEffect(() => {
-    const category = searchParams.get('category');
-    setActiveCategory(category || 'All');
-  }, [searchParams]);
+    let mounted = true;
+    fetch('/api/products?sort=featured', { cache: 'no-store' })
+      .then((res) => res.json() as Promise<{ products?: StoreProduct[] }>)
+      .then((data) => {
+        if (mounted) setProducts(data.products ?? []);
+      })
+      .catch(() => {
+        if (mounted) setProducts([]);
+      });
+
+    fetch('/api/categories', { cache: 'no-store' })
+      .then((res) => res.json() as Promise<{ categories?: StoreCategory[] }>)
+      .then((data) => {
+        if (mounted) setCategories(data.categories ?? []);
+      })
+      .catch(() => {
+        if (mounted) setCategories([]);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const filtered = useMemo(() => {
     let result = [...products];
     if (activeCategory !== 'All') result = result.filter(p => p.category === activeCategory);
-    result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1]);
+    result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1] * 1000);
     if (sortBy === 'newest') result = result.filter(p => p.isNew).concat(result.filter(p => !p.isNew));
     if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price);
     if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price);
     if (sortBy === 'rating') result.sort((a, b) => b.rating - a.rating);
     return result;
-  }, [activeCategory, sortBy, priceRange]);
+  }, [products, activeCategory, sortBy, priceRange]);
 
   return (
     <AppShell>

@@ -11,6 +11,7 @@ export async function GET(req: NextRequest) {
   try {
     const guard = requireAdmin(req);
     if (guard) return guard;
+    
     await connectDB();
 
     // ── KPI Summary (single-row table) ──────────────────────────────────
@@ -323,6 +324,34 @@ export async function GET(req: NextRequest) {
     );
   } catch (err) {
     console.error('GET /api/powerbi error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    
+    // Return empty data structure instead of error
+    // This allows dashboard to load even when DB is unavailable
+    const emptyData = {
+      summary: [{
+        totalRevenue: 0, totalOrders: 0, avgOrderValue: 0,
+        totalDiscount: 0, pendingOrders: 0, confirmedOrders: 0,
+        shippedOrders: 0, deliveredOrders: 0, cancelledOrders: 0,
+        totalCOGS: 0, grossProfit: 0, profitMargin: 0,
+      }],
+      orders: [],
+      orderItems: [],
+      dailyRevenue: [],
+      monthlyRevenue: [],
+      categoryRevenue: [],
+      topProducts: [],
+      paymentSplit: [],
+      orderStatus: [],
+      cityStats: [],
+      customers: [],
+      inventory: [],
+      _error: err instanceof Error ? err.message : 'Database connection failed',
+    };
+    
+    return NextResponse.json(emptyData, {
+      headers: {
+        'Cache-Control': 'private, no-store, max-age=0, must-revalidate',
+      },
+    });
   }
 }

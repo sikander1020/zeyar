@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, Heart, Search, Menu, X, ArrowRight } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
-import { products } from '@/data/products';
+import type { StoreProduct } from '@/types/storefront';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -22,6 +22,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [products, setProducts] = useState<StoreProduct[]>([]);
   const itemCount = useCartStore((s) => s.itemCount());
   const wishlistCount = useWishlistStore((s) => s.items.length);
   const toggleCart = useCartStore((s) => s.toggleCart);
@@ -30,6 +31,22 @@ export default function Navbar() {
     const handleScroll = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    fetch('/api/products', { cache: 'no-store' })
+      .then((res) => res.json() as Promise<{ products?: StoreProduct[] }>)
+      .then((data) => {
+        if (mounted) setProducts(data.products ?? []);
+      })
+      .catch(() => {
+        if (mounted) setProducts([]);
+      });
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   return (
@@ -242,7 +259,7 @@ export default function Navbar() {
                       ))}
                     
                     {products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.tags.some(t => t.includes(searchQuery.toLowerCase()))).length === 0 && (
-                      <p className="text-brown-muted font-inter">No pieces found matching "{searchQuery}".</p>
+                      <p className="text-brown-muted font-inter">No pieces found matching &quot;{searchQuery}&quot;.</p>
                     )}
                   </div>
                 </div>

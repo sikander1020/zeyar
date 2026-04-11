@@ -1,16 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Heart, ShoppingBag, Star, ChevronDown, ChevronLeft, Share2, Package, RotateCcw, Truck } from 'lucide-react';
-import { products } from '@/data/products';
+import { Heart, ShoppingBag, Star, ChevronDown, Share2, Package, RotateCcw, Truck } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import AppShell from '@/components/layout/AppShell';
 import dynamic from 'next/dynamic';
-import { notFound, useParams } from 'next/navigation';
+import { useParams } from 'next/navigation';
+import type { StoreProduct } from '@/types/storefront';
 
 const ProductViewer = dynamic(() => import('@/components/3d/ProductViewer'), {
   ssr: false,
@@ -24,23 +24,115 @@ const ProductViewer = dynamic(() => import('@/components/3d/ProductViewer'), {
 export default function ProductPage() {
   const params = useParams();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
-  const product = products.find(p => p.id === id);
+  const [product, setProduct] = useState<StoreProduct | null>(null);
+  const [allProducts, setAllProducts] = useState<StoreProduct[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  // We have to move hook calls below, but if product is not found we want to show 404.
-  // In a real app we'd do this in a server component. Here we can return notFound() early if hydration allows,
-  // or return it after hooks if needed. Let's initialize hooks safely.
-  
-  const [selectedSize, setSelectedSize] = useState(product?.sizes[1] || product?.sizes[0] || '');
-  const [selectedColor, setSelectedColor] = useState(product?.colors[0] || { name: '', hex: '' });
+  const [selectedSize, setSelectedSize] = useState('');
+  const [selectedColor, setSelectedColor] = useState({ name: '', hex: '' });
   const [activeImage, setActiveImage] = useState(0);
   const [activeTab, setActiveTab] = useState<'3d' | 'images'>('3d');
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
+  const [reviews, setReviews] = useState<Array<{
+    reviewId: string;
+    customerName: string;
+    rating: number;
+    title: string;
+    comment: string;
+    isVerifiedPurchase: boolean;
+    createdAt: string;
+  }>>([]);
+  const [reviewForm, setReviewForm] = useState({
+    customerName: '',
+    customerEmail: '',
+    rating: 5,
+    title: '',
+    comment: '',
+    orderId: '',
+  });
+  const [reviewSubmitting, setReviewSubmitting] = useState(false);
+  const [reviewMsg, setReviewMsg] = useState('');
 
   const addItem = useCartStore(s => s.addItem);
   const toggleCart = useCartStore(s => s.toggleCart);
   const { toggle, isWishlisted } = useWishlistStore();
-  
-  if (!product) return notFound();
+
+  useEffect(() => {
+    let mounted = true;
+
+    Promise.all([
+      fetch(`/api/products/${id}`, { cache: 'no-store' }).then((res) => res.json() as Promise<{ product?: StoreProduct }>),
+      fetch('/api/products?sort=featured', { cache: 'no-store' }).then((res) => res.json() as Promise<{ products?: StoreProduct[] }>),
+    ])
+      .then(([single, list]) => {
+        if (!mounted) return;
+        const p = single.product ?? null;
+        setProduct(p);
+        setAllProducts(list.products ?? []);
+        if (p) {
+          setSelectedSize(p.sizes[1] || p.sizes[0] || '');
+          setSelectedColor(p.colors[0] || { name: '', hex: '' });
+        }
+      })
+      .catch(() => {
+        if (!mounted) return;
+        setProduct(null);
+        setAllProducts([]);
+      })
+      .finally(() => {
+        if (mounted) setLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [id]);
+
+  useEffect(() => {
+    if (!product?.id) return;
+    let mounted = true;
+
+    fetch(`/api/reviews?productId=${encodeURIComponent(product.id)}`, { cache: 'no-store' })
+      .then((res) => res.json() as Promise<{ reviews?: Array<{
+        reviewId: string;
+        customerName: string;
+        rating: number;
+        title: string;
+        comment: string;
+        isVerifiedPurchase: boolean;
+        createdAt: string;
+      }> }>)
+      .then((data) => {
+        if (mounted) setReviews(data.reviews ?? []);
+      })
+      .catch(() => {
+        if (mounted) setReviews([]);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [product?.id]);
+
+  if (loading) {
+    return (
+      <AppShell>
+        <div className="pt-24 min-h-screen bg-cream flex items-center justify-center">
+          <p className="text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>Loading product...</p>
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (!product) {
+    return (
+      <AppShell>
+        <div className="pt-24 min-h-screen bg-cream flex items-center justify-center">
+          <p className="text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>Product not found.</p>
+        </div>
+      </AppShell>
+    );
+  }
 
   const wishlisted = isWishlisted(product.id);
 
@@ -49,7 +141,39 @@ export default function ProductPage() {
     toggleCart();
   };
 
-  const related = products.filter(p => p.category === product.category && p.id !== product.id).slice(0, 3);
+  async function submitReview() {
+    setReviewMsg('');
+    setReviewSubmitting(true);
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: product.id,
+          productName: product.name,
+          customerName: reviewForm.customerName,
+          customerEmail: reviewForm.customerEmail,
+          rating: reviewForm.rating,
+          title: reviewForm.title,
+          comment: reviewForm.comment,
+          orderId: reviewForm.orderId,
+        }),
+      });
+      const data = await res.json() as { success?: boolean; error?: string };
+      if (!res.ok || !data.success) {
+        setReviewMsg(data.error ?? 'Could not submit review.');
+        return;
+      }
+      setReviewMsg('Thanks! Your review is submitted and awaiting approval.');
+      setReviewForm({ customerName: '', customerEmail: '', rating: 5, title: '', comment: '', orderId: '' });
+    } catch {
+      setReviewMsg('Could not submit review.');
+    } finally {
+      setReviewSubmitting(false);
+    }
+  }
+
+  const related = allProducts.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 3);
 
   return (
     <AppShell>
@@ -166,12 +290,12 @@ export default function ProductPage() {
               {/* Price */}
               <div className="flex items-baseline gap-3 mb-8">
                 <span className="text-3xl font-playfair font-semibold text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
-                  Rs {(product.price * 280).toLocaleString()}
+                  Rs {product.price.toLocaleString()}
                 </span>
                 {product.originalPrice && (
                   <>
                     <span className="text-lg text-brown-muted line-through font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      Rs {(product.originalPrice * 280).toLocaleString()}
+                      Rs {product.originalPrice.toLocaleString()}
                     </span>
                     <span className="text-sm text-rose-gold font-semibold font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
                       {Math.round((1 - product.price / product.originalPrice) * 100)}% off
@@ -226,11 +350,12 @@ export default function ProductPage() {
               <div className="flex gap-3 mb-8">
                 <motion.button
                   whileTap={{ scale: 0.98 }}
+                  disabled={product.outOfStock || product.stock <= 0}
                   onClick={handleAddToCart}
-                  className="btn-luxury btn-primary flex-1 flex items-center justify-center gap-3"
+                  className="btn-luxury btn-primary flex-1 flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <ShoppingBag size={15} strokeWidth={2} />
-                  Add to Bag
+                  {product.outOfStock || product.stock <= 0 ? 'Out of Stock' : 'Add to Bag'}
                 </motion.button>
                 <button
                   onClick={() => toggle(product.id)}
@@ -287,6 +412,96 @@ export default function ProductPage() {
             </div>
           </div>
 
+          {/* Reviews */}
+          <div className="mt-20 grid grid-cols-1 lg:grid-cols-2 gap-10">
+            <div>
+              <h2 className="text-2xl font-playfair text-brown mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
+                Customer Reviews
+              </h2>
+              <div className="space-y-4">
+                {reviews.length === 0 && (
+                  <p className="text-sm text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    No approved reviews yet.
+                  </p>
+                )}
+                {reviews.map((r) => (
+                  <div key={r.reviewId} className="bg-white border border-nude/20 p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-semibold text-brown font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>{r.customerName}</p>
+                      <span className="text-xs text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        {new Date(r.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    <div className="flex gap-1 mb-2">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <span key={i} className={i < r.rating ? 'text-rose-gold' : 'text-nude/30'}>★</span>
+                      ))}
+                      {r.isVerifiedPurchase && (
+                        <span className="ml-2 text-[10px] px-2 py-0.5 bg-green-100 text-green-700">Verified</span>
+                      )}
+                    </div>
+                    {r.title && <p className="text-sm font-semibold text-brown mb-1 font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>{r.title}</p>}
+                    <p className="text-sm text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>{r.comment}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <h2 className="text-2xl font-playfair text-brown mb-6" style={{ fontFamily: "'Playfair Display', serif" }}>
+                Write a Review
+              </h2>
+              <div className="bg-white border border-nude/20 p-5 space-y-3">
+                <input
+                  value={reviewForm.customerName}
+                  onChange={(e) => setReviewForm((s) => ({ ...s, customerName: e.target.value }))}
+                  className="input-luxury"
+                  placeholder="Your name"
+                />
+                <input
+                  value={reviewForm.customerEmail}
+                  onChange={(e) => setReviewForm((s) => ({ ...s, customerEmail: e.target.value }))}
+                  className="input-luxury"
+                  placeholder="Your email"
+                />
+                <input
+                  value={reviewForm.orderId}
+                  onChange={(e) => setReviewForm((s) => ({ ...s, orderId: e.target.value }))}
+                  className="input-luxury"
+                  placeholder="Order ID (optional, for verified badge)"
+                />
+                <select
+                  value={reviewForm.rating}
+                  onChange={(e) => setReviewForm((s) => ({ ...s, rating: Number(e.target.value) }))}
+                  className="input-luxury"
+                >
+                  {[5, 4, 3, 2, 1].map((v) => (
+                    <option key={v} value={v}>{v} stars</option>
+                  ))}
+                </select>
+                <input
+                  value={reviewForm.title}
+                  onChange={(e) => setReviewForm((s) => ({ ...s, title: e.target.value }))}
+                  className="input-luxury"
+                  placeholder="Title (optional)"
+                />
+                <textarea
+                  value={reviewForm.comment}
+                  onChange={(e) => setReviewForm((s) => ({ ...s, comment: e.target.value }))}
+                  className="input-luxury"
+                  placeholder="Your review"
+                  rows={4}
+                />
+                <button onClick={submitReview} disabled={reviewSubmitting} className="btn-luxury btn-primary w-full">
+                  {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
+                </button>
+                {reviewMsg && (
+                  <p className="text-sm text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>{reviewMsg}</p>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Related products */}
           {related.length > 0 && (
             <div className="mt-24">
@@ -300,7 +515,7 @@ export default function ProductPage() {
                       <Image src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
                     </div>
                     <h3 className="text-sm font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>{p.name}</h3>
-                    <p className="text-sm text-brown-muted font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>Rs {(p.price * 280).toLocaleString()}</p>
+                    <p className="text-sm text-brown-muted font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>Rs {p.price.toLocaleString()}</p>
                   </Link>
                 ))}
               </div>

@@ -5,12 +5,12 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
-import { products } from '@/data/products';
 import { Heart, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
+import type { StoreProduct } from '@/types/storefront';
 
-function ProductCard({ product, index }: { product: typeof products[0]; index: number }) {
+function ProductCard({ product, index }: { product: StoreProduct; index: number }) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-50px' });
   const [hovered, setHovered] = useState(false);
@@ -51,6 +51,7 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
           <div className="absolute top-4 left-4 flex flex-col gap-1.5">
             {product.isNew && <span className="badge-new">New</span>}
             {product.isSale && <span className="badge-sale">Sale</span>}
+            {(product.outOfStock || product.stock <= 0) && <span className="badge-sale">Out</span>}
           </div>
 
           {/* Quick actions */}
@@ -62,11 +63,12 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
               <Heart size={14} className={wishlisted ? 'fill-current' : ''} strokeWidth={1.5} />
             </button>
             <button
+              disabled={product.outOfStock || product.stock <= 0}
               onClick={(e) => {
                 e.preventDefault();
                 addItem(product, product.sizes[1] || product.sizes[0], product.colors[0]);
               }}
-              className="w-9 h-9 rounded-full bg-white/80 flex items-center justify-center text-brown hover:bg-brown hover:text-white transition-all duration-300"
+              className="w-9 h-9 rounded-full bg-white/80 flex items-center justify-center text-brown hover:bg-brown hover:text-white transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <ShoppingBag size={14} strokeWidth={1.5} />
             </button>
@@ -93,11 +95,11 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
           </div>
           <div className="text-right">
             <p className="text-base font-semibold text-brown font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-              Rs {(product.price * 280).toLocaleString()}
+              Rs {product.price.toLocaleString()}
             </p>
             {product.originalPrice && (
               <p className="text-xs text-brown-muted line-through font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                Rs {(product.originalPrice * 280).toLocaleString()}
+                Rs {product.originalPrice.toLocaleString()}
               </p>
             )}
           </div>
@@ -122,7 +124,25 @@ function ProductCard({ product, index }: { product: typeof products[0]; index: n
 export default function FeaturedCollections() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
-  const featured = products.filter(p => p.isBestseller || p.isNew).slice(0, 4);
+  const [products, setProducts] = useState<StoreProduct[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    fetch('/api/products?sort=featured', { cache: 'no-store' })
+      .then((res) => res.json() as Promise<{ products?: StoreProduct[] }>)
+      .then((data) => {
+        if (mounted) setProducts(data.products ?? []);
+      })
+      .catch(() => {
+        if (mounted) setProducts([]);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const featured = products.filter((p) => p.isBestseller || p.isNew).slice(0, 4);
 
   return (
     <section className="section-padding bg-cream">

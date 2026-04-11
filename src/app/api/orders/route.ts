@@ -4,6 +4,7 @@ import { randomBytes } from 'crypto';
 import { connectDB } from '@/lib/mongodb';
 import Order from '@/models/Order';
 import Product from '@/models/Product';
+import Coupon from '@/models/Coupon';
 import { requireAdmin } from '@/lib/adminAuth';
 import { rateLimit } from '@/lib/rateLimit';
 
@@ -14,6 +15,43 @@ function generateOrderId(): string {
   const m = String(now.getMonth() + 1).padStart(2, '0');
   const rand = Math.floor(1000 + Math.random() * 9000);
   return `ORD-${y}${m}-${rand}`;
+}
+
+type CouponDoc = {
+  _id: unknown;
+  code: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  minOrderValue: number;
+  maxDiscountValue: number;
+  usageLimit: number;
+  usedCount: number;
+  startDate: Date;
+  endDate: Date;
+  applicableCategories: string[];
+  applicableProducts: string[];
+};
+
+function couponAppliesToItems(coupon: CouponDoc, items: Array<{ productId: string; category: string }>): boolean {
+  const hasCatRule = coupon.applicableCategories.length > 0;
+  const hasProdRule = coupon.applicableProducts.length > 0;
+  if (!hasCatRule && !hasProdRule) return true;
+
+  return items.some((item) => {
+    const catOk = !hasCatRule || coupon.applicableCategories.includes(item.category);
+    const prodOk = !hasProdRule || coupon.applicableProducts.includes(item.productId);
+    return catOk && prodOk;
+  });
+}
+
+function computeDiscount(coupon: CouponDoc, subtotal: number): number {
+  if (coupon.discountType === 'fixed') {
+    return Math.min(coupon.discountValue, subtotal);
+  }
+
+  const raw = (subtotal * coupon.discountValue) / 100;
+  const capped = coupon.maxDiscountValue > 0 ? Math.min(raw, coupon.maxDiscountValue) : raw;
+  return Math.min(capped, subtotal);
 }
 
 // POST /api/orders — place a new order
@@ -28,6 +66,7 @@ export async function POST(req: NextRequest) {
     const {
       customer, items,
       paymentMethod = 'COD',
+      couponCode = '',
     } = body;
 
     if (!customer || !items?.length) {
@@ -68,7 +107,54 @@ export async function POST(req: NextRequest) {
         });
 
         const subtotal = safeItems.reduce((sum, i) => sum + i.qty * i.price, 0);
-        const discount = 0;
+        let discount = 0;
+        let couponData: { code: string; amount: number; couponId: string } | undefined;
+
+        const trimmedCoupon = String(couponCode).trim().toUpperCase();
+        if (trimmedCoupon) {
+          const coupon = await Coupon.findOne({ code: trimmedCoupon, isActive: true })
+            .session(session)
+            .lean() as CouponDoc | null;
+
+          if (!coupon) throw new Error('INVALID_COUPON');
+
+          const now = new Date();
+          if (now < new Date(coupon.startDate) || now > new Date(coupon.endDate)) {
+            throw new Error('COUPON_EXPIRED');
+          }
+
+          if (coupon.usageLimit > 0 && coupon.usedCount >= coupon.usageLimit) {
+            throw new Error('COUPON_LIMIT');
+          }
+
+          if (subtotal < (coupon.minOrderValue || 0)) {
+            throw new Error('COUPON_MIN_ORDER');
+          }
+
+          if (!couponAppliesToItems(coupon, safeItems.map((i) => ({ productId: i.productId, category: i.category })))) {
+            throw new Error('COUPON_NOT_APPLICABLE');
+          }
+
+          discount = Math.round(computeDiscount(coupon, subtotal));
+          couponData = {
+            code: coupon.code,
+            amount: discount,
+            couponId: String(coupon._id),
+          };
+
+          await Coupon.updateOne(
+            {
+              _id: coupon._id,
+              $or: [
+                { usageLimit: 0 },
+                { $expr: { $lt: ['$usedCount', '$usageLimit'] } },
+              ],
+            },
+            { $inc: { usedCount: 1 } },
+            { session },
+          );
+        }
+
         const total = subtotal - discount;
 
         for (const item of items as { productId: string; qty: number }[]) {
@@ -92,6 +178,7 @@ export async function POST(req: NextRequest) {
           items: safeItems,
           subtotal,
           discount,
+          coupon: couponData,
           total,
           paymentMethod,
           paymentStatus: paymentMethod === 'card' ? 'paid' : 'unpaid',
@@ -111,6 +198,9 @@ export async function POST(req: NextRequest) {
           { error: 'One or more items are out of stock. Please refresh and try again.' },
           { status: 409 },
         );
+      }
+      if (['INVALID_COUPON', 'COUPON_EXPIRED', 'COUPON_LIMIT', 'COUPON_MIN_ORDER', 'COUPON_NOT_APPLICABLE'].includes(msg)) {
+        return NextResponse.json({ error: 'Coupon is invalid for this order.' }, { status: 409 });
       }
       throw e;
     } finally {

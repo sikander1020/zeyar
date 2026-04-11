@@ -55,12 +55,71 @@ interface BankProofRow {
   total: number;
   bankTransfer?: { transactionId?: string; proofUrl?: string; submittedAt?: string };
 }
+interface CategoryRow {
+  categoryId: string;
+  name: string;
+  description: string;
+  slug: string;
+  image: string;
+  isActive: boolean;
+  sortOrder: number;
+  productCount: number;
+}
+interface ProductRow {
+  productId: string;
+  name: string;
+  category: string;
+  price: number;
+  originalPrice?: number;
+  costPrice: number;
+  stock: number;
+  sold: number;
+  images?: string[];
+  description?: string;
+  details?: string[];
+  sizes?: string[];
+  colors?: Array<{ name: string; hex: string }>;
+  tags?: string[];
+  isActive: boolean;
+  outOfStock: boolean;
+  isNewArrival: boolean;
+  isSale: boolean;
+  isBestseller: boolean;
+}
+interface CouponRow {
+  _id: string;
+  code: string;
+  description: string;
+  discountType: 'percentage' | 'fixed';
+  discountValue: number;
+  minOrderValue: number;
+  maxDiscountValue: number;
+  usageLimit: number;
+  usedCount: number;
+  startDate: string;
+  endDate: string;
+  isActive: boolean;
+}
+interface ReviewRow {
+  reviewId: string;
+  productId: string;
+  productName: string;
+  customerName: string;
+  customerEmail: string;
+  rating: number;
+  title: string;
+  comment: string;
+  isApproved: boolean;
+  isVerifiedPurchase: boolean;
+  createdAt: string;
+}
 interface DashData {
   summary: Summary[]; orders: Order[]; orderItems: OrderItem[];
   dailyRevenue: DailyRevenue[]; monthlyRevenue: MonthlyRevenue[];
   categoryRevenue: CategoryRevenue[]; topProducts: TopProduct[];
   paymentSplit: PaymentSplit[]; orderStatus: OrderStatus[];
   cityStats: CityStats[]; customers: Customer[]; inventory: InventoryItem[];
+  _error?: string;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -111,7 +170,12 @@ const TABS = [
   { id: 'overview',   label: 'Overview',       icon: '▦' },
   { id: 'sales',      label: 'Sales',           icon: '◈' },
   { id: 'orders',     label: 'Orders',          icon: '≡' },
+  { id: 'products',   label: 'Products',        icon: '◉' },
+  { id: 'categories', label: 'Categories',      icon: '▤' },
   { id: 'inventory',  label: 'Inventory',       icon: '▤' },
+  { id: 'customers',  label: 'Customers',       icon: '⊙' },
+  { id: 'coupons',    label: 'Coupons',         icon: '🏷' },
+  { id: 'reviews',    label: 'Reviews',         icon: '★' },
   { id: 'finance',    label: 'Finance',         icon: '₨' },
   { id: 'locations',  label: 'Locations',       icon: '⊙' },
   { id: 'bankProofs', label: 'Bank Proofs',     icon: '✓' },
@@ -205,7 +269,43 @@ function LoginWall({ onLogin }: { onLogin: () => void }) {
 // ── Overview Tab ──────────────────────────────────────────────────────────────
 function OverviewTab({ data }: { data: DashData }) {
   const s = data.summary[0];
+  const hasError = data._error;
+  
   if (!s) return <p style={{ color: MUTED }}>No data yet. Place your first order to see stats.</p>;
+  
+  // Show warning if there was a database error but we still loaded the dashboard
+  if (hasError) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div style={{ padding: 20, background: '#FFF5F5', border: '1px solid #FED7D7', borderRadius: 12 }}>
+          <p style={{ margin: '0 0 8px', color: '#C0504D', fontSize: 14, fontWeight: 600 }}>⚠️ Database Connection Issue</p>
+          <p style={{ margin: 0, color: '#C0504D', fontSize: 13 }}>
+            Could not connect to MongoDB. Dashboard is showing empty data.
+          </p>
+          <p style={{ margin: '8px 0 0', color: '#C0504D', fontSize: 12 }}>
+            Error: {hasError}
+          </p>
+          <p style={{ margin: '12px 0 0', fontSize: 13, color: BROWN }}>
+            <strong>To fix this:</strong>
+          </p>
+          <ul style={{ margin: '8px 0 0', fontSize: 13, color: BROWN, lineHeight: 1.8 }}>
+            <li>Check your internet connection</li>
+            <li>Verify MongoDB Atlas IP whitelist includes your IP</li>
+            <li>Check MongoDB credentials in .env.local</li>
+            <li>Restart the dev server after fixing</li>
+          </ul>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: 16 }}>
+          <KpiCard label="Total Revenue" value={fmt(s.totalRevenue)} accent />
+          <KpiCard label="Total Orders" value={fmtN(s.totalOrders)} />
+          <KpiCard label="Gross Profit" value={fmt(s.grossProfit)} accent />
+          <KpiCard label="Profit Margin" value={`${s.profitMargin}%`} />
+          <KpiCard label="Avg Order Value" value={fmt(s.avgOrderValue)} />
+          <KpiCard label="Total Discounts" value={fmt(s.totalDiscount)} />
+        </div>
+      </div>
+    );
+  }
 
   const statusCards = [
     { label: 'Pending',   value: s.pendingOrders },
@@ -344,7 +444,7 @@ function SalesTab({ data }: { data: DashData }) {
 }
 
 // ── Orders Tab ────────────────────────────────────────────────────────────────
-function OrdersTab({ data }: { data: DashData }) {
+function OrdersTab({ data, fetchData }: { data: DashData; fetchData?: () => void }) {
   const [search, setSearch]   = useState('');
   const [statusF, setStatusF] = useState('all');
   const [monthF,  setMonthF]  = useState('all');
@@ -384,6 +484,15 @@ function OrdersTab({ data }: { data: DashData }) {
       headers: { ...authHeaders(), 'Content-Type': 'application/json' },
       body: JSON.stringify({ orderId }),
     });
+  }
+
+  async function updateOrderStatus(orderId: string, status: string) {
+    await fetch('/api/admin/orders/update-status', {
+      method: 'POST',
+      headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, status }),
+    });
+    fetchData?.();
   }
 
   return (
@@ -455,7 +564,15 @@ function OrdersTab({ data }: { data: DashData }) {
                       Mark received
                     </button>
                   ) : (
-                    <span style={{ color: MUTED, fontSize: 12 }}>—</span>
+                    <select
+                      value={o.status}
+                      onChange={(e) => updateOrderStatus(o.orderId, e.target.value)}
+                      style={{ padding: '6px 10px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: '#fff', outline: 'none' }}
+                    >
+                      {['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'].map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
                   )}
                 </td>
               </tr>
@@ -724,6 +841,747 @@ function LocationsTab({ data }: { data: DashData }) {
   );
 }
 
+// ── Categories Tab ────────────────────────────────────────────────────────────
+function CategoriesTab() {
+  const [categories, setCategories] = useState<CategoryRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<CategoryRow | null>(null);
+  const [formData, setFormData] = useState({ name: '', description: '', slug: '', image: '', isActive: true, sortOrder: 0 });
+
+  const authHeaders = useCallback(() => {
+    const token = localStorage.getItem('zaybaash_admin_token') ?? '';
+    const ts = localStorage.getItem('zaybaash_admin_ts') ?? '';
+    return { 'x-admin-token': token, 'x-admin-ts': ts, 'Content-Type': 'application/json' };
+  }, []);
+
+  const loadCategories = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/categories', { headers: authHeaders(), cache: 'no-store' });
+      const data = await res.json() as { categories?: CategoryRow[] };
+      setCategories(data.categories ?? []);
+    } catch (err) {
+      console.error('Failed to load categories:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [authHeaders]);
+
+  useEffect(() => { void loadCategories(); }, [loadCategories]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    try {
+      const url = editing ? `/api/admin/categories/${editing.categoryId}` : '/api/admin/categories';
+      const method = editing ? 'PUT' : 'POST';
+      await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(formData) });
+      setShowForm(false);
+      setEditing(null);
+      setFormData({ name: '', description: '', slug: '', image: '', isActive: true, sortOrder: 0 });
+      void loadCategories();
+    } catch (err) {
+      console.error('Failed to save category:', err);
+    }
+  }
+
+  async function handleDelete(categoryId: string) {
+    if (!confirm('Delete this category?')) return;
+    await fetch(`/api/admin/categories/${categoryId}`, { method: 'DELETE', headers: authHeaders() });
+    void loadCategories();
+  }
+
+  function startEdit(cat: CategoryRow) {
+    setEditing(cat);
+    setFormData({ name: cat.name, description: cat.description, slug: cat.slug, image: cat.image, isActive: cat.isActive, sortOrder: cat.sortOrder });
+    setShowForm(true);
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>{categories.length} categories</p>
+        <button onClick={() => { setShowForm(!showForm); setEditing(null); setFormData({ name: '', description: '', slug: '', image: '', isActive: true, sortOrder: 0 }); }}
+          style={{ padding: '10px 16px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+          {showForm ? 'Cancel' : '+ Add Category'}
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleSubmit} style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+            <input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Category Name" required
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <input value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} placeholder="Slug"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <input value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Description"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
+            <input value={formData.image} onChange={(e) => setFormData({ ...formData, image: e.target.value })} placeholder="Image URL"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <input type="number" value={formData.sortOrder} onChange={(e) => setFormData({ ...formData, sortOrder: Number(e.target.value) })} placeholder="Sort Order"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+          </div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN, marginBottom: 16 }}>
+            <input type="checkbox" checked={formData.isActive} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })} style={{ accentColor: ROSE }} />
+            Active
+          </label>
+          <button type="submit" style={{ padding: '10px 20px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            {editing ? 'Update' : 'Create'} Category
+          </button>
+        </form>
+      )}
+
+      <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, overflow: 'hidden' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <thead>
+            <tr style={{ background: ROSE, color: '#fff' }}>
+              {['Name', 'Slug', 'Sort Order', 'Active', 'Actions'].map((h) => (
+                <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600 }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {categories.map((c, i) => (
+              <tr key={c.categoryId} style={{ background: i % 2 === 0 ? '#fff' : BEIGE }}>
+                <td style={{ padding: '10px 14px', fontWeight: 500 }}>{c.name}</td>
+                <td style={{ padding: '10px 14px', fontFamily: 'monospace', fontSize: 12, color: MUTED }}>{c.slug}</td>
+                <td style={{ padding: '10px 14px' }}>{c.sortOrder}</td>
+                <td style={{ padding: '10px 14px' }}>{c.isActive ? '✓' : '✗'}</td>
+                <td style={{ padding: '10px 14px' }}>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => startEdit(c)} style={{ padding: '6px 10px', background: '#6B5247', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Edit</button>
+                    <button onClick={() => handleDelete(c.categoryId)} style={{ padding: '6px 10px', background: '#C0504D', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Delete</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ── Products Tab ──────────────────────────────────────────────────────────────
+function ProductsTab() {
+  const [products, setProducts] = useState<ProductRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [lowStockThreshold, setLowStockThreshold] = useState(5);
+  const [showLowStockOnly, setShowLowStockOnly] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<ProductRow | null>(null);
+  const [formData, setFormData] = useState({
+    name: '',
+    category: '',
+    price: 0,
+    originalPrice: 0,
+    costPrice: 0,
+    stock: 0,
+    description: '',
+    imageUrls: '',
+    detailsText: '',
+    sizesText: 'S, M, L',
+    colorsText: 'Default:#E6B7A9',
+    tagsText: '',
+    isActive: true,
+    outOfStock: false,
+    isNewArrival: false,
+    isSale: false,
+    isBestseller: false,
+  });
+
+  function parseCsvOrLines(value: string): string[] {
+    return value
+      .split(/[\n,]/g)
+      .map((v) => v.trim())
+      .filter(Boolean);
+  }
+
+  function parseColors(value: string): Array<{ name: string; hex: string }> {
+    const rows = parseCsvOrLines(value);
+    const parsed = rows
+      .map((row) => {
+        const [namePart, hexPart] = row.split(':');
+        const name = (namePart ?? '').trim();
+        const hex = (hexPart ?? '').trim();
+        if (!name || !hex) return null;
+        return { name, hex };
+      })
+      .filter((c): c is { name: string; hex: string } => !!c);
+
+    return parsed.length > 0 ? parsed : [{ name: 'Default', hex: '#E6B7A9' }];
+  }
+
+  function resetForm() {
+    setFormData({
+      name: '',
+      category: '',
+      price: 0,
+      originalPrice: 0,
+      costPrice: 0,
+      stock: 0,
+      description: '',
+      imageUrls: '',
+      detailsText: '',
+      sizesText: 'S, M, L',
+      colorsText: 'Default:#E6B7A9',
+      tagsText: '',
+      isActive: true,
+      outOfStock: false,
+      isNewArrival: false,
+      isSale: false,
+      isBestseller: false,
+    });
+  }
+
+  const authHeaders = useCallback(() => {
+    const token = localStorage.getItem('zaybaash_admin_token') ?? '';
+    const ts = localStorage.getItem('zaybaash_admin_ts') ?? '';
+    return { 'x-admin-token': token, 'x-admin-ts': ts, 'Content-Type': 'application/json' };
+  }, []);
+
+  const loadProducts = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/products', { headers: authHeaders(), cache: 'no-store' });
+      const data = await res.json() as { products?: ProductRow[] };
+      setProducts(data.products ?? []);
+    } catch (err) {
+      console.error('Failed to load products:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [authHeaders]);
+
+  useEffect(() => { void loadProducts(); }, [loadProducts]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    try {
+      const url = editing ? `/api/admin/products/${editing.productId}` : '/api/admin/products';
+      const method = editing ? 'PUT' : 'POST';
+
+      const payload = {
+        name: formData.name,
+        category: formData.category,
+        price: Number(formData.price) || 0,
+        originalPrice: Number(formData.originalPrice) || undefined,
+        costPrice: Number(formData.costPrice) || 0,
+        stock: Number(formData.stock) || 0,
+        description: formData.description,
+        images: parseCsvOrLines(formData.imageUrls),
+        details: parseCsvOrLines(formData.detailsText),
+        sizes: parseCsvOrLines(formData.sizesText),
+        colors: parseColors(formData.colorsText),
+        tags: parseCsvOrLines(formData.tagsText),
+        isActive: formData.isActive,
+        outOfStock: formData.outOfStock || (Number(formData.stock) || 0) <= 0,
+        isNewArrival: formData.isNewArrival,
+        isSale: formData.isSale,
+        isBestseller: formData.isBestseller,
+      };
+
+      await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
+      setShowForm(false);
+      setEditing(null);
+      resetForm();
+      void loadProducts();
+    } catch (err) {
+      console.error('Failed to save product:', err);
+    }
+  }
+
+  async function handleDelete(productId: string) {
+    if (!confirm('Delete this product?')) return;
+    await fetch(`/api/admin/products/${productId}`, { method: 'DELETE', headers: authHeaders() });
+    void loadProducts();
+  }
+
+  async function quickSetStock(prod: ProductRow, nextStock: number) {
+    const payload = {
+      name: prod.name,
+      category: prod.category,
+      price: prod.price,
+      originalPrice: prod.originalPrice,
+      costPrice: prod.costPrice,
+      stock: nextStock,
+      description: prod.description,
+      images: prod.images,
+      details: prod.details,
+      sizes: prod.sizes,
+      colors: prod.colors,
+      rating: prod.rating,
+      reviewCount: prod.reviewCount,
+      tags: prod.tags,
+      isActive: prod.isActive,
+      outOfStock: nextStock <= 0,
+      isNewArrival: prod.isNewArrival,
+      isSale: prod.isSale,
+      isBestseller: prod.isBestseller,
+    };
+    await fetch(`/api/admin/products/${prod.productId}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify(payload),
+    });
+    void loadProducts();
+  }
+
+  function startEdit(prod: ProductRow) {
+    setEditing(prod);
+    setFormData({
+      name: prod.name,
+      category: prod.category,
+      price: prod.price,
+      originalPrice: prod.originalPrice || 0,
+      costPrice: prod.costPrice,
+      stock: prod.stock,
+      description: prod.description || '',
+      imageUrls: (prod.images ?? []).join('\n'),
+      detailsText: (prod.details ?? []).join('\n'),
+      sizesText: (prod.sizes ?? []).join(', '),
+      colorsText: (prod.colors ?? []).map((c) => `${c.name}:${c.hex}`).join(', '),
+      tagsText: (prod.tags ?? []).join(', '),
+      isActive: prod.isActive !== false,
+      outOfStock: prod.outOfStock === true || prod.stock <= 0,
+      isNewArrival: prod.isNewArrival,
+      isSale: prod.isSale,
+      isBestseller: prod.isBestseller,
+    });
+    setShowForm(true);
+  }
+
+  const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= lowStockThreshold && p.isActive !== false).length;
+  const outOfStockCount = products.filter((p) => p.outOfStock || p.stock <= 0).length;
+  const filteredProducts = showLowStockOnly
+    ? products.filter((p) => p.stock > 0 && p.stock <= lowStockThreshold && p.isActive !== false)
+    : products;
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>{products.length} products</p>
+          <span style={{ fontSize: 12, color: '#A0613E', background: '#FDF3EC', border: '1px solid #F1D9C7', borderRadius: 999, padding: '4px 10px' }}>
+            Low stock: {lowStockCount}
+          </span>
+          <span style={{ fontSize: 12, color: '#8A3A38', background: '#FDECEC', border: '1px solid #F3CACA', borderRadius: 999, padding: '4px 10px' }}>
+            Out of stock: {outOfStockCount}
+          </span>
+        </div>
+        <button onClick={() => { setShowForm(!showForm); setEditing(null); resetForm(); }}
+          style={{ padding: '10px 16px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+          {showForm ? 'Cancel' : '+ Add Product'}
+        </button>
+      </div>
+
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+        <label style={{ fontSize: 12, color: BROWN }}>Low-stock threshold</label>
+        <input
+          type="number"
+          min={1}
+          value={lowStockThreshold}
+          onChange={(e) => setLowStockThreshold(Math.max(1, Number(e.target.value) || 1))}
+          style={{ width: 80, padding: '8px 10px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: '#fff' }}
+        />
+        <button
+          onClick={() => setShowLowStockOnly((v) => !v)}
+          style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #EBD9CC', background: showLowStockOnly ? '#FBEDE6' : '#fff', color: BROWN, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
+        >
+          {showLowStockOnly ? 'Showing Low Stock Only' : 'Show Low Stock Only'}
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleSubmit} style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+            <input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Product Name" required
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
+            <input value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} placeholder="Category" required
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <input type="number" value={formData.price} onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })} placeholder="Price" required
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <input type="number" value={formData.originalPrice} onChange={(e) => setFormData({ ...formData, originalPrice: Number(e.target.value) })} placeholder="Original Price (optional)"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <input type="number" value={formData.costPrice} onChange={(e) => setFormData({ ...formData, costPrice: Number(e.target.value) })} placeholder="Cost Price" required
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <input type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })} placeholder="Stock" required
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Description"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1', minHeight: 90 }} />
+            <textarea value={formData.imageUrls} onChange={(e) => setFormData({ ...formData, imageUrls: e.target.value })} placeholder="Image URLs (one per line)"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 90 }} />
+            <textarea value={formData.detailsText} onChange={(e) => setFormData({ ...formData, detailsText: e.target.value })} placeholder="Details (comma or line separated)"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 90 }} />
+            <input value={formData.sizesText} onChange={(e) => setFormData({ ...formData, sizesText: e.target.value })} placeholder="Sizes (e.g. XS,S,M,L)"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <input value={formData.colorsText} onChange={(e) => setFormData({ ...formData, colorsText: e.target.value })} placeholder="Colors (e.g. Rose:#E6B7A9, Black:#1A1A1A)"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <input value={formData.tagsText} onChange={(e) => setFormData({ ...formData, tagsText: e.target.value })} placeholder="Tags (comma separated)"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
+          </div>
+          <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
+              <input type="checkbox" checked={formData.isActive} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })} style={{ accentColor: ROSE }} />
+              Active in Store
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
+              <input type="checkbox" checked={formData.outOfStock} onChange={(e) => setFormData({ ...formData, outOfStock: e.target.checked })} style={{ accentColor: ROSE }} />
+              Mark Out of Stock
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
+              <input type="checkbox" checked={formData.isNewArrival} onChange={(e) => setFormData({ ...formData, isNewArrival: e.target.checked })} style={{ accentColor: ROSE }} />
+              New Arrival
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
+              <input type="checkbox" checked={formData.isSale} onChange={(e) => setFormData({ ...formData, isSale: e.target.checked })} style={{ accentColor: ROSE }} />
+              On Sale
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
+              <input type="checkbox" checked={formData.isBestseller} onChange={(e) => setFormData({ ...formData, isBestseller: e.target.checked })} style={{ accentColor: ROSE }} />
+              Bestseller
+            </label>
+          </div>
+          <button type="submit" style={{ padding: '10px 20px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            {editing ? 'Update' : 'Create'} Product
+          </button>
+        </form>
+      )}
+
+      <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, overflow: 'hidden', overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <thead>
+            <tr style={{ background: ROSE, color: '#fff' }}>
+              {['Name', 'Category', 'Price', 'Cost', 'Stock', 'Sold', 'Status', 'Tags', 'Actions'].map((h) => (
+                <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filteredProducts.map((p, i) => (
+              <tr key={p.productId} style={{ background: i % 2 === 0 ? '#fff' : BEIGE }}>
+                <td style={{ padding: '10px 14px', fontWeight: 500 }}>{p.name}</td>
+                <td style={{ padding: '10px 14px' }}>{p.category}</td>
+                <td style={{ padding: '10px 14px', fontWeight: 600 }}>{fmt(p.price)}</td>
+                <td style={{ padding: '10px 14px' }}>{fmt(p.costPrice)}</td>
+                <td style={{ padding: '10px 14px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span>{p.stock}</span>
+                    {p.stock > 0 && p.stock <= lowStockThreshold && p.isActive !== false && (
+                      <span style={{ fontSize: 10, color: '#A0613E', background: '#FDF3EC', border: '1px solid #F1D9C7', borderRadius: 999, padding: '2px 6px' }}>
+                        LOW
+                      </span>
+                    )}
+                  </div>
+                </td>
+                <td style={{ padding: '10px 14px' }}>{p.sold}</td>
+                <td style={{ padding: '10px 14px' }}>
+                  {!p.isActive ? 'Hidden' : p.outOfStock || p.stock <= 0 ? 'Out of stock' : 'In stock'}
+                </td>
+                <td style={{ padding: '10px 14px' }}>
+                  <div style={{ display: 'flex', gap: 4 }}>
+                    {p.isNewArrival && <span className="badge-new">New</span>}
+                    {p.isSale && <span className="badge-sale">Sale</span>}
+                    {p.isBestseller && <span style={{ background: '#6B8E6B', color: '#fff', fontSize: 10, padding: '2px 6px', borderRadius: 4 }}>Best</span>}
+                  </div>
+                </td>
+                <td style={{ padding: '10px 14px' }}>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {p.outOfStock || p.stock <= 0 ? (
+                      <button onClick={() => void quickSetStock(p, Math.max(lowStockThreshold, 1))} style={{ padding: '6px 10px', background: '#3E7B4E', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Restock</button>
+                    ) : (
+                      <button onClick={() => void quickSetStock(p, 0)} style={{ padding: '6px 10px', background: '#B37A3B', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Mark OOS</button>
+                    )}
+                    <button onClick={() => startEdit(p)} style={{ padding: '6px 10px', background: '#6B5247', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Edit</button>
+                    <button onClick={() => handleDelete(p.productId)} style={{ padding: '6px 10px', background: '#C0504D', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Delete</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ── Coupons Tab ───────────────────────────────────────────────────────────────
+function CouponsTab() {
+  const [coupons, setCoupons] = useState<CouponRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [editing, setEditing] = useState<CouponRow | null>(null);
+  const [formData, setFormData] = useState({ code: '', description: '', discountType: 'percentage' as 'percentage' | 'fixed', discountValue: 0, minOrderValue: 0, maxDiscountValue: 0, usageLimit: 0, startDate: '', endDate: '', isActive: true });
+
+  const authHeaders = useCallback(() => {
+    const token = localStorage.getItem('zaybaash_admin_token') ?? '';
+    const ts = localStorage.getItem('zaybaash_admin_ts') ?? '';
+    return { 'x-admin-token': token, 'x-admin-ts': ts, 'Content-Type': 'application/json' };
+  }, []);
+
+  const loadCoupons = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/coupons', { headers: authHeaders(), cache: 'no-store' });
+      const data = await res.json() as { coupons?: CouponRow[] };
+      setCoupons(data.coupons ?? []);
+    } catch (err) {
+      console.error('Failed to load coupons:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [authHeaders]);
+
+  useEffect(() => { void loadCoupons(); }, [loadCoupons]);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    try {
+      const url = editing ? `/api/admin/coupons/${editing._id}` : '/api/admin/coupons';
+      const method = editing ? 'PUT' : 'POST';
+      await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(formData) });
+      setShowForm(false);
+      setEditing(null);
+      setFormData({ code: '', description: '', discountType: 'percentage', discountValue: 0, minOrderValue: 0, maxDiscountValue: 0, usageLimit: 0, startDate: '', endDate: '', isActive: true });
+      void loadCoupons();
+    } catch (err) {
+      console.error('Failed to save coupon:', err);
+    }
+  }
+
+  async function handleDelete(id: string) {
+    if (!confirm('Delete this coupon?')) return;
+    await fetch(`/api/admin/coupons/${id}`, { method: 'DELETE', headers: authHeaders() });
+    void loadCoupons();
+  }
+
+  function startEdit(coupon: CouponRow) {
+    setEditing(coupon);
+    setFormData({ code: coupon.code, description: coupon.description, discountType: coupon.discountType, discountValue: coupon.discountValue, minOrderValue: coupon.minOrderValue, maxDiscountValue: coupon.maxDiscountValue, usageLimit: coupon.usageLimit, startDate: coupon.startDate.slice(0, 10), endDate: coupon.endDate.slice(0, 10), isActive: coupon.isActive });
+    setShowForm(true);
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>{coupons.length} coupons</p>
+        <button onClick={() => { setShowForm(!showForm); setEditing(null); setFormData({ code: '', description: '', discountType: 'percentage', discountValue: 0, minOrderValue: 0, maxDiscountValue: 0, usageLimit: 0, startDate: '', endDate: '', isActive: true }); }}
+          style={{ padding: '10px 16px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+          {showForm ? 'Cancel' : '+ Add Coupon'}
+        </button>
+      </div>
+
+      {showForm && (
+        <form onSubmit={handleSubmit} style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+            <input value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })} placeholder="Coupon Code" required
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <select value={formData.discountType} onChange={(e) => setFormData({ ...formData, discountType: e.target.value as 'percentage' | 'fixed' })}
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: '#fff', outline: 'none' }}>
+              <option value="percentage">Percentage (%)</option>
+              <option value="fixed">Fixed Amount (PKR)</option>
+            </select>
+            <input type="number" value={formData.discountValue} onChange={(e) => setFormData({ ...formData, discountValue: Number(e.target.value) })} placeholder="Discount Value" required
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <input type="number" value={formData.minOrderValue} onChange={(e) => setFormData({ ...formData, minOrderValue: Number(e.target.value) })} placeholder="Min Order Value"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <input type="number" value={formData.maxDiscountValue} onChange={(e) => setFormData({ ...formData, maxDiscountValue: Number(e.target.value) })} placeholder="Max Discount"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <input type="number" value={formData.usageLimit} onChange={(e) => setFormData({ ...formData, usageLimit: Number(e.target.value) })} placeholder="Usage Limit (0=unlimited)"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <input type="date" value={formData.startDate} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} required
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <input type="date" value={formData.endDate} onChange={(e) => setFormData({ ...formData, endDate: e.target.value })} required
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <input value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Description"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
+          </div>
+          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN, marginBottom: 16 }}>
+            <input type="checkbox" checked={formData.isActive} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })} style={{ accentColor: ROSE }} />
+            Active
+          </label>
+          <button type="submit" style={{ padding: '10px 20px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            {editing ? 'Update' : 'Create'} Coupon
+          </button>
+        </form>
+      )}
+
+      <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, overflow: 'hidden', overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <thead>
+            <tr style={{ background: ROSE, color: '#fff' }}>
+              {['Code', 'Discount', 'Min Order', 'Used/Limit', 'Valid Until', 'Active', 'Actions'].map((h) => (
+                <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {coupons.map((c, i) => (
+              <tr key={c._id} style={{ background: i % 2 === 0 ? '#fff' : BEIGE }}>
+                <td style={{ padding: '10px 14px', fontFamily: 'monospace', fontWeight: 600 }}>{c.code}</td>
+                <td style={{ padding: '10px 14px' }}>{c.discountType === 'percentage' ? `${c.discountValue}%` : fmt(c.discountValue)}</td>
+                <td style={{ padding: '10px 14px' }}>{c.minOrderValue > 0 ? fmt(c.minOrderValue) : '—'}</td>
+                <td style={{ padding: '10px 14px' }}>{c.usedCount}/{c.usageLimit || '∞'}</td>
+                <td style={{ padding: '10px 14px', fontSize: 12, color: MUTED }}>{new Date(c.endDate).toLocaleDateString()}</td>
+                <td style={{ padding: '10px 14px' }}>{c.isActive ? '✓' : '✗'}</td>
+                <td style={{ padding: '10px 14px' }}>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => startEdit(c)} style={{ padding: '6px 10px', background: '#6B5247', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Edit</button>
+                    <button onClick={() => handleDelete(c._id)} style={{ padding: '6px 10px', background: '#C0504D', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Delete</button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ── Reviews Tab ───────────────────────────────────────────────────────────────
+function ReviewsTab() {
+  const [reviews, setReviews] = useState<ReviewRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [filter, setFilter] = useState<'all' | 'approved' | 'pending'>('all');
+
+  const authHeaders = useCallback(() => {
+    const token = localStorage.getItem('zaybaash_admin_token') ?? '';
+    const ts = localStorage.getItem('zaybaash_admin_ts') ?? '';
+    return { 'x-admin-token': token, 'x-admin-ts': ts };
+  }, []);
+
+  const loadReviews = useCallback(async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/reviews', { headers: authHeaders(), cache: 'no-store' });
+      const data = await res.json() as { reviews?: ReviewRow[] };
+      setReviews(data.reviews ?? []);
+    } catch (err) {
+      console.error('Failed to load reviews:', err);
+    } finally {
+      setLoading(false);
+    }
+  }, [authHeaders]);
+
+  useEffect(() => { void loadReviews(); }, [loadReviews]);
+
+  async function toggleApproval(reviewId: string, isApproved: boolean) {
+    await fetch(`/api/admin/reviews/${reviewId}`, {
+      method: 'PUT',
+      headers: authHeaders(),
+      body: JSON.stringify({ isApproved: !isApproved }),
+    });
+    void loadReviews();
+  }
+
+  async function handleDelete(reviewId: string) {
+    if (!confirm('Delete this review?')) return;
+    await fetch(`/api/admin/reviews/${reviewId}`, { method: 'DELETE', headers: authHeaders() });
+    void loadReviews();
+  }
+
+  const filtered = reviews.filter((r) => {
+    if (filter === 'approved') return r.isApproved;
+    if (filter === 'pending') return !r.isApproved;
+    return true;
+  });
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+        <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>{filtered.length} reviews</p>
+        <div style={{ display: 'flex', gap: 8 }}>
+          {(['all', 'pending', 'approved'] as const).map((f) => (
+            <button key={f} onClick={() => setFilter(f)}
+              style={{ padding: '8px 14px', background: filter === f ? ROSE : '#fff', color: filter === f ? '#fff' : BROWN, border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer', textTransform: 'capitalize' }}>
+              {f}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {filtered.map((r) => (
+          <div key={r.reviewId} style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: 12 }}>
+              <div>
+                <h4 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 600, color: BROWN }}>{r.productName}</h4>
+                <p style={{ margin: 0, fontSize: 12, color: MUTED }}>by {r.customerName} ({r.customerEmail}) · {new Date(r.createdAt).toLocaleDateString()}</p>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => toggleApproval(r.reviewId, r.isApproved)}
+                  style={{ padding: '6px 10px', background: r.isApproved ? '#6B8E6B' : '#F0C9BF', color: BROWN, border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>
+                  {r.isApproved ? 'Approved' : 'Approve'}
+                </button>
+                <button onClick={() => handleDelete(r.reviewId)}
+                  style={{ padding: '6px 10px', background: '#C0504D', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>
+                  Delete
+                </button>
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+              {Array.from({ length: 5 }).map((_, i) => (
+                <span key={i} style={{ color: i < r.rating ? '#F59E0B' : '#EBD9CC', fontSize: 16 }}>★</span>
+              ))}
+              {r.isVerifiedPurchase && <span style={{ background: '#6B8E6B', color: '#fff', fontSize: 10, padding: '2px 6px', borderRadius: 4 }}>Verified</span>}
+            </div>
+            {r.title && <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 600, color: BROWN }}>{r.title}</p>}
+            <p style={{ margin: 0, fontSize: 13, color: BROWN, lineHeight: 1.5 }}>{r.comment}</p>
+          </div>
+        ))}
+        {filtered.length === 0 && (
+          <div style={{ textAlign: 'center', padding: 40, color: MUTED }}>No reviews found.</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ── Customers Tab ─────────────────────────────────────────────────────────────
+function CustomersTab({ data }: { data: DashData }) {
+  const [search, setSearch] = useState('');
+  const filtered = data.customers.filter((c) => {
+    if (!search) return true;
+    const s = search.toLowerCase();
+    return c.name.toLowerCase().includes(s) || c.email.toLowerCase().includes(s) || c.city.toLowerCase().includes(s);
+  });
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+      <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search by name, email, or city…"
+        style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+      <p style={{ margin: 0, fontSize: 12, color: MUTED }}>{filtered.length} customers</p>
+      <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, overflow: 'hidden', overflowX: 'auto' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+          <thead>
+            <tr style={{ background: ROSE, color: '#fff' }}>
+              {['Name', 'Email', 'City', 'State', 'Orders', 'Total Spend'].map((h) => (
+                <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {filtered.map((c, i) => (
+              <tr key={c.email} style={{ background: i % 2 === 0 ? '#fff' : BEIGE }}>
+                <td style={{ padding: '10px 14px', fontWeight: 500 }}>{c.name || '—'}</td>
+                <td style={{ padding: '10px 14px', fontSize: 12, color: MUTED }}>{c.email}</td>
+                <td style={{ padding: '10px 14px' }}>{c.city}</td>
+                <td style={{ padding: '10px 14px' }}>{c.state}</td>
+                <td style={{ padding: '10px 14px' }}>{c.orderCount}</td>
+                <td style={{ padding: '10px 14px', fontWeight: 600 }}>{fmt(c.totalSpend)}</td>
+              </tr>
+            ))}
+            {filtered.length === 0 && (
+              <tr><td colSpan={6} style={{ padding: 32, textAlign: 'center', color: MUTED }}>No customers found.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 // ── Bank Proofs Tab ───────────────────────────────────────────────────────────
 function BankProofsTab() {
   const [rows, setRows] = useState<BankProofRow[]>([]);
@@ -876,6 +1734,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(false);
   const [lastRef, setLastRef] = useState('');
   const [liveOn, setLiveOn]   = useState(true);
+  const [error, setError]     = useState('');
 
   const verify = useCallback(async () => {
     const token = localStorage.getItem('zaybaash_admin_token');
@@ -895,7 +1754,10 @@ export default function DashboardPage() {
 
   const fetchData = useCallback(async (opts?: { silent?: boolean }) => {
     const silent = opts?.silent === true;
-    if (!silent) setLoading(true);
+    if (!silent) {
+      setLoading(true);
+      setError('');
+    }
     try {
       const token = localStorage.getItem('zaybaash_admin_token') ?? '';
       const ts    = localStorage.getItem('zaybaash_admin_ts') ?? '';
@@ -908,10 +1770,24 @@ export default function DashboardPage() {
         },
       });
       const d = await res.json() as DashData & { error?: string };
-      if (!res.ok || d.error) return;
+      if (!res.ok) {
+        const errMsg = d.error || `HTTP ${res.status}: Failed to fetch data`;
+        console.error('Dashboard fetch error:', errMsg);
+        if (!silent) setError(errMsg);
+        return;
+      }
+      if (d.error) {
+        console.error('Dashboard data error:', d.error);
+        if (!silent) setError(d.error);
+        return;
+      }
       setData(d as DashData);
       setLastRef(new Date().toLocaleTimeString());
-    } catch { /* keep previous data */ }
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : 'Unknown error occurred';
+      console.error('Dashboard fetch exception:', err);
+      if (!silent) setError(`Failed to load: ${errMsg}`);
+    }
     finally {
       if (!silent) setLoading(false);
     }
@@ -964,7 +1840,8 @@ export default function DashboardPage() {
       {/* Sidebar */}
       <aside style={{
         width: 220, background: BROWN, color: '#fff', display: 'flex',
-        flexDirection: 'column', padding: '28px 0', position: 'sticky', top: 0, height: '100vh', flexShrink: 0,
+        flexDirection: 'column', padding: '28px 0', position: 'fixed', left: 0, top: 0,
+        height: '100vh', flexShrink: 0, zIndex: 100, overflowY: 'auto',
       }}>
         <div style={{ padding: '0 20px 28px', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
           <p style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: '0.04em' }}>ZAYBAASH</p>
@@ -995,7 +1872,7 @@ export default function DashboardPage() {
       </aside>
 
       {/* Main content */}
-      <main style={{ flex: 1, padding: '32px 36px', overflowY: 'auto', maxWidth: 1200 }}>
+      <main style={{ flex: 1, marginLeft: 220, padding: '32px 36px', overflowY: 'auto', minHeight: '100vh' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
           <div>
@@ -1046,17 +1923,43 @@ export default function DashboardPage() {
 
         {/* Tab content */}
         {!data ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 300 }}>
-            <p style={{ color: MUTED }}>Loading dashboard data…</p>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: 300, gap: 16 }}>
+            {loading ? (
+              <>
+                <div style={{ width: 40, height: 40, border: '4px solid #EBD9CC', borderTop: `4px solid ${ROSE}`, borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
+                <p style={{ color: MUTED, fontSize: 14 }}>Loading dashboard data…</p>
+              </>
+            ) : error ? (
+              <>
+                <div style={{ padding: 24, background: '#FFF5F5', border: '1px solid #FED7D7', borderRadius: 12, maxWidth: 500, textAlign: 'center' }}>
+                  <p style={{ color: '#C0504D', fontSize: 14, fontWeight: 600, marginBottom: 8 }}>⚠️ Error Loading Data</p>
+                  <p style={{ color: '#C0504D', fontSize: 13, marginBottom: 16 }}>{error}</p>
+                  <button
+                    onClick={() => fetchData()}
+                    style={{ padding: '10px 20px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Try Again
+                  </button>
+                </div>
+              </>
+            ) : (
+              <p style={{ color: MUTED, fontSize: 14 }}>No data loaded</p>
+            )}
           </div>
         ) : (
           <>
-            {tab === 'overview'  && <OverviewTab   data={data} />}
-            {tab === 'sales'     && <SalesTab      data={data} />}
-            {tab === 'orders'    && <OrdersTab     data={data} />}
-            {tab === 'inventory' && <InventoryTab  data={data} />}
-            {tab === 'finance'   && <FinanceTab    data={data} />}
-            {tab === 'locations' && <LocationsTab  data={data} />}
+            {tab === 'overview'   && <OverviewTab   data={data} />}
+            {tab === 'sales'      && <SalesTab      data={data} />}
+            {tab === 'orders'     && <OrdersTab     data={data} fetchData={() => fetchData()} />}
+            {tab === 'products'   && <ProductsTab />}
+            {tab === 'categories' && <CategoriesTab />}
+            {tab === 'inventory'  && <InventoryTab  data={data} />}
+            {tab === 'customers'  && <CustomersTab  data={data} />}
+            {tab === 'coupons'    && <CouponsTab />}
+            {tab === 'reviews'    && <ReviewsTab />}
+            {tab === 'finance'    && <FinanceTab    data={data} />}
+            {tab === 'locations'  && <LocationsTab  data={data} />}
             {tab === 'bankProofs' && <BankProofsTab />}
           </>
         )}

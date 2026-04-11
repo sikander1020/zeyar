@@ -1,9 +1,9 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { Product } from '@/data/products';
+import type { StoreProduct } from '@/types/storefront';
 
 export interface CartItem {
-  product: Product;
+  product: StoreProduct;
   quantity: number;
   selectedSize: string;
   selectedColor: { name: string; hex: string };
@@ -12,7 +12,7 @@ export interface CartItem {
 interface CartStore {
   items: CartItem[];
   isOpen: boolean;
-  addItem: (product: Product, size: string, color: { name: string; hex: string }) => void;
+  addItem: (product: StoreProduct, size: string, color: { name: string; hex: string }) => void;
   removeItem: (productId: string, size: string) => void;
   updateQuantity: (productId: string, size: string, quantity: number) => void;
   clearCart: () => void;

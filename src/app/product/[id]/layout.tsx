@@ -1,40 +1,29 @@
-import { products } from '@/data/products';
 import { Metadata } from 'next';
 import { SITE_ORIGIN } from '@/lib/siteUrl';
 
-export function generateStaticParams() {
-  return products.map((product) => ({
-    id: product.id,
-  }));
-}
-
 export function generateMetadata({ params }: { params: { id: string } }): Metadata {
-  const product = products.find((p) => p.id === params.id);
-  if (!product) {
-    return { title: 'Product Not Found' };
-  }
   return {
-    title: product.name,
-    description: `Shop the ${product.name} at ZAYBAASH, Pakistan's premium beauty with style destination. ${product.description}`,
+    title: 'Product Details',
+    description: 'Shop premium ZAYBAASH pieces with live catalog pricing and availability.',
     openGraph: {
-      title: `${product.name} | ZAYBAASH Pakistan`,
-      description: `Shop the ${product.name} at ZAYBAASH, Pakistan's premium beauty with style destination.`,
-      url: `${SITE_ORIGIN}/product/${product.id}`,
+      title: 'Product Details | ZAYBAASH Pakistan',
+      description: 'Shop premium ZAYBAASH pieces with live catalog pricing and availability.',
+      url: `${SITE_ORIGIN}/product/${params.id}`,
       images: [
         {
-          url: product.images[0] || '',
+          url: '/apple-icon.png',
           width: 800,
           height: 800,
-          alt: product.name,
+          alt: 'ZAYBAASH',
         },
       ],
       type: 'article',
     },
     twitter: {
       card: 'summary_large_image',
-      title: `${product.name} | ZAYBAASH Pakistan`,
-      description: `Shop the ${product.name} at ZAYBAASH, Pakistan's premium beauty with style destination.`,
-      images: [product.images[0] || ''],
+      title: 'Product Details | ZAYBAASH Pakistan',
+      description: 'Shop premium ZAYBAASH pieces with live catalog pricing and availability.',
+      images: ['/apple-icon.png'],
     }
   };
 }

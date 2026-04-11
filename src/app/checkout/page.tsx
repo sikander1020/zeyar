@@ -23,6 +23,19 @@ export default function CheckoutPage() {
     cardName: '', cardNumber: '', expiry: '', cvv: '',
   });
   const [paymentMethod, setPaymentMethod] = useState<'COD' | 'bank'>('COD');
+  const [couponCode, setCouponCode] = useState('');
+  const [couponApplying, setCouponApplying] = useState(false);
+  const [couponError, setCouponError] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<{
+    code: string;
+    discount: number;
+    total: number;
+  } | null>(null);
+
+  const subtotal = total();
+  const discount = appliedCoupon?.discount ?? 0;
+  const netTotal = Math.max(0, subtotal - discount);
+  const finalTotal = netTotal * 1.08;
 
   const update = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
@@ -46,10 +59,11 @@ export default function CheckoutPage() {
           size:      i.selectedSize ?? '',
           color:     i.selectedColor?.name ?? '',
         })),
-        subtotal: total(),
-        discount: 0,
-        total:    total(),
+        subtotal,
+        discount,
+        total: netTotal,
         paymentMethod,
+        couponCode: appliedCoupon?.code ?? '',
       };
       const res = await fetch('/api/orders', {
         method: 'POST',
@@ -75,7 +89,59 @@ export default function CheckoutPage() {
     }
     setPlaced(true);
     clearCart();
-  }, [form, items, total, paymentMethod, router, clearCart]);
+  }, [form, items, subtotal, discount, netTotal, paymentMethod, appliedCoupon, router, clearCart]);
+
+  const applyCoupon = useCallback(async () => {
+    setCouponError('');
+    setCouponApplying(true);
+    try {
+      const code = couponCode.trim();
+      if (!code) {
+        setCouponError('Enter a coupon code.');
+        setCouponApplying(false);
+        return;
+      }
+
+      const res = await fetch('/api/coupons/validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          code,
+          items: items.map((i) => ({
+            productId: i.product.id,
+            category: i.product.category,
+            qty: i.quantity,
+            price: i.product.price,
+          })),
+        }),
+      });
+
+      const data = await res.json() as {
+        valid?: boolean;
+        coupon?: { code: string };
+        discount?: number;
+        total?: number;
+        error?: string;
+      };
+
+      if (!res.ok || !data.valid || !data.coupon) {
+        setCouponError(data.error ?? 'Invalid coupon.');
+        setAppliedCoupon(null);
+        return;
+      }
+
+      setAppliedCoupon({
+        code: data.coupon.code,
+        discount: Number(data.discount) || 0,
+        total: Number(data.total) || subtotal,
+      });
+    } catch {
+      setCouponError('Could not validate coupon.');
+      setAppliedCoupon(null);
+    } finally {
+      setCouponApplying(false);
+    }
+  }, [couponCode, items, subtotal]);
 
   if (placed) {
     return (
@@ -289,7 +355,7 @@ export default function CheckoutPage() {
                       className="btn-luxury btn-rose flex-1 flex items-center justify-center gap-2"
                     >
                       <ShieldCheck size={16} strokeWidth={2} />
-                      Place Order — ${(total() * 1.08).toFixed(0)}
+                      Place Order — ${finalTotal.toFixed(0)}
                     </motion.button>
                   </div>
                   {submitError && (
@@ -322,14 +388,48 @@ export default function CheckoutPage() {
                   ))}
                 </div>
                 <div className="border-t border-nude/30 pt-4 space-y-2">
+                  <div className="pb-3 border-b border-nude/20">
+                    <p className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      Coupon
+                    </p>
+                    <div className="flex gap-2">
+                      <input
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        placeholder="Enter code"
+                        className="input-luxury"
+                      />
+                      <button
+                        type="button"
+                        onClick={applyCoupon}
+                        disabled={couponApplying}
+                        className="btn-luxury btn-outline"
+                      >
+                        {couponApplying ? 'Applying...' : 'Apply'}
+                      </button>
+                    </div>
+                    {appliedCoupon && (
+                      <p className="text-xs text-rose-gold font-inter mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        Applied: {appliedCoupon.code}
+                      </p>
+                    )}
+                    {couponError && (
+                      <p className="text-xs text-red-600 font-inter mt-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        {couponError}
+                      </p>
+                    )}
+                  </div>
                   <div className="flex justify-between text-sm font-inter text-brown-muted" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    <span>Subtotal</span><span>${total().toFixed(0)}</span>
+                    <span>Subtotal</span><span>${subtotal.toFixed(0)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm font-inter text-brown-muted" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <span>Discount</span><span>- ${discount.toFixed(0)}</span>
                   </div>
                   <div className="flex justify-between text-sm font-inter text-brown-muted" style={{ fontFamily: "'Inter', sans-serif" }}>
                     <span>Shipping</span><span className="text-rose-gold">Free</span>
                   </div>
                   <div className="flex justify-between font-playfair font-semibold text-brown pt-2 border-t border-nude/20" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    <span>Total</span><span>${(total() * 1.08).toFixed(0)}</span>
+                    <span>Total</span><span>${finalTotal.toFixed(0)}</span>
                   </div>
                 </div>
               </div>

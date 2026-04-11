@@ -1,17 +1,34 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Heart, ShoppingBag, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { products } from '@/data/products';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import { useCartStore } from '@/store/useCartStore';
 import AppShell from '@/components/layout/AppShell';
+import type { StoreProduct } from '@/types/storefront';
 
 export default function WishlistPage() {
   const { items, toggle } = useWishlistStore();
   const addItem = useCartStore((s) => s.addItem);
+  const [products, setProducts] = useState<StoreProduct[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    fetch('/api/products', { cache: 'no-store' })
+      .then((res) => res.json() as Promise<{ products?: StoreProduct[] }>)
+      .then((data) => {
+        if (mounted) setProducts(data.products ?? []);
+      })
+      .catch(() => {
+        if (mounted) setProducts([]);
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // Map purely by ID, but since products.ts might have dropped some id's, we filter those out.
   const wishlistedProducts = items
@@ -80,14 +97,15 @@ export default function WishlistPage() {
 
                     <div className="mt-auto flex gap-3">
                       <button
+                        disabled={product.outOfStock || product.stock <= 0}
                         onClick={() => {
                           const size = product.sizes[1] || product.sizes[0];
                           const color = product.colors[0];
                           addItem(product, size, color);
                         }}
-                        className="btn-luxury btn-primary flex-1 flex justify-center items-center gap-2 text-xs"
+                        className="btn-luxury btn-primary flex-1 flex justify-center items-center gap-2 text-xs disabled:opacity-60 disabled:cursor-not-allowed"
                       >
-                        <ShoppingBag size={14} /> Quick Add
+                        <ShoppingBag size={14} /> {product.outOfStock || product.stock <= 0 ? 'Out of Stock' : 'Quick Add'}
                       </button>
                       <button
                         onClick={() => toggle(product.id)}
