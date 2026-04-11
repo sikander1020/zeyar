@@ -181,7 +181,7 @@ export default function ProductPage() {
 
   return (
     <AppShell>
-      <div className="pt-24 bg-cream min-h-screen">
+      <div className="pt-24 bg-cream min-h-screen pb-24 md:pb-0">
         {/* Breadcrumb */}
         <div className="max-w-7xl mx-auto px-6 py-6">
           <nav className="flex items-center gap-2 text-xs text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -525,6 +525,27 @@ export default function ProductPage() {
               </div>
             </div>
           )}
+        </div>
+
+        <div className="fixed bottom-0 left-0 right-0 z-[90] md:hidden bg-cream/95 backdrop-blur border-t border-nude/30 p-3">
+          <div className="max-w-7xl mx-auto flex items-center gap-3">
+            <div className="min-w-0">
+              <p className="text-[11px] tracking-[0.12em] uppercase text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                {selectedSize ? `Size ${selectedSize}` : 'Select size'}
+              </p>
+              <p className="text-sm font-semibold text-brown font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                Rs {product.price.toLocaleString()}
+              </p>
+            </div>
+            <button
+              type="button"
+              disabled={product.outOfStock || product.stock <= 0}
+              onClick={handleAddToCart}
+              className="btn-luxury btn-primary flex-1 disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {product.outOfStock || product.stock <= 0 ? 'Out of Stock' : 'Add to Bag'}
+            </button>
+          </div>
         </div>
       </div>
     </AppShell>

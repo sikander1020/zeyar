@@ -432,6 +432,21 @@ export default function CheckoutPage() {
                     <span>Total</span><span>${finalTotal.toFixed(0)}</span>
                   </div>
                 </div>
+
+                <div className="mt-5 pt-4 border-t border-nude/25 space-y-3">
+                  <div className="grid grid-cols-1 gap-2 text-xs text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <div className="flex items-center gap-2"><ShieldCheck size={13} className="text-rose-gold" strokeWidth={1.8} /> Secure checkout</div>
+                    <div className="flex items-center gap-2"><Truck size={13} className="text-rose-gold" strokeWidth={1.8} /> Delivery in 2-4 business days</div>
+                    <div className="flex items-center gap-2"><Lock size={13} className="text-rose-gold" strokeWidth={1.8} /> Easy exchange policy</div>
+                  </div>
+
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <Link href="/privacy-policy" className="hover:text-brown transition-colors">Privacy</Link>
+                    <Link href="/terms-and-conditions" className="hover:text-brown transition-colors">Terms</Link>
+                    <Link href="/cookie-policy" className="hover:text-brown transition-colors">Cookies</Link>
+                    <Link href="/returns" className="hover:text-brown transition-colors">Returns</Link>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

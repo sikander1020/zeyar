@@ -3,6 +3,8 @@
 import Navbar from '@/components/layout/Navbar';
 import Footer from '@/components/layout/Footer';
 import CartDrawer from '@/components/layout/CartDrawer';
+import CookieConsentBanner from '@/components/layout/CookieConsentBanner';
+import WhatsAppFab from '@/components/layout/WhatsAppFab';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
 
@@ -24,6 +26,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           {children}
         </motion.main>
       </AnimatePresence>
+      <CookieConsentBanner />
+      <WhatsAppFab />
       <Footer />
     </>
   );
