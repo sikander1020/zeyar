@@ -131,6 +131,18 @@ function DressesContent() {
     };
   }, []);
 
+  useEffect(() => {
+    setActiveCategory(initialCategory);
+  }, [initialCategory]);
+
+  useEffect(() => {
+    if (activeCategory === 'All') return;
+    const names = new Set(categories.map((c) => c.name));
+    if (categories.length > 0 && !names.has(activeCategory)) {
+      setActiveCategory('All');
+    }
+  }, [categories, activeCategory]);
+
   const filtered = useMemo(() => {
     let result = [...products];
     if (activeCategory !== 'All') result = result.filter(p => p.category === activeCategory);
