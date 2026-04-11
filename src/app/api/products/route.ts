@@ -78,7 +78,10 @@ export async function GET(req: NextRequest) {
       products.sort((a, b) => b.rating - a.rating);
     }
 
-    return NextResponse.json({ products });
+    return NextResponse.json(
+      { products },
+      { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } },
+    );
   } catch (err) {
     console.error('GET /api/products error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

@@ -121,13 +121,14 @@ function ProductCard({ product, index }: { product: StoreProduct; index: number 
   );
 }
 
-export default function FeaturedCollections() {
+export default function FeaturedCollections({ initialProducts }: { initialProducts?: StoreProduct[] } = {}) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
-  const [products, setProducts] = useState<StoreProduct[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<StoreProduct[]>(initialProducts ?? []);
+  const [loading, setLoading] = useState(!initialProducts);
 
   useEffect(() => {
+    if (initialProducts) return;
     let mounted = true;
     fetch('/api/products?sort=featured', { cache: 'no-store' })
       .then((res) => res.json() as Promise<{ products?: StoreProduct[] }>)
@@ -144,7 +145,7 @@ export default function FeaturedCollections() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [initialProducts]);
 
   const featuredTagged = products.filter((p) => p.isBestseller || p.isNew);
   const featured = (featuredTagged.length > 0 ? featuredTagged : products).slice(0, 4);

@@ -62,7 +62,10 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    return NextResponse.json({ product: normalizeProduct(doc as never) });
+    return NextResponse.json(
+      { product: normalizeProduct(doc as never) },
+      { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } },
+    );
   } catch (err) {
     console.error('GET /api/products/[id] error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

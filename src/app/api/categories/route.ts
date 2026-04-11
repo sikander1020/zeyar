@@ -48,7 +48,10 @@ export async function GET() {
         }));
     }
 
-    return NextResponse.json({ categories: result });
+    return NextResponse.json(
+      { categories: result },
+      { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } },
+    );
   } catch (err) {
     console.error('GET /api/categories error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

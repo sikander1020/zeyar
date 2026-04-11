@@ -7,14 +7,15 @@ import { motion, useInView } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { StoreProduct } from '@/types/storefront';
 
-export default function NewArrivalsSlider() {
+export default function NewArrivalsSlider({ initialProducts }: { initialProducts?: StoreProduct[] } = {}) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const [start, setStart] = useState(0);
-  const [products, setProducts] = useState<StoreProduct[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [products, setProducts] = useState<StoreProduct[]>(initialProducts ?? []);
+  const [loading, setLoading] = useState(!initialProducts);
 
   useEffect(() => {
+    if (initialProducts) return;
     let mounted = true;
     fetch('/api/products?sort=newest', { cache: 'no-store' })
       .then((res) => res.json() as Promise<{ products?: StoreProduct[] }>)
@@ -31,7 +32,7 @@ export default function NewArrivalsSlider() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [initialProducts]);
 
   const newProducts = products.filter((p) => p.isNew);
   const sliderProducts = newProducts.length > 0 ? newProducts : products.slice(0, 6);

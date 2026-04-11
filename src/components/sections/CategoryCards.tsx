@@ -8,13 +8,14 @@ import { motion, useInView } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import type { StoreCategory } from '@/types/storefront';
 
-export default function CategoryCards() {
+export default function CategoryCards({ initialCategories }: { initialCategories?: StoreCategory[] } = {}) {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
-  const [categories, setCategories] = useState<StoreCategory[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [categories, setCategories] = useState<StoreCategory[]>(initialCategories ?? []);
+  const [loading, setLoading] = useState(!initialCategories);
 
   useEffect(() => {
+    if (initialCategories) return;
     let mounted = true;
     fetch('/api/categories', { cache: 'no-store' })
       .then((res) => res.json() as Promise<{ categories?: StoreCategory[] }>)
@@ -30,7 +31,7 @@ export default function CategoryCards() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [initialCategories]);
 
   return (
     <section className="section-padding bg-beige">
