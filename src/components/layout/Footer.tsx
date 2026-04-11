@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -31,11 +31,11 @@ function IconFacebook({ size = 15 }: { size?: number }) {
 
 const footerLinks = {
   Shop: [
-    { label: 'New Arrivals', href: '/shop?sort=newest' },
-    { label: 'Dresses', href: '/shop?category=Dresses' },
-    { label: 'Two-Piece Sets', href: '/shop?category=Two-Piece' },
-    { label: 'Casual', href: '/shop?category=Casual' },
-    { label: 'Formal', href: '/shop?category=Formal' },
+    { label: 'New Arrivals', href: '/dresses?sort=newest' },
+    { label: 'Dresses', href: '/dresses?category=Dresses' },
+    { label: 'Two-Piece Sets', href: '/dresses?category=Two-Piece' },
+    { label: 'Casual', href: '/dresses?category=Casual' },
+    { label: 'Formal', href: '/dresses?category=Formal' },
   ],
   Company: [
     { label: 'Our Story', href: '/about' },

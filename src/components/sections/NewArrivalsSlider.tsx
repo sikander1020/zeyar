@@ -29,9 +29,10 @@ export default function NewArrivalsSlider() {
     };
   }, []);
 
-  const newProducts = products.filter(p => p.isNew);
+  const newProducts = products.filter((p) => p.isNew);
+  const sliderProducts = newProducts.length > 0 ? newProducts : products.slice(0, 6);
   const visible = 3;
-  const maxStart = Math.max(0, newProducts.length - visible);
+  const maxStart = Math.max(0, sliderProducts.length - visible);
 
   const prev = () => setStart(s => Math.max(0, s - 1));
   const next = () => setStart(s => Math.min(maxStart, s + 1));
@@ -77,7 +78,7 @@ export default function NewArrivalsSlider() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {newProducts.slice(start, start + visible).map((product, i) => (
+          {sliderProducts.slice(start, start + visible).map((product, i) => (
             <motion.div
               key={product.id}
               initial={{ opacity: 0, y: 30 }}
@@ -94,7 +95,7 @@ export default function NewArrivalsSlider() {
                     className="object-cover transition-transform duration-700 group-hover:scale-110"
                   />
                   <div className="absolute top-4 left-4">
-                    <span className="badge-new">New</span>
+                    <span className="badge-new">{product.isNew ? "New" : "Featured"}</span>
                   </div>
                   <div className="absolute inset-0 bg-gradient-to-t from-brown/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
                   <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-400">
@@ -120,7 +121,7 @@ export default function NewArrivalsSlider() {
         </div>
 
         <div className="text-center mt-12">
-          <Link href="/shop?sort=newest" className="btn-luxury btn-outline">
+          <Link href="/dresses?sort=newest" className="btn-luxury btn-outline">
             View All New Arrivals
           </Link>
         </div>

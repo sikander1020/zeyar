@@ -22,7 +22,7 @@ export async function GET() {
       counts.map((r) => [String(r._id ?? ''), Number(r.count) || 0]),
     );
 
-    const result = categories.map((c) => ({
+    let result = categories.map((c) => ({
       id: c.categoryId,
       name: c.name,
       slug: c.slug,
@@ -32,6 +32,21 @@ export async function GET() {
       sortOrder: Number(c.sortOrder) || 0,
       count: countByCategory.get(c.name) ?? 0,
     }));
+
+    if (result.length === 0) {
+      result = Array.from(countByCategory.entries())
+        .sort((a, b) => b[1] - a[1])
+        .map(([name, count], i) => ({
+          id: `cat_${String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+          name,
+          slug: String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          description: `${name} collection`,
+          image: FALLBACK_IMAGE,
+          isActive: true,
+          sortOrder: i,
+          count,
+        }));
+    }
 
     return NextResponse.json({ categories: result });
   } catch (err) {

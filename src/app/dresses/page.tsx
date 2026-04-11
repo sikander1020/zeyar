@@ -99,11 +99,12 @@ function ProductCard({ product, index }: { product: StoreProduct; index: number 
 function DressesContent() {
   const searchParams = useSearchParams();
   const initialCategory = (searchParams.get('category') ?? 'All').trim() || 'All';
+  const initialSort = (searchParams.get('sort') ?? 'featured').trim();
 
   const [products, setProducts] = useState<StoreProduct[]>([]);
   const [categories, setCategories] = useState<StoreCategory[]>([]);
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
-  const [sortBy, setSortBy] = useState('featured');
+  const [sortBy, setSortBy] = useState(initialSort || 'featured');
   const [priceRange] = useState([0, 600]);
 
   useEffect(() => {
@@ -136,6 +137,10 @@ function DressesContent() {
   }, [initialCategory]);
 
   useEffect(() => {
+    setSortBy(initialSort || 'featured');
+  }, [initialSort]);
+
+  useEffect(() => {
     if (activeCategory === 'All') return;
     const names = new Set(categories.map((c) => c.name));
     if (categories.length > 0 && !names.has(activeCategory)) {
@@ -143,9 +148,20 @@ function DressesContent() {
     }
   }, [categories, activeCategory]);
 
+  const categoryPills = useMemo(() => {
+    const fixed = ['All', 'Dresses', 'Formal', 'Casual', 'One Piece'];
+    const dynamic = new Set<string>([...categories.map((c) => c.name), ...products.map((p) => p.category)]);
+    return [...new Set([...fixed, ...Array.from(dynamic).filter(Boolean)])];
+  }, [categories, products]);
+
+  const normalizeCategory = (value: string) => value.trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ');
+
   const filtered = useMemo(() => {
     let result = [...products];
-    if (activeCategory !== 'All') result = result.filter(p => p.category === activeCategory);
+    if (activeCategory !== 'All') {
+      const target = normalizeCategory(activeCategory);
+      result = result.filter((p) => normalizeCategory(p.category) === target);
+    }
     result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1] * 1000);
     if (sortBy === 'newest') result = result.filter(p => p.isNew).concat(result.filter(p => !p.isNew));
     if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price);
@@ -175,7 +191,7 @@ function DressesContent() {
           <div className="flex items-center justify-between gap-4 mb-8 flex-wrap">
             {/* Category pills */}
             <div className="flex gap-2 flex-wrap">
-              {['All', ...categories.map(c => c.name)].map(cat => (
+              {categoryPills.map((cat) => (
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}

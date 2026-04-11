@@ -56,7 +56,7 @@ export default function CategoryCards() {
               transition={{ duration: 0.6, delay: i * 0.12 }}
             >
               <Link
-                href={`/shop?category=${cat.name}`}
+                href={`/dresses?category=${encodeURIComponent(cat.name)}`}
                 className="group relative block overflow-hidden aspect-[3/4] bg-nude/20"
               >
                 <Image

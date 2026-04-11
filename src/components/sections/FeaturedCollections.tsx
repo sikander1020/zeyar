@@ -142,7 +142,8 @@ export default function FeaturedCollections() {
     };
   }, []);
 
-  const featured = products.filter((p) => p.isBestseller || p.isNew).slice(0, 4);
+  const featuredTagged = products.filter((p) => p.isBestseller || p.isNew);
+  const featured = (featuredTagged.length > 0 ? featuredTagged : products).slice(0, 4);
 
   return (
     <section className="section-padding bg-cream">
@@ -179,7 +180,7 @@ export default function FeaturedCollections() {
           transition={{ duration: 0.6, delay: 0.5 }}
           className="text-center mt-14"
         >
-          <Link href="/shop" className="btn-luxury btn-outline">
+          <Link href="/dresses" className="btn-luxury btn-outline">
             View All Pieces
           </Link>
         </motion.div>
