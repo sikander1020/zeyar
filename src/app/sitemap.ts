@@ -8,7 +8,19 @@ export const dynamic = 'force-dynamic';
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = SITE_ORIGIN;
   
-  const staticRoutes = ['', '/shop', '/dresses', '/about', '/wishlist', '/cart', '/size-guide', '/returns'].map((route) => ({
+  const staticRoutes = [
+    '',
+    '/shop',
+    '/dresses',
+    '/about',
+    '/wishlist',
+    '/cart',
+    '/size-guide',
+    '/returns',
+    '/privacy-policy',
+    '/terms-and-conditions',
+    '/cookie-policy',
+  ].map((route) => ({
     url: `${base}${route}`,
     lastModified: new Date().toISOString(),
     changeFrequency: 'weekly' as const,

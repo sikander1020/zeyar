@@ -150,14 +150,18 @@ export default function Footer() {
             © 2026 ZAYBAASH. All rights reserved.
           </p>
           <div className="flex gap-6">
-            {['Privacy Policy', 'Terms of Service', 'Cookie Policy'].map((item) => (
+            {[
+              { label: 'Privacy Policy', href: '/privacy-policy' },
+              { label: 'Terms & Conditions', href: '/terms-and-conditions' },
+              { label: 'Cookie Policy', href: '/cookie-policy' },
+            ].map((item) => (
               <Link
-                key={item}
-                href="/"
+                key={item.label}
+                href={item.href}
                 className="text-xs text-cream/30 hover:text-cream/60 transition-colors duration-300 font-inter"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
-                {item}
+                {item.label}
               </Link>
             ))}
           </div>
