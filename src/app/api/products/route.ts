@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
     const category = (url.searchParams.get('category') ?? '').trim();
     const sort = (url.searchParams.get('sort') ?? 'featured').trim();
 
-    const q: { isActive: boolean; category?: string } = { isActive: true };
+    const q: { isActive?: { $ne: boolean }; category?: string } = { isActive: { $ne: false } };
     if (category && category !== 'All') {
       q.category = category;
     }
@@ -84,3 +84,4 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+

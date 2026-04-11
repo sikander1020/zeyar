@@ -57,7 +57,7 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     await connectDB();
     const { id } = await params;
 
-    const doc = await Product.findOne({ productId: id, isActive: true }).lean();
+    const doc = await Product.findOne({ productId: id, isActive: { $ne: false } }).lean();
     if (!doc) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }

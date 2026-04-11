@@ -9,12 +9,12 @@ export async function GET() {
   try {
     await connectDB();
 
-    const categories = await Category.find({ isActive: true })
+    const categories = await Category.find({ isActive: { $ne: false } })
       .sort({ sortOrder: 1, createdAt: -1 })
       .lean();
 
     const counts = await Product.aggregate([
-      { $match: { isActive: true } },
+      { $match: { isActive: { $ne: false } } },
       { $group: { _id: '$category', count: { $sum: 1 } } },
     ]);
 
@@ -39,3 +39,4 @@ export async function GET() {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
+
