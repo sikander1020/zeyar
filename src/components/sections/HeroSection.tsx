@@ -1,10 +1,11 @@
 'use client';
 
-import { useRef } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowRight, Play } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation';
 
 const HeroScene = dynamic(() => import('@/components/3d/HeroScene'), {
   ssr: false,
@@ -16,6 +17,13 @@ const HeroScene = dynamic(() => import('@/components/3d/HeroScene'), {
 });
 
 export default function HeroSection() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.prefetch('/shop');
+    router.prefetch('/dresses');
+  }, [router]);
+
   return (
     <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-cream via-beige to-cream-dark">
       {/* Background texture */}
@@ -79,7 +87,13 @@ export default function HeroSection() {
               transition={{ duration: 0.7, delay: 0.65 }}
               className="flex flex-wrap gap-4"
             >
-              <Link href="/shop" className="btn-luxury btn-primary inline-flex items-center gap-3">
+              <Link
+                href="/shop"
+                prefetch
+                onMouseEnter={() => router.prefetch('/shop')}
+                onFocus={() => router.prefetch('/shop')}
+                className="btn-luxury btn-primary inline-flex items-center gap-3"
+              >
                 Explore Collection
                 <ArrowRight size={15} strokeWidth={2} />
               </Link>

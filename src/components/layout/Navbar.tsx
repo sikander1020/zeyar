@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingBag, Heart, Search, Menu, X, ArrowRight } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
@@ -18,6 +19,7 @@ const navLinks = [
 ];
 
 export default function Navbar() {
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -34,8 +36,14 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
+    // Warm up critical routes from the first paint so navigation feels instant.
+    router.prefetch('/shop');
+    router.prefetch('/dresses');
+  }, [router]);
+
+  useEffect(() => {
     let mounted = true;
-    fetch('/api/products', { cache: 'no-store' })
+    fetch('/api/products', { cache: 'force-cache' })
       .then((res) => res.json() as Promise<{ products?: StoreProduct[] }>)
       .then((data) => {
         if (mounted) setProducts(data.products ?? []);
@@ -84,6 +92,15 @@ export default function Navbar() {
               <li key={link.href}>
                 <Link
                   href={link.href}
+                  prefetch
+                  onMouseEnter={() => {
+                    if (link.href.startsWith('/shop')) router.prefetch('/shop');
+                    if (link.href.startsWith('/dresses')) router.prefetch('/dresses');
+                  }}
+                  onFocus={() => {
+                    if (link.href.startsWith('/shop')) router.prefetch('/shop');
+                    if (link.href.startsWith('/dresses')) router.prefetch('/dresses');
+                  }}
                   className="text-[11px] tracking-[0.18em] uppercase font-inter font-medium text-brown hover:text-rose-gold transition-colors duration-300 relative group"
                   style={{ fontFamily: "'Inter', sans-serif" }}
                 >
@@ -181,6 +198,7 @@ export default function Navbar() {
                   >
                     <Link
                       href={link.href}
+                      prefetch
                       className="text-lg font-playfair text-brown hover:text-rose-gold transition-colors duration-300"
                       onClick={() => setMobileOpen(false)}
                       style={{ fontFamily: "'Playfair Display', serif" }}
