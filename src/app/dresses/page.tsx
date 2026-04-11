@@ -98,11 +98,11 @@ function ProductCard({ product, index }: { product: StoreProduct; index: number 
 
 function DressesContent() {
   const searchParams = useSearchParams();
-  const initialCategory = searchParams.get('category') || 'All';
+  const initialCategory = (searchParams.get('category') ?? 'All').trim() || 'All';
 
   const [products, setProducts] = useState<StoreProduct[]>([]);
   const [categories, setCategories] = useState<StoreCategory[]>([]);
-  const [activeCategory, setActiveCategory] = useState(initialCategory);
+  const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
   const [sortBy, setSortBy] = useState('featured');
   const [priceRange] = useState([0, 600]);
 
