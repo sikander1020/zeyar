@@ -4,6 +4,7 @@ import NewArrivalsSlider from '@/components/sections/NewArrivalsSlider';
 import CategoryCards from '@/components/sections/CategoryCards';
 import Testimonials from '@/components/sections/Testimonials';
 import Newsletter from '@/components/sections/Newsletter';
+import RecentlyViewedStrip from '@/components/sections/RecentlyViewedStrip';
 import { getStorefrontCategories, getStorefrontProducts } from '@/lib/storefrontData';
 import type { StoreCategory, StoreProduct } from '@/types/storefront';
 
@@ -32,6 +33,7 @@ export default async function ShopPage() {
 
         <FeaturedCollections initialProducts={products} />
         <NewArrivalsSlider initialProducts={products} />
+        <RecentlyViewedStrip products={products} />
         <CategoryCards initialCategories={initialCategories} />
         <Testimonials />
         <Newsletter />

@@ -14,6 +14,7 @@ import type { StoreCategory, StoreProduct } from '@/types/storefront';
 const sortOptions = [
   { value: 'featured', label: 'Featured' },
   { value: 'newest', label: 'Newest' },
+  { value: 'popular', label: 'Most Popular' },
   { value: 'price-asc', label: 'Price: Low to High' },
   { value: 'price-desc', label: 'Price: High to Low' },
   { value: 'rating', label: 'Top Rated' },
@@ -105,7 +106,10 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
   const [categories] = useState<StoreCategory[]>(initialCategories);
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
   const [sortBy, setSortBy] = useState(initialSort || 'featured');
-  const [priceRange] = useState([0, 600]);
+  const [query, setQuery] = useState('');
+  const [onlyInStock, setOnlyInStock] = useState(false);
+  const [selectedSize, setSelectedSize] = useState('All Sizes');
+  const [maxPrice, setMaxPrice] = useState(600000);
 
   useEffect(() => {
     setActiveCategory(initialCategory);
@@ -134,6 +138,12 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
     return [...new Set([...fixed, ...Array.from(dynamic).filter(Boolean)])];
   }, [categories, products]);
 
+  const sizeOptions = useMemo(() => {
+    const set = new Set<string>();
+    products.forEach((p) => p.sizes.forEach((s) => set.add(s)));
+    return ['All Sizes', ...Array.from(set)];
+  }, [products]);
+
   const normalizeCategory = (value: string) => value.trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ');
 
   const filtered = useMemo(() => {
@@ -152,13 +162,32 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
         result = exact;
       }
     }
-    result = result.filter(p => p.price >= priceRange[0] && p.price <= priceRange[1] * 1000);
+    const normalizedQuery = query.trim().toLowerCase();
+    if (normalizedQuery) {
+      result = result.filter((p) =>
+        p.name.toLowerCase().includes(normalizedQuery) ||
+        p.category.toLowerCase().includes(normalizedQuery) ||
+        p.tags.some((t) => t.toLowerCase().includes(normalizedQuery))
+      );
+    }
+
+    result = result.filter((p) => p.price <= maxPrice);
+
+    if (onlyInStock) {
+      result = result.filter((p) => !p.outOfStock && p.stock > 0);
+    }
+
+    if (selectedSize !== 'All Sizes') {
+      result = result.filter((p) => p.sizes.includes(selectedSize));
+    }
+
     if (sortBy === 'newest') result = result.filter(p => p.isNew).concat(result.filter(p => !p.isNew));
+    if (sortBy === 'popular') result.sort((a, b) => b.reviewCount - a.reviewCount);
     if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price);
     if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price);
     if (sortBy === 'rating') result.sort((a, b) => b.rating - a.rating);
     return result;
-  }, [products, activeCategory, sortBy, priceRange]);
+  }, [products, activeCategory, sortBy, query, maxPrice, onlyInStock, selectedSize]);
 
   return (
     <AppShell>
@@ -176,7 +205,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
         </div>
 
         <div className="max-w-7xl mx-auto px-6 py-10">
-          <div className="flex items-center justify-between gap-4 mb-8 flex-wrap">
+          <div className="flex items-center justify-between gap-4 mb-5 flex-wrap">
             <div className="flex gap-2 flex-wrap">
               {categoryPills.map((cat) => (
                 <button
@@ -207,6 +236,70 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
               <span className="text-sm text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
                 {filtered.length} pieces
               </span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search dresses"
+              className="input-luxury"
+            />
+
+            <div className="relative">
+              <select
+                value={selectedSize}
+                onChange={(e) => setSelectedSize(e.target.value)}
+                className="appearance-none w-full pl-4 pr-10 py-3 bg-transparent border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
+                style={{ fontFamily: "'Inter', sans-serif" }}
+              >
+                {sizeOptions.map((s) => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
+              <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brown-muted pointer-events-none" />
+            </div>
+
+            <div className="border border-nude px-3 py-2.5">
+              <label className="text-[10px] tracking-[0.12em] uppercase text-brown-muted font-inter block mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+                Max Price
+              </label>
+              <input
+                type="range"
+                min={10000}
+                max={600000}
+                step={5000}
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(Number(e.target.value))}
+                className="w-full"
+              />
+              <p className="text-xs text-brown font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>Rs {maxPrice.toLocaleString()}</p>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setOnlyInStock((v) => !v)}
+                className={`px-4 py-2.5 text-xs tracking-[0.12em] uppercase font-inter border transition-all duration-300 ${onlyInStock ? 'bg-brown text-cream border-brown' : 'border-nude text-brown hover:border-brown'}`}
+                style={{ fontFamily: "'Inter', sans-serif" }}
+              >
+                In Stock Only
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery('');
+                  setOnlyInStock(false);
+                  setSelectedSize('All Sizes');
+                  setMaxPrice(600000);
+                  setActiveCategory('All');
+                  setSortBy('featured');
+                }}
+                className="text-xs text-brown-muted underline underline-offset-2 hover:text-brown transition-colors"
+              >
+                Reset
+              </button>
             </div>
           </div>
 

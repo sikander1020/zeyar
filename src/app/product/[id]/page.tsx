@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
@@ -52,6 +52,7 @@ export default function ProductPage() {
   });
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewMsg, setReviewMsg] = useState('');
+  const [recentlyViewedIds, setRecentlyViewedIds] = useState<string[]>([]);
 
   const addItem = useCartStore(s => s.addItem);
   const toggleCart = useCartStore(s => s.toggleCart);
@@ -112,6 +113,19 @@ export default function ProductPage() {
     return () => {
       mounted = false;
     };
+  }, [product?.id]);
+
+  useEffect(() => {
+    if (!product?.id) return;
+    const storageKey = 'zaybaash-recently-viewed-v1';
+    try {
+      const parsed = JSON.parse(window.localStorage.getItem(storageKey) ?? '[]') as string[];
+      const next = [product.id, ...parsed.filter((pid) => pid !== product.id)].slice(0, 12);
+      window.localStorage.setItem(storageKey, JSON.stringify(next));
+      setRecentlyViewedIds(next.filter((pid) => pid !== product.id));
+    } catch {
+      setRecentlyViewedIds([]);
+    }
   }, [product?.id]);
 
   if (loading) {
@@ -178,6 +192,14 @@ export default function ProductPage() {
   }
 
   const related = allProducts.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 3);
+  const recentlyViewed = useMemo(() => {
+    if (recentlyViewedIds.length === 0) return [] as StoreProduct[];
+    const byId = new Map(allProducts.map((p) => [p.id, p]));
+    return recentlyViewedIds
+      .map((pid) => byId.get(pid))
+      .filter((p): p is StoreProduct => Boolean(p))
+      .slice(0, 4);
+  }, [allProducts, recentlyViewedIds]);
 
   return (
     <AppShell>
@@ -514,6 +536,25 @@ export default function ProductPage() {
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
                 {related.map(p => (
+                  <Link key={p.id} href={`/product/${p.id}`} className="group product-card">
+                    <div className="relative aspect-[3/4] overflow-hidden bg-beige mb-4">
+                      <Image src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+                    </div>
+                    <h3 className="text-sm font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>{p.name}</h3>
+                    <p className="text-sm text-brown-muted font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>Rs {p.price.toLocaleString()}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {recentlyViewed.length > 0 && (
+            <div className="mt-20">
+              <h2 className="text-3xl font-playfair text-brown mb-10 text-center" style={{ fontFamily: "'Playfair Display', serif" }}>
+                Recently <span className="italic gradient-rose-text">Viewed</span>
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {recentlyViewed.map((p) => (
                   <Link key={p.id} href={`/product/${p.id}`} className="group product-card">
                     <div className="relative aspect-[3/4] overflow-hidden bg-beige mb-4">
                       <Image src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
