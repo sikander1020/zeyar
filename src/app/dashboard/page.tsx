@@ -850,6 +850,8 @@ function CategoriesTab() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<CategoryRow | null>(null);
   const [formData, setFormData] = useState({ name: '', description: '', slug: '', image: '', isActive: true, sortOrder: 0 });
+  const [uploadedCategoryImage, setUploadedCategoryImage] = useState('');
+  const [uploadingCategoryImage, setUploadingCategoryImage] = useState(false);
 
   const authHeaders = useCallback(() => {
     const token = localStorage.getItem('zaybaash_admin_token') ?? '';
@@ -872,12 +874,39 @@ function CategoriesTab() {
 
   useEffect(() => { void loadCategories(); }, [loadCategories]);
 
+  async function handleCategoryImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = e.currentTarget.files;
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+    setUploadingCategoryImage(true);
+    try {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const dataUrl = event.target?.result as string;
+        setUploadedCategoryImage(dataUrl);
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Error reading category image:', err);
+    } finally {
+      setUploadingCategoryImage(false);
+      e.currentTarget.value = '';
+    }
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     try {
       const url = editing ? `/api/admin/categories/${editing.categoryId}` : '/api/admin/categories';
       const method = editing ? 'PUT' : 'POST';
-      const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(formData) });
+      const payload = {
+        ...formData,
+        image: uploadedCategoryImage || formData.image || '',
+        sortOrder: Number(formData.sortOrder) || 0,
+      };
+
+      const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
         throw new Error(typeof data?.error === 'string' ? data.error : 'Failed to save category');
@@ -887,6 +916,7 @@ function CategoriesTab() {
       setShowForm(false);
       setEditing(null);
       setFormData({ name: '', description: '', slug: '', image: '', isActive: true, sortOrder: 0 });
+      setUploadedCategoryImage('');
     } catch (err) {
       console.error('Failed to save category:', err);
       alert(err instanceof Error ? err.message : 'Failed to save category');
@@ -911,6 +941,7 @@ function CategoriesTab() {
   function startEdit(cat: CategoryRow) {
     setEditing(cat);
     setFormData({ name: cat.name, description: cat.description, slug: cat.slug, image: cat.image, isActive: cat.isActive, sortOrder: cat.sortOrder });
+    setUploadedCategoryImage(cat.image || '');
     setShowForm(true);
   }
 
@@ -918,7 +949,7 @@ function CategoriesTab() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>{categories.length} categories</p>
-        <button onClick={() => { setShowForm(!showForm); setEditing(null); setFormData({ name: '', description: '', slug: '', image: '', isActive: true, sortOrder: 0 }); }}
+        <button onClick={() => { setShowForm(!showForm); setEditing(null); setFormData({ name: '', description: '', slug: '', image: '', isActive: true, sortOrder: 0 }); setUploadedCategoryImage(''); }}
           style={{ padding: '10px 16px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
           {showForm ? 'Cancel' : '+ Add Category'}
         </button>
@@ -937,9 +968,29 @@ function CategoriesTab() {
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
             <input value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Description"
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
-            <input value={formData.image} onChange={(e) => setFormData({ ...formData, image: e.target.value })} placeholder="Image URL"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input type="number" value={formData.sortOrder} onChange={(e) => setFormData({ ...formData, sortOrder: Number(e.target.value) })} placeholder="Sort Order"
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 8, fontWeight: 600 }}>Category Picture</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleCategoryImageUpload}
+                disabled={uploadingCategoryImage}
+                style={{ display: 'block', width: '100%', padding: '8px 10px', border: '2px dashed #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: CREAM, cursor: uploadingCategoryImage ? 'not-allowed' : 'pointer' }}
+              />
+              {uploadedCategoryImage && (
+                <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <img src={uploadedCategoryImage} alt="Category" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, border: '1px solid #EBD9CC' }} />
+                  <button
+                    type="button"
+                    onClick={() => setUploadedCategoryImage('')}
+                    style={{ padding: '6px 10px', background: '#C0504D', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              )}
+            </div>
+            <input type="number" value={formData.sortOrder === 0 ? '' : formData.sortOrder} onChange={(e) => setFormData({ ...formData, sortOrder: Number(e.target.value) || 0 })} placeholder="Sort Order"
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
           </div>
           <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN, marginBottom: 16 }}>
@@ -1006,7 +1057,6 @@ function ProductsTab() {
     costPrice: 0,
     stock: 0,
     description: '',
-    imageUrls: '',
     detailsText: '',
     sizesText: 'S, M, L',
     colorsText: 'Default:#E6B7A9',
@@ -1049,7 +1099,6 @@ function ProductsTab() {
       costPrice: 0,
       stock: 0,
       description: '',
-      imageUrls: '',
       detailsText: '',
       sizesText: 'S, M, L',
       colorsText: 'Default:#E6B7A9',
@@ -1124,7 +1173,7 @@ function ProductsTab() {
         costPrice: Number(formData.costPrice) || 0,
         stock: Number(formData.stock) || 0,
         description: formData.description,
-        images: uploadedImages.length > 0 ? uploadedImages : parseCsvOrLines(formData.imageUrls),
+        images: uploadedImages,
         details: parseCsvOrLines(formData.detailsText),
         sizes: parseCsvOrLines(formData.sizesText),
         colors: parseColors(formData.colorsText),
@@ -1198,7 +1247,6 @@ function ProductsTab() {
       costPrice: prod.costPrice,
       stock: prod.stock,
       description: prod.description || '',
-      imageUrls: (prod.images ?? []).join('\n'),
       detailsText: (prod.details ?? []).join('\n'),
       sizesText: (prod.sizes ?? []).join(', '),
       colorsText: (prod.colors ?? []).map((c) => `${c.name}:${c.hex}`).join(', '),
@@ -1296,13 +1344,13 @@ function ProductsTab() {
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
             <input value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} placeholder="Category" required
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input type="number" value={formData.price} onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })} placeholder="Price" required
+            <input type="number" value={formData.price === 0 ? '' : formData.price} onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) || 0 })} placeholder="Price" required
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input type="number" value={formData.originalPrice} onChange={(e) => setFormData({ ...formData, originalPrice: Number(e.target.value) })} placeholder="Original Price (optional)"
+            <input type="number" value={formData.originalPrice === 0 ? '' : formData.originalPrice} onChange={(e) => setFormData({ ...formData, originalPrice: Number(e.target.value) || 0 })} placeholder="Original Price (optional)"
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input type="number" value={formData.costPrice} onChange={(e) => setFormData({ ...formData, costPrice: Number(e.target.value) })} placeholder="Cost Price" required
+            <input type="number" value={formData.costPrice === 0 ? '' : formData.costPrice} onChange={(e) => setFormData({ ...formData, costPrice: Number(e.target.value) || 0 })} placeholder="Cost Price" required
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input type="number" value={formData.stock} onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) })} placeholder="Stock" required
+            <input type="number" value={formData.stock === 0 ? '' : formData.stock} onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) || 0 })} placeholder="Stock" required
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
             <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Description"
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1', minHeight: 90 }} />
@@ -1333,11 +1381,9 @@ function ProductsTab() {
                 </div>
               )}
               {uploadedImages.length === 0 && (
-                <p style={{ fontSize: 12, color: MUTED, marginTop: 8 }}>No images uploaded. You can also paste image URLs below as fallback.</p>
+                <p style={{ fontSize: 12, color: MUTED, marginTop: 8 }}>No images uploaded yet.</p>
               )}
             </div>
-            <textarea value={formData.imageUrls} onChange={(e) => setFormData({ ...formData, imageUrls: e.target.value })} placeholder="Image URLs as fallback (one per line)"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 60, gridColumn: '1 / -1' }} />
             <textarea value={formData.detailsText} onChange={(e) => setFormData({ ...formData, detailsText: e.target.value })} placeholder="Details (comma or line separated)"
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 90 }} />
             <input value={formData.sizesText} onChange={(e) => setFormData({ ...formData, sizesText: e.target.value })} placeholder="Sizes (e.g. XS,S,M,L)"
