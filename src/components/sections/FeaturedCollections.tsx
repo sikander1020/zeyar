@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
-import { Heart, ShoppingBag } from 'lucide-react';
+import { Heart, ShoppingBag, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import type { StoreProduct } from '@/types/storefront';
@@ -126,6 +126,8 @@ export default function FeaturedCollections({ initialProducts }: { initialProduc
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const [products, setProducts] = useState<StoreProduct[]>(initialProducts ?? []);
   const [loading, setLoading] = useState(!initialProducts);
+  const [visibleCards, setVisibleCards] = useState(3);
+  const [start, setStart] = useState(0);
 
   useEffect(() => {
     if (initialProducts) return;
@@ -149,6 +151,43 @@ export default function FeaturedCollections({ initialProducts }: { initialProduc
 
   const featuredTagged = products.filter((p) => p.isBestseller || p.isNew);
   const featured = (featuredTagged.length > 0 ? featuredTagged : products).slice(0, 4);
+  const maxStart = Math.max(0, featured.length - visibleCards);
+  const pages = maxStart + 1;
+
+  useEffect(() => {
+    const onResize = () => {
+      const width = window.innerWidth;
+      if (width < 768) {
+        setVisibleCards(1);
+      } else if (width < 1200) {
+        setVisibleCards(2);
+      } else {
+        setVisibleCards(3);
+      }
+    };
+
+    onResize();
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  useEffect(() => {
+    setStart((prev) => Math.min(prev, maxStart));
+  }, [maxStart]);
+
+  useEffect(() => {
+    if (featured.length <= visibleCards) return;
+
+    const timer = window.setInterval(() => {
+      setStart((prev) => (prev >= maxStart ? 0 : prev + 1));
+    }, 4500);
+
+    return () => window.clearInterval(timer);
+  }, [featured.length, visibleCards, maxStart]);
+
+  const prev = () => setStart((s) => (s <= 0 ? maxStart : s - 1));
+  const next = () => setStart((s) => (s >= maxStart ? 0 : s + 1));
+  const cardWidthPct = 100 / Math.max(visibleCards, 1);
 
   return (
     <section className="section-padding bg-cream">
@@ -186,10 +225,59 @@ export default function FeaturedCollections({ initialProducts }: { initialProduc
         )}
 
         {!loading && featured.length > 0 && (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
-            {featured.map((product, index) => (
-              <ProductCard key={product.id} product={product} index={index} />
-            ))}
+          <div className="relative">
+            <div className="overflow-hidden -mx-3">
+              <motion.div
+                className="flex"
+                animate={{ x: `-${start * cardWidthPct}%` }}
+                transition={{ duration: 0.65, ease: [0.2, 0.8, 0.2, 1] }}
+              >
+                {featured.map((product, index) => (
+                  <div
+                    key={product.id}
+                    className="px-3"
+                    style={{ flex: `0 0 ${cardWidthPct}%` }}
+                  >
+                    <ProductCard product={product} index={index} />
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+
+            {featured.length > visibleCards && (
+              <div className="flex items-center justify-between gap-3 mt-6">
+                <div className="flex gap-2">
+                  {Array.from({ length: pages }).map((_, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => setStart(i)}
+                      aria-label={`Go to slide ${i + 1}`}
+                      className={`h-2.5 rounded-full transition-all duration-300 ${start === i ? 'w-8 bg-brown' : 'w-2.5 bg-nude hover:bg-brown/60'}`}
+                    />
+                  ))}
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={prev}
+                    className="w-10 h-10 border border-nude flex items-center justify-center text-brown hover:bg-nude hover:text-white transition-all duration-300"
+                    aria-label="Previous featured items"
+                  >
+                    <ChevronLeft size={16} strokeWidth={1.75} />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={next}
+                    className="w-10 h-10 border border-nude flex items-center justify-center text-brown hover:bg-nude hover:text-white transition-all duration-300"
+                    aria-label="Next featured items"
+                  >
+                    <ChevronRight size={16} strokeWidth={1.75} />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
