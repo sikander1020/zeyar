@@ -119,32 +119,38 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
     setSortBy(initialSort || 'featured');
   }, [initialSort]);
 
+  const normalizeCategory = (value: string) => value.trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ');
+
+  const toDisplayCategory = (value: string) =>
+    normalizeCategory(value)
+      .split(' ')
+      .filter(Boolean)
+      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+      .join(' ');
+
   useEffect(() => {
     if (activeCategory === 'All') return;
-    const fixed = ['All', 'Dresses', 'Formal', 'Casual', 'One Piece'];
     const names = new Set<string>([
-      ...fixed,
-      ...categories.map((c) => c.name),
-      ...products.map((p) => p.category),
+      ...categories.map((c) => toDisplayCategory(c.name)),
     ]);
     if (names.size > 0 && !names.has(activeCategory)) {
       setActiveCategory('All');
     }
-  }, [categories, products, activeCategory]);
+  }, [categories, activeCategory]);
 
   const categoryPills = useMemo(() => {
-    const fixed = ['All', 'Dresses', 'Formal', 'Casual', 'One Piece'];
-    const dynamic = new Set<string>([...categories.map((c) => c.name), ...products.map((p) => p.category)]);
-    return [...new Set([...fixed, ...Array.from(dynamic).filter(Boolean)])];
-  }, [categories, products]);
+    const dynamic = categories.map((c) => c.name)
+      .map((name) => toDisplayCategory(name))
+      .filter(Boolean);
+
+    return ['All', ...Array.from(new Set(dynamic))];
+  }, [categories]);
 
   const sizeOptions = useMemo(() => {
     const set = new Set<string>();
     products.forEach((p) => p.sizes.forEach((s) => set.add(s)));
     return ['All Sizes', ...Array.from(set)];
   }, [products]);
-
-  const normalizeCategory = (value: string) => value.trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ');
 
   const filtered = useMemo(() => {
     let result = [...products];

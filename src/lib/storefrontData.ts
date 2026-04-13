@@ -7,6 +7,18 @@ import type { StoreCategory, StoreProduct } from '@/types/storefront';
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80';
 const FALLBACK_CATEGORY_IMAGE = 'https://images.unsplash.com/photo-1594938298603-c8148c4b69c8?w=800&q=80';
 
+function categoryKey(value: string) {
+  return String(value ?? '').trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+function categoryDisplayName(value: string) {
+  return categoryKey(value)
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+}
+
 function normalizeProduct(p: {
   _id?: unknown;
   productId: string;
@@ -100,17 +112,46 @@ const getRawCategories = unstable_cache(
       { $match: { isActive: { $ne: false } } },
       { $group: { _id: '$category', count: { $sum: 1 } } },
     ]);
-    const countMap = new Map<string, number>(counts.map((r) => [String(r._id ?? ''), Number(r.count) || 0]));
+    const countMap = new Map<string, number>();
+    for (const row of counts) {
+      const key = categoryKey(String(row._id ?? ''));
+      if (!key) continue;
+      countMap.set(key, (countMap.get(key) ?? 0) + (Number(row.count) || 0));
+    }
 
-    const result = categories.length > 0
-      ? categories.map((c) => normalizeCategory(c as never, countMap.get(c.name) ?? 0))
-      : Array.from(countMap.entries())
-          .sort((a, b) => b[1] - a[1])
-          .map(([name, count], i) => normalizeCategory({
-            categoryId: `cat_${i}`,
-            name,
-            slug: String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-          }, count));
+    let result: StoreCategory[];
+    if (categories.length > 0) {
+      const dedup = new Map<string, StoreCategory>();
+      for (const c of categories) {
+        const key = categoryKey(String(c.name || c.slug || ''));
+        if (!key) continue;
+
+        const normalized = normalizeCategory({
+          _id: c._id,
+          categoryId: String(c.categoryId || ''),
+          name: categoryDisplayName(String(c.name || key)),
+          slug: String(c.slug || key).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+          description: c.description,
+          image: c.image,
+          isActive: c.isActive,
+          sortOrder: c.sortOrder,
+        }, countMap.get(key) ?? 0);
+
+        const prev = dedup.get(key);
+        if (!prev || normalized.sortOrder < prev.sortOrder) {
+          dedup.set(key, normalized);
+        }
+      }
+      result = Array.from(dedup.values()).sort((a, b) => a.sortOrder - b.sortOrder);
+    } else {
+      result = Array.from(countMap.entries())
+        .sort((a, b) => b[1] - a[1])
+        .map(([key, count], i) => normalizeCategory({
+          categoryId: `cat_${String(key).replace(/[^a-z0-9]+/g, '-')}`,
+          name: categoryDisplayName(key),
+          slug: String(key).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        }, count));
+    }
 
     return result;
   },
