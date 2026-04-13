@@ -263,7 +263,7 @@ export default function CheckoutPage() {
                     <button
                       type="button"
                       onClick={() => setPaymentMethod('COD')}
-                      className={`glass p-6 border transition-all ${paymentMethod === 'COD' ? 'border-rose-gold/60' : 'border-nude/20'}`}
+                      className={`glass p-6 border cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-rose-gold/50 active:translate-y-0 ${paymentMethod === 'COD' ? 'border-rose-gold/60 ring-1 ring-rose-gold/40' : 'border-nude/20'}`}
                       style={{ textAlign: 'left' }}
                     >
                       <div className="flex items-center gap-3 mb-2">
@@ -278,7 +278,7 @@ export default function CheckoutPage() {
                     <button
                       type="button"
                       onClick={() => setPaymentMethod('bank')}
-                      className={`glass p-6 border transition-all ${paymentMethod === 'bank' ? 'border-rose-gold/60' : 'border-nude/20'}`}
+                      className={`glass p-6 border cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-rose-gold/50 active:translate-y-0 ${paymentMethod === 'bank' ? 'border-rose-gold/60 ring-1 ring-rose-gold/40' : 'border-nude/20'}`}
                       style={{ textAlign: 'left' }}
                     >
                       <div className="flex items-center gap-3 mb-2">

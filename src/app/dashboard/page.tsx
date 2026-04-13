@@ -877,20 +877,35 @@ function CategoriesTab() {
     try {
       const url = editing ? `/api/admin/categories/${editing.categoryId}` : '/api/admin/categories';
       const method = editing ? 'PUT' : 'POST';
-      await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(formData) });
+      const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(formData) });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(typeof data?.error === 'string' ? data.error : 'Failed to save category');
+      }
+
+      await loadCategories();
       setShowForm(false);
       setEditing(null);
       setFormData({ name: '', description: '', slug: '', image: '', isActive: true, sortOrder: 0 });
-      void loadCategories();
     } catch (err) {
       console.error('Failed to save category:', err);
+      alert(err instanceof Error ? err.message : 'Failed to save category');
     }
   }
 
   async function handleDelete(categoryId: string) {
     if (!confirm('Delete this category?')) return;
-    await fetch(`/api/admin/categories/${categoryId}`, { method: 'DELETE', headers: authHeaders() });
-    void loadCategories();
+    try {
+      const res = await fetch(`/api/admin/categories/${categoryId}`, { method: 'DELETE', headers: authHeaders() });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(typeof data?.error === 'string' ? data.error : 'Failed to delete category');
+      }
+      await loadCategories();
+    } catch (err) {
+      console.error('Failed to delete category:', err);
+      alert(err instanceof Error ? err.message : 'Failed to delete category');
+    }
   }
 
   function startEdit(cat: CategoryRow) {

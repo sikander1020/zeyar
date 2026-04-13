@@ -7,7 +7,7 @@ import { requireAdmin } from '@/lib/adminAuth';
 export async function GET() {
   try {
     await connectDB();
-    const categories = await Category.find({}).sort({ sortOrder: 1, createdAt: -1 }).lean();
+    let categories = await Category.find({}).sort({ sortOrder: 1, createdAt: -1 }).lean();
 
     const counts = await Product.aggregate([
       { $group: { _id: '$category', count: { $sum: 1 } } },
@@ -16,19 +16,8 @@ export async function GET() {
       counts.map((r) => [String(r._id ?? ''), Number(r.count) || 0]),
     );
 
-    let result = categories.map((c) => ({
-      categoryId: c.categoryId || String(c._id ?? ''),
-      name: c.name,
-      description: c.description || '',
-      slug: c.slug || String(c.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-      image: c.image || '',
-      isActive: c.isActive !== false,
-      sortOrder: Number(c.sortOrder) || 0,
-      productCount: (countMap.get(c.name) ?? Number(c.productCount)) || 0,
-    }));
-
-    if (result.length === 0 && countMap.size > 0) {
-      result = Array.from(countMap.entries())
+    if (categories.length === 0 && countMap.size > 0) {
+      const fallbackRows = Array.from(countMap.entries())
         .sort((a, b) => b[1] - a[1])
         .map(([name, count], i) => ({
           categoryId: `cat_${String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
@@ -40,7 +29,43 @@ export async function GET() {
           sortOrder: i,
           productCount: count,
         }));
+
+      if (fallbackRows.length > 0) {
+        await Category.bulkWrite(
+          fallbackRows.map((row) => ({
+            updateOne: {
+              filter: { categoryId: row.categoryId },
+              update: {
+                $setOnInsert: {
+                  categoryId: row.categoryId,
+                  name: row.name,
+                  description: row.description,
+                  slug: row.slug,
+                  image: row.image,
+                  isActive: row.isActive,
+                  sortOrder: row.sortOrder,
+                  productCount: row.productCount,
+                },
+              },
+              upsert: true,
+            },
+          })),
+        );
+      }
+
+      categories = await Category.find({}).sort({ sortOrder: 1, createdAt: -1 }).lean();
     }
+
+    const result = categories.map((c) => ({
+      categoryId: c.categoryId || String(c._id ?? ''),
+      name: c.name,
+      description: c.description || '',
+      slug: c.slug || String(c.name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      image: c.image || '',
+      isActive: c.isActive !== false,
+      sortOrder: Number(c.sortOrder) || 0,
+      productCount: (countMap.get(c.name) ?? Number(c.productCount)) || 0,
+    }));
 
     return NextResponse.json({ categories: result });
   } catch (err) {
