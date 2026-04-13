@@ -327,7 +327,7 @@ export default function CheckoutPage() {
                           </>
                         ) : (
                           <p className="text-xs text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                            Bank details are being updated. Place your order and our team will share payment details on WhatsApp/Email right away.
+                            You will be directed to the payment section soon.
                           </p>
                         )}
                       </div>
