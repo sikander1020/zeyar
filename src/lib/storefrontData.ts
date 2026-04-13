@@ -4,8 +4,29 @@ import Product from '@/models/Product';
 import Category from '@/models/Category';
 import type { StoreCategory, StoreProduct } from '@/types/storefront';
 
-const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80';
+const FALLBACK_IMAGES = [
+  'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80',
+  'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?w=800&q=80',
+  'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=800&q=80',
+  'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=800&q=80',
+  'https://images.unsplash.com/photo-1464863979621-258859e62245?w=800&q=80',
+  'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80',
+];
 const FALLBACK_CATEGORY_IMAGE = 'https://images.unsplash.com/photo-1594938298603-c8148c4b69c8?w=800&q=80';
+
+function stableIndex(seed: string, size: number) {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i += 1) {
+    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+  }
+  return size > 0 ? hash % size : 0;
+}
+
+function fallbackProductImages(seed: string) {
+  const first = stableIndex(seed, FALLBACK_IMAGES.length);
+  const second = (first + 1) % FALLBACK_IMAGES.length;
+  return [FALLBACK_IMAGES[first], FALLBACK_IMAGES[second]];
+}
 
 function categoryKey(value: string) {
   return String(value ?? '').trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
@@ -45,13 +66,21 @@ function normalizeProduct(p: {
     ? p.productId.trim()
     : String(p._id ?? '').trim();
 
+  const imageSeed = `${resolvedId}|${p.name}|${p.category}`;
+  const safeImages = Array.isArray(p.images) ? p.images.filter(Boolean) : [];
+  const images = safeImages.length >= 2
+    ? safeImages
+    : safeImages.length === 1
+      ? [safeImages[0], ...fallbackProductImages(imageSeed).slice(0, 1)]
+      : fallbackProductImages(imageSeed);
+
   return {
     id: resolvedId,
     name: p.name,
     category: p.category,
     price: Number(p.price) || 0,
     originalPrice: p.originalPrice,
-    images: Array.isArray(p.images) && p.images.length > 0 ? p.images : [FALLBACK_IMAGE],
+    images,
     colors: Array.isArray(p.colors) && p.colors.length > 0 ? p.colors : [{ name: 'Default', hex: '#E6B7A9' }],
     sizes: Array.isArray(p.sizes) && p.sizes.length > 0 ? p.sizes : ['S', 'M', 'L'],
     description: p.description ?? '',

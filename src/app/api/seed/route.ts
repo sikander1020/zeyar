@@ -16,7 +16,7 @@ const seedProducts = [
   { productId: 'zaybaash-005', name: 'Pearl Cascade Dress',          category: 'Formal',  price: 27800, originalPrice: 33000 },
   { productId: 'zaybaash-006', name: 'Garden Party Dress',           category: 'Casual',  price: 21500 },
   { productId: 'zaybaash-007', name: 'Royal Emerald Gown',           category: 'Dresses', price: 35000 },
-  { productId: 'zaybaash-008', name: 'Blossom Two-Piece Set',        category: 'Casual',  price: 19800, originalPrice: 24500 },
+  { productId: 'zaybaash-008', name: 'Blossom Two-Piece Set',        category: 'Two Piece',  price: 19800, originalPrice: 24500 },
   { productId: 'zaybaash-009', name: 'Crystal Evening Gown',         category: 'Formal',  price: 42000 },
   { productId: 'zaybaash-010', name: 'Saffron Sunset Dress',         category: 'Dresses', price: 23500 },
   { productId: 'zaybaash-011', name: 'Azure Dream Maxi',             category: 'Casual',  price: 17900, originalPrice: 21000 },
@@ -39,9 +39,9 @@ export async function GET(req: NextRequest) {
     // ── Seed Categories ───────────────────────────────────────────────
     const categories = [
       { categoryId: 'cat-one-piece', name: 'One Piece', slug: 'one-piece', description: 'Modest luxury reimagined', sortOrder: 1 },
-      { categoryId: 'cat-dresses', name: 'Dresses', slug: 'dresses', description: 'From ethereal maxis to sleek midis', sortOrder: 2 },
+      { categoryId: 'cat-formal', name: 'Formal', slug: 'formal', description: 'Power dressing for modern women', sortOrder: 2 },
       { categoryId: 'cat-casual', name: 'Casual', slug: 'casual', description: 'Effortlessly elegant everyday wear', sortOrder: 3 },
-      { categoryId: 'cat-formal', name: 'Formal', slug: 'formal', description: 'Power dressing for modern women', sortOrder: 4 },
+      { categoryId: 'cat-two-piece', name: 'Two Piece', slug: 'two-piece', description: 'Coordinated sets for modern elegance', sortOrder: 4 },
     ];
 
     for (const cat of categories) {

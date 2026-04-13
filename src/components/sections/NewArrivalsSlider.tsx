@@ -139,11 +139,16 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
           </div>
         )}
 
-        <div className="text-center mt-12">
-          <Link href="/dresses?sort=newest" className="btn-luxury btn-outline">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="text-center mt-12"
+        >
+          <Link href="/dresses?sort=newest&filter=new" className="btn-luxury btn-outline">
             View All New Arrivals
           </Link>
-        </div>
+        </motion.div>
       </div>
     </section>
   );

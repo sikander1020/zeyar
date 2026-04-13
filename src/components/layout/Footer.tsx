@@ -56,8 +56,8 @@ const footerLinks = {
 };
 
 const socials = [
-  { icon: IconInstagram, href: 'https://instagram.com/zaybaash', label: 'Instagram' },
-  { icon: IconTikTok, href: 'https://tiktok.com/@zaybaash', label: 'TikTok' },
+  { icon: IconInstagram, href: 'https://www.instagram.com/zaybaash/', label: 'Instagram' },
+  { icon: IconTikTok, href: 'https://www.tiktok.com/@zaybaash/', label: 'TikTok' },
   { icon: IconFacebook, href: 'https://facebook.com/zaybaash', label: 'Facebook' },
   
 ];

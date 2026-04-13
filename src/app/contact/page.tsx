@@ -69,9 +69,9 @@ export default function ContactPage() {
                 </h2>
                 <div className="space-y-6">
                   {[
-                    { icon: Mail, label: 'Email', value: 'hello@zaybaash.com' },
-                    { icon: Phone, label: 'Phone', value: '+92 300 123 4567' },
-                    { icon: MapPin, label: 'Address', value: '24 Fashion District, Suite 301, Karachi, Pakistan' },
+                    { icon: Mail, label: 'Email', value: 'care.zaybaash@gmail.com' },
+                    { icon: Phone, label: 'Phone', value: '+92 321 964 3246' },
+                    { icon: MapPin, label: 'Address', value: 'Islamabad, Pakistan' },
                   ].map(({ icon: Icon, label, value }) => (
                     <div key={label} className="flex gap-4">
                       <div className="w-10 h-10 bg-nude/20 flex items-center justify-center flex-shrink-0">
@@ -93,8 +93,8 @@ export default function ContactPage() {
                 </h3>
                 <div className="flex gap-3">
                   {[
-                    { icon: IconInstagram, href: 'https://instagram.com/zaybaash', label: 'Instagram' },
-                    { icon: IconTikTok,    href: 'https://tiktok.com/@zaybaash',   label: 'TikTok'    },
+                    { icon: IconInstagram, href: 'https://www.instagram.com/zaybaash/', label: 'Instagram' },
+                    { icon: IconTikTok,    href: 'https://www.tiktok.com/@zaybaash/',   label: 'TikTok'    },
                     { icon: IconFacebook,  href: 'https://facebook.com/zaybaash',  label: 'Facebook'  },
                   ].map(({ icon: Icon, href, label }) => (
                     <a

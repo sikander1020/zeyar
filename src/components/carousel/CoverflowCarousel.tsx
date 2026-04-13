@@ -1,0 +1,250 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { motion } from 'framer-motion';
+import Image from 'next/image';
+import Link from 'next/link';
+import { ChevronLeft, ChevronRight, Heart, ShoppingBag } from 'lucide-react';
+import { useCartStore } from '@/store/useCartStore';
+import { useWishlistStore } from '@/store/useWishlistStore';
+import type { StoreProduct } from '@/types/storefront';
+
+interface CoverflowCarouselProps {
+  products: StoreProduct[];
+  onSlideChange?: (index: number) => void;
+}
+
+const CARD_ANGLE = 35; // Rotation angle for side cards
+const CARD_WIDTH = 280; // Width of each card in pixels
+const PERSPECTIVE = 1000; // Perspective depth
+
+export default function CoverflowCarousel({ products, onSlideChange }: CoverflowCarouselProps) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isAutoplay, setIsAutoplay] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const autoplayTimerRef = useRef<NodeJS.Timeout>();
+
+  const addItem = useCartStore((s) => s.addItem);
+  const { toggle, isWishlisted } = useWishlistStore();
+
+  // Autoplay functionality
+  useEffect(() => {
+    if (!isAutoplay) return;
+
+    autoplayTimerRef.current = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % products.length);
+    }, 5000);
+
+    return () => {
+      if (autoplayTimerRef.current) clearInterval(autoplayTimerRef.current);
+    };
+  }, [isAutoplay, products.length]);
+
+  const handlePrev = () => {
+    setIsAutoplay(false);
+    setActiveIndex((prev) => (prev - 1 + products.length) % products.length);
+    onSlideChange?.(activeIndex - 1 < 0 ? products.length - 1 : activeIndex - 1);
+  };
+
+  const handleNext = () => {
+    setIsAutoplay(false);
+    setActiveIndex((prev) => (prev + 1) % products.length);
+    onSlideChange?.(activeIndex + 1);
+  };
+
+  const getCardPosition = (index: number): { x: number; z: number; angle: number; opacity: number; scale: number } => {
+    let position = index - activeIndex;
+
+    // Normalize position to -1, 0, 1 range
+    if (position > products.length / 2) {
+      position -= products.length;
+    } else if (position < -products.length / 2) {
+      position += products.length;
+    }
+
+    if (position === 0) {
+      // Center card - focused
+      return { x: 0, z: 0, angle: 0, opacity: 1, scale: 1.1 };
+    } else if (position === 1) {
+      // Right card - rotated right
+      return { x: CARD_WIDTH * 0.5, z: -100, angle: CARD_ANGLE, opacity: 0.7, scale: 0.85 };
+    } else if (position === -1) {
+      // Left card - rotated left
+      return { x: -CARD_WIDTH * 0.5, z: -100, angle: -CARD_ANGLE, opacity: 0.7, scale: 0.85 };
+    } else if (Math.abs(position) === 2) {
+      // Far cards - barely visible
+      return { x: position > 0 ? CARD_WIDTH * 0.8 : -CARD_WIDTH * 0.8, z: -200, angle: position > 0 ? CARD_ANGLE * 1.5 : -CARD_ANGLE * 1.5, opacity: 0, scale: 0.7 };
+    }
+
+    return { x: position * CARD_WIDTH, z: -300, angle: position > 0 ? CARD_ANGLE * 2 : -CARD_ANGLE * 2, opacity: 0, scale: 0.6 };
+  };
+
+  return (
+    <div className="relative w-full py-12">
+      {/* Perspective container */}
+      <div
+        ref={containerRef}
+        className="relative h-96 flex items-center justify-center overflow-hidden"
+        style={{
+          perspective: `${PERSPECTIVE}px`,
+        }}
+        onMouseEnter={() => setIsAutoplay(false)}
+        onMouseLeave={() => setIsAutoplay(true)}
+      >
+        {/* Cards */}
+        <div className="relative w-full h-full flex items-center justify-center">
+          {products.map((product, index) => {
+            const { x, z, angle, opacity, scale } = getCardPosition(index);
+            const isCenter = index === activeIndex;
+
+            return (
+              <motion.div
+                key={product.id}
+                className="absolute w-72"
+                animate={{
+                  x,
+                  z,
+                  rotateY: angle,
+                  opacity,
+                  scale,
+                }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 300,
+                  damping: 30,
+                }}
+                style={{
+                  transformStyle: 'preserve-3d',
+                }}
+              >
+                {/* Card container with shadow */}
+                <div
+                  className={`relative rounded-lg overflow-hidden transition-shadow duration-500 ${
+                    isCenter ? 'shadow-2xl' : 'shadow-lg'
+                  }`}
+                  style={{
+                    boxShadow: isCenter
+                      ? '0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 40px rgba(0, 0, 0, 0.2)'
+                      : '0 10px 25px -5px rgba(0, 0, 0, 0.2)',
+                  }}
+                >
+                  {/* Product Image */}
+                  <Link href={`/product/${product.id}`}>
+                    <div className="relative aspect-[3/4] bg-beige overflow-hidden group cursor-pointer">
+                      <Image
+                        src={product.images[0]}
+                        alt={product.name}
+                        fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-110"
+                        priority={isCenter}
+                      />
+
+                      {/* Overlay gradient */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-brown/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
+
+                      {/* Badges */}
+                      {isCenter && (
+                        <div className="absolute top-4 left-4 flex flex-col gap-2">
+                          {product.isNew && <span className="badge-new">New</span>}
+                          {product.isSale && <span className="badge-sale">Sale</span>}
+                          {product.outOfStock && <span className="badge-sale">Out</span>}
+                        </div>
+                      )}
+
+                      {/* Quick Actions - Only visible when center */}
+                      {isCenter && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10 }}
+                          whileInView={{ opacity: 1, y: 0 }}
+                          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-brown/95 to-brown/60 p-6 text-cream"
+                        >
+                          <div className="flex gap-3 mb-4">
+                            <button
+                              onClick={(e) => {
+                                e.preventDefault();
+                                toggle(product.id);
+                              }}
+                              className={`flex-1 h-10 rounded flex items-center justify-center gap-2 transition-all duration-300 text-sm font-semibold ${
+                                isWishlisted(product.id)
+                                  ? 'bg-rose-gold text-cream'
+                                  : 'bg-cream/20 text-cream hover:bg-rose-gold'
+                              }`}
+                            >
+                              <Heart size={16} className={isWishlisted(product.id) ? 'fill-current' : ''} />
+                              {isWishlisted(product.id) ? 'Saved' : 'Save'}
+                            </button>
+                            <button
+                              disabled={product.outOfStock}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                addItem(product, product.sizes[1] || product.sizes[0], product.colors[0]);
+                              }}
+                              className="flex-1 h-10 rounded bg-cream text-brown flex items-center justify-center gap-2 font-semibold hover:bg-rose-gold hover:text-cream transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                            >
+                              <ShoppingBag size={16} />
+                              Add
+                            </button>
+                          </div>
+
+                          <div className="text-center">
+                            <p className="text-xs tracking-widest uppercase font-inter mb-1">{product.category}</p>
+                            <h3 className="text-lg font-playfair font-semibold mb-2">{product.name}</h3>
+                            <p className="text-base font-semibold">Rs {product.price.toLocaleString()}</p>
+                            {product.originalPrice && (
+                              <p className="text-xs text-rose-gold line-through">Rs {product.originalPrice.toLocaleString()}</p>
+                            )}
+                          </div>
+                        </motion.div>
+                      )}
+                    </div>
+                  </Link>
+                </div>
+              </motion.div>
+            );
+          })}
+        </div>
+
+        {/* Navigation Arrows */}
+        <button
+          onClick={handlePrev}
+          className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-brown hover:bg-brown hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
+          aria-label="Previous"
+        >
+          <ChevronLeft size={24} strokeWidth={1.5} />
+        </button>
+
+        <button
+          onClick={handleNext}
+          className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-brown hover:bg-brown hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
+          aria-label="Next"
+        >
+          <ChevronRight size={24} strokeWidth={1.5} />
+        </button>
+      </div>
+
+      {/* Pagination dots */}
+      <div className="flex justify-center gap-3 mt-8">
+        {products.map((_, index) => (
+          <motion.button
+            key={index}
+            onClick={() => {
+              setIsAutoplay(false);
+              setActiveIndex(index);
+              onSlideChange?.(index);
+            }}
+            className={`rounded-full transition-all duration-300 ${
+              index === activeIndex ? 'bg-brown w-8 h-3' : 'bg-nude hover:bg-brown/60 w-3 h-3'
+            }`}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
+
+      {/* Slide counter */}
+      <div className="text-center mt-6 text-brown-muted font-inter text-sm">
+        <span className="font-semibold text-brown">{activeIndex + 1}</span>
+        <span> / {products.length}</span>
+      </div>
+    </div>
+  );
+}

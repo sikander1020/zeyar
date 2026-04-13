@@ -73,8 +73,8 @@ export default function RootLayout({
     logo: `${SITE_ORIGIN}/apple-icon.png`,
     description: 'Beauty with Style in Pakistan - Premium women\'s fashion',
     sameAs: [
-      'https://instagram.com/zaybaash',
-      'https://tiktok.com/@zaybaash',
+      'https://www.instagram.com/zaybaash/',
+      'https://www.tiktok.com/@zaybaash/',
       'https://facebook.com/zaybaash',
     ],
   };
