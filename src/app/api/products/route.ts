@@ -63,13 +63,29 @@ export async function GET(req: NextRequest) {
     const url = new URL(req.url);
     const category = (url.searchParams.get('category') ?? '').trim();
     const sort = (url.searchParams.get('sort') ?? 'featured').trim();
+    const qRaw = (url.searchParams.get('q') ?? '').trim();
+    const limitRaw = Number(url.searchParams.get('limit') ?? 0);
+    const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 40) : 0;
 
-    const q: { isActive?: { $ne: boolean }; category?: string } = { isActive: { $ne: false } };
+    const q: {
+      isActive?: { $ne: boolean };
+      category?: string;
+      $or?: Array<{ name?: RegExp; tags?: RegExp; category?: RegExp }>;
+    } = { isActive: { $ne: false } };
     if (category && category !== 'All') {
       q.category = category;
     }
 
-    const docs = await Product.find(q).lean();
+    if (qRaw.length >= 2) {
+      const escaped = qRaw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escaped, 'i');
+      q.$or = [{ name: regex }, { tags: regex }, { category: regex }];
+    }
+
+    const docs = await Product.find(q)
+      .select('productId name category price originalPrice images colors sizes description details rating reviewCount tags stock isActive outOfStock isNewArrival isSale isBestseller')
+      .limit(limit || 0)
+      .lean();
     const products = docs.map((d) => normalizeProduct(d as never));
 
     if (sort === 'newest') {

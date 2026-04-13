@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Heart, ShoppingBag } from 'lucide-react';
@@ -63,6 +63,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
   const [isAutoplay, setIsAutoplay] = useState(true);
   const [viewportWidth, setViewportWidth] = useState(1280);
   const [centerTilt, setCenterTilt] = useState({ x: 0, y: 0 });
+  const reduceMotion = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
   const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -71,6 +72,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
 
   // Autoplay functionality
   useEffect(() => {
+    if (reduceMotion) return;
     if (!isAutoplay) return;
 
     autoplayTimerRef.current = setInterval(() => {
@@ -80,7 +82,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
     return () => {
       if (autoplayTimerRef.current) clearInterval(autoplayTimerRef.current);
     };
-  }, [isAutoplay, products.length]);
+  }, [isAutoplay, products.length, reduceMotion]);
 
   useEffect(() => {
     const updateViewport = () => {
@@ -105,7 +107,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
   };
 
   const handlePointerMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (viewportWidth < 1024) return;
+    if (reduceMotion || viewportWidth < 1024) return;
     const bounds = event.currentTarget.getBoundingClientRect();
     const px = (event.clientX - bounds.left) / bounds.width;
     const py = (event.clientY - bounds.top) / bounds.height;
@@ -172,7 +174,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
           height: `${metrics.containerHeight}px`,
         }}
         onMouseEnter={() => setIsAutoplay(false)}
-        onMouseLeave={() => setIsAutoplay(true)}
+        onMouseLeave={() => setIsAutoplay(!reduceMotion)}
         onMouseMove={handlePointerMove}
         onMouseOut={resetPointerTilt}
       >
@@ -191,13 +193,14 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
                 animate={{
                   x,
                   z,
-                  rotateY: isCenter ? centerTilt.y : angle,
-                  rotateX: isCenter ? centerTilt.x : 0,
+                  rotateY: reduceMotion ? 0 : isCenter ? centerTilt.y : angle,
+                  rotateX: reduceMotion ? 0 : isCenter ? centerTilt.x : 0,
                   opacity,
                   scale,
                 }}
                 transition={{
-                  type: 'spring',
+                  type: reduceMotion ? 'tween' : 'spring',
+                  duration: reduceMotion ? 0.22 : undefined,
                   stiffness: isCenter ? 120 : 220,
                   damping: isCenter ? 24 : 28,
                   mass: isCenter ? 1 : 0.9,

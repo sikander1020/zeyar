@@ -24,6 +24,7 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [debouncedQuery, setDebouncedQuery] = useState('');
   const [products, setProducts] = useState<StoreProduct[]>([]);
   const itemCount = useCartStore((s) => s.itemCount());
   const wishlistCount = useWishlistStore((s) => s.items.length);
@@ -42,8 +43,21 @@ export default function Navbar() {
   }, [router]);
 
   useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setDebouncedQuery(searchQuery.trim());
+    }, 180);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery]);
+
+  useEffect(() => {
+    if (!searchOpen) return;
+    if (debouncedQuery.length < 2) {
+      setProducts([]);
+      return;
+    }
+
     let mounted = true;
-    fetch('/api/products', { cache: 'force-cache' })
+    fetch(`/api/products?q=${encodeURIComponent(debouncedQuery)}&limit=12`, { cache: 'no-store' })
       .then((res) => res.json() as Promise<{ products?: StoreProduct[] }>)
       .then((data) => {
         if (mounted) setProducts(data.products ?? []);
@@ -55,7 +69,7 @@ export default function Navbar() {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [searchOpen, debouncedQuery]);
 
   return (
     <>
@@ -255,7 +269,6 @@ export default function Navbar() {
                   <p className="text-xs uppercase tracking-[0.1em] text-brown-muted mb-6">Results</p>
                   <div className="space-y-6">
                     {products
-                      .filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.tags.some(t => t.includes(searchQuery.toLowerCase())))
                       .map((p, i) => (
                         <motion.div
                           key={p.id}
@@ -276,7 +289,7 @@ export default function Navbar() {
                         </motion.div>
                       ))}
                     
-                    {products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()) || p.tags.some(t => t.includes(searchQuery.toLowerCase()))).length === 0 && (
+                    {products.length === 0 && (
                       <p className="text-brown-muted font-inter">No pieces found matching &quot;{searchQuery}&quot;.</p>
                     )}
                   </div>
