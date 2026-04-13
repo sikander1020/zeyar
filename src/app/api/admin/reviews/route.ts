@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Review from '@/models/Review';
 import { requireAdmin } from '@/lib/adminAuth';
+import { syncProductReviewAggregates } from '@/lib/reviewAggregates';
 
 export async function GET(req: NextRequest) {
   try {
@@ -41,6 +42,11 @@ export async function POST(req: NextRequest) {
     });
 
     await review.save();
+
+    if (review.isApproved) {
+      await syncProductReviewAggregates(review.productId);
+    }
+
     return NextResponse.json({ review }, { status: 201 });
   } catch (err) {
     console.error('POST /api/admin/reviews error:', err);

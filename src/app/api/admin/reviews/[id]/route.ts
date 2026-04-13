@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Review from '@/models/Review';
 import { requireAdmin } from '@/lib/adminAuth';
+import { syncProductReviewAggregates } from '@/lib/reviewAggregates';
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -27,6 +28,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Review not found' }, { status: 404 });
     }
 
+    await syncProductReviewAggregates(review.productId);
+
     return NextResponse.json({ review });
   } catch (err) {
     console.error('PUT /api/admin/reviews/[id] error:', err);
@@ -47,6 +50,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     if (!review) {
       return NextResponse.json({ error: 'Review not found' }, { status: 404 });
     }
+
+    await syncProductReviewAggregates(review.productId);
 
     return NextResponse.json({ success: true });
   } catch (err) {

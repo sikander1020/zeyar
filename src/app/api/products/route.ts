@@ -5,6 +5,7 @@ import Product from '@/models/Product';
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80';
 
 function normalizeProduct(p: {
+  _id?: unknown;
   productId: string;
   name: string;
   category: string;
@@ -25,12 +26,15 @@ function normalizeProduct(p: {
   isSale?: boolean;
   isBestseller?: boolean;
 }) {
+  const resolvedId = typeof p.productId === 'string' && p.productId.trim().length > 0
+    ? p.productId.trim()
+    : String(p._id ?? '').trim();
   const images = Array.isArray(p.images) && p.images.length > 0 ? p.images : [FALLBACK_IMAGE];
   const colors = Array.isArray(p.colors) && p.colors.length > 0 ? p.colors : [{ name: 'Default', hex: '#E6B7A9' }];
   const sizes = Array.isArray(p.sizes) && p.sizes.length > 0 ? p.sizes : ['S', 'M', 'L'];
 
   return {
-    id: p.productId,
+    id: resolvedId,
     name: p.name,
     category: p.category,
     price: Number(p.price) || 0,

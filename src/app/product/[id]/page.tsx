@@ -61,9 +61,27 @@ export default function ProductPage() {
   useEffect(() => {
     let mounted = true;
 
+    const pid = String(id ?? '').trim();
+    if (!pid) {
+      setProduct(null);
+      setAllProducts([]);
+      setLoading(false);
+      return () => {
+        mounted = false;
+      };
+    }
+
     Promise.all([
-      fetch(`/api/products/${id}`, { cache: 'no-store' }).then((res) => res.json() as Promise<{ product?: StoreProduct }>),
-      fetch('/api/products?sort=featured', { cache: 'no-store' }).then((res) => res.json() as Promise<{ products?: StoreProduct[] }>),
+      fetch(`/api/products/${encodeURIComponent(pid)}`, { cache: 'no-store' })
+        .then(async (res) => {
+          if (!res.ok) return { product: null } as { product: StoreProduct | null };
+          return res.json() as Promise<{ product?: StoreProduct }>;
+        }),
+      fetch('/api/products?sort=featured', { cache: 'no-store' })
+        .then(async (res) => {
+          if (!res.ok) return { products: [] } as { products: StoreProduct[] };
+          return res.json() as Promise<{ products?: StoreProduct[] }>;
+        }),
     ])
       .then(([single, list]) => {
         if (!mounted) return;
@@ -127,6 +145,15 @@ export default function ProductPage() {
       setRecentlyViewedIds([]);
     }
   }, [product?.id]);
+
+  const recentlyViewed = useMemo(() => {
+    if (!product || recentlyViewedIds.length === 0) return [] as StoreProduct[];
+    const byId = new Map(allProducts.map((p) => [p.id, p]));
+    return recentlyViewedIds
+      .map((pid) => byId.get(pid))
+      .filter((p): p is StoreProduct => Boolean(p))
+      .slice(0, 4);
+  }, [allProducts, recentlyViewedIds, product]);
 
   if (loading) {
     return (
@@ -192,14 +219,6 @@ export default function ProductPage() {
   }
 
   const related = allProducts.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 3);
-  const recentlyViewed = useMemo(() => {
-    if (recentlyViewedIds.length === 0) return [] as StoreProduct[];
-    const byId = new Map(allProducts.map((p) => [p.id, p]));
-    return recentlyViewedIds
-      .map((pid) => byId.get(pid))
-      .filter((p): p is StoreProduct => Boolean(p))
-      .slice(0, 4);
-  }, [allProducts, recentlyViewedIds]);
 
   return (
     <AppShell>

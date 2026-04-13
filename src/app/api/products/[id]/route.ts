@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Product from '@/models/Product';
+import mongoose from 'mongoose';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80';
 
 function normalizeProduct(p: {
+  _id?: unknown;
   productId: string;
   name: string;
   category: string;
@@ -25,12 +27,15 @@ function normalizeProduct(p: {
   isSale?: boolean;
   isBestseller?: boolean;
 }) {
+  const resolvedId = typeof p.productId === 'string' && p.productId.trim().length > 0
+    ? p.productId.trim()
+    : String(p._id ?? '').trim();
   const images = Array.isArray(p.images) && p.images.length > 0 ? p.images : [FALLBACK_IMAGE];
   const colors = Array.isArray(p.colors) && p.colors.length > 0 ? p.colors : [{ name: 'Default', hex: '#E6B7A9' }];
   const sizes = Array.isArray(p.sizes) && p.sizes.length > 0 ? p.sizes : ['S', 'M', 'L'];
 
   return {
-    id: p.productId,
+    id: resolvedId,
     name: p.name,
     category: p.category,
     price: Number(p.price) || 0,
@@ -57,7 +62,15 @@ export async function GET(_req: NextRequest, { params }: { params: Promise<{ id:
     await connectDB();
     const { id } = await params;
 
-    const doc = await Product.findOne({ productId: id, isActive: { $ne: false } }).lean();
+    const pid = decodeURIComponent(String(id ?? '').trim());
+    if (!pid) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    let doc = await Product.findOne({ productId: pid, isActive: { $ne: false } }).lean();
+    if (!doc && mongoose.Types.ObjectId.isValid(pid)) {
+      doc = await Product.findOne({ _id: new mongoose.Types.ObjectId(pid), isActive: { $ne: false } }).lean();
+    }
     if (!doc) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }

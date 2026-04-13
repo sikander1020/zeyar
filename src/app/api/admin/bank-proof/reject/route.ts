@@ -10,8 +10,9 @@ export async function POST(req: NextRequest) {
     const guard = requireAdmin(req);
     if (guard) return guard;
 
-    const { orderId } = await req.json() as { orderId?: string };
+    const { orderId, reason } = await req.json() as { orderId?: string; reason?: string };
     if (!orderId) return NextResponse.json({ error: 'orderId is required' }, { status: 400 });
+    const rejectionReason = String(reason ?? '').trim().slice(0, 500);
 
     await connectDB();
 
@@ -45,9 +46,7 @@ export async function POST(req: NextRequest) {
             status: 'cancelled',
             'bankTransfer.status': 'rejected',
             'bankTransfer.reviewedAt': now,
-            'bankTransfer.proofUrl': '',
-            'bankTransfer.transactionId': '',
-            'bankTransfer.submittedAt': null,
+            'bankTransfer.rejectionReason': rejectionReason,
           },
         },
         { session },

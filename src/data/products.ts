@@ -21,8 +21,8 @@ export const products: Product[] = [
   {
     id: 'zaybaash-001',
     name: 'Velvet Reverie Gown',
-    price: 289,
-    originalPrice: 380,
+    price: 28900,
+    originalPrice: 38000,
     category: 'Dresses',
     images: [
       'https://images.unsplash.com/photo-1566479179817-0c9c4acec19b?w=800&q=80',
@@ -44,9 +44,10 @@ export const products: Product[] = [
   },
   {
     id: 'zaybaash-002',
-    name: 'Aurora Silk Midi',
-    price: 195,
-    category: 'Dresses',
+    name: 'Silk Whisper Set',
+    price: 24500,
+    originalPrice: 29900,
+    category: 'Formal',
     images: [
       'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=800&q=80',
       'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=800&q=80',

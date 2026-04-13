@@ -8,6 +8,7 @@ const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1515372039744-b8f02a3a
 const FALLBACK_CATEGORY_IMAGE = 'https://images.unsplash.com/photo-1594938298603-c8148c4b69c8?w=800&q=80';
 
 function normalizeProduct(p: {
+  _id?: unknown;
   productId: string;
   name: string;
   category: string;
@@ -28,8 +29,12 @@ function normalizeProduct(p: {
   isSale?: boolean;
   isBestseller?: boolean;
 }): StoreProduct {
+  const resolvedId = typeof p.productId === 'string' && p.productId.trim().length > 0
+    ? p.productId.trim()
+    : String(p._id ?? '').trim();
+
   return {
-    id: p.productId,
+    id: resolvedId,
     name: p.name,
     category: p.category,
     price: Number(p.price) || 0,

@@ -43,6 +43,7 @@ export interface IOrder extends Document {
     submittedAt?: Date;
     status: 'awaiting_proof' | 'proof_submitted' | 'approved' | 'rejected';
     reviewedAt?: Date;
+    rejectionReason?: string;
   };
 }
 
@@ -85,6 +86,7 @@ const OrderSchema = new Schema<IOrder>(
       submittedAt:    { type: Date },
       status:         { type: String, enum: ['awaiting_proof', 'proof_submitted', 'approved', 'rejected'] },
       reviewedAt:     { type: Date },
+      rejectionReason:{ type: String, default: '' },
     },
   },
   { timestamps: true }

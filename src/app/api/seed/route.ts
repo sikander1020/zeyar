@@ -25,8 +25,11 @@ const seedProducts = [
 
 export async function GET(req: NextRequest) {
   try {
-    const guard = requireAdmin(req);
-    if (guard) return guard;
+    // Dev mode: skip auth for easy seeding; production requires admin.
+    if (process.env.NODE_ENV === 'production') {
+      const guard = requireAdmin(req);
+      if (guard) return guard;
+    }
     await connectDB();
 
     let productsInserted = 0;
