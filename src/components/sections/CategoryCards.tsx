@@ -4,9 +4,71 @@ import { useEffect, useState } from 'react';
 import { useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, useInView } from 'framer-motion';
+import { motion, useInView, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
 import type { StoreCategory } from '@/types/storefront';
+
+function CategoryCardItem({ cat, i, inView }: { cat: StoreCategory; i: number; inView: boolean }) {
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const smoothX = useSpring(mx, { stiffness: 210, damping: 20, mass: 0.45 });
+  const smoothY = useSpring(my, { stiffness: 210, damping: 20, mass: 0.45 });
+  const { scrollYProgress } = useScroll({ target: cardRef, offset: ['start end', 'end start'] });
+  const imageY = useTransform(scrollYProgress, [0, 1], [-12, 12]);
+
+  return (
+    <motion.div
+      ref={cardRef}
+      initial={{ opacity: 0, y: 40 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.6, delay: i * 0.12 }}
+      style={{ x: smoothX, y: smoothY }}
+      onMouseMove={(e) => {
+        const rect = cardRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        const px = (e.clientX - rect.left) / rect.width - 0.5;
+        const py = (e.clientY - rect.top) / rect.height - 0.5;
+        mx.set(px * 8);
+        my.set(py * 8);
+      }}
+      onMouseLeave={() => {
+        mx.set(0);
+        my.set(0);
+      }}
+    >
+      <Link
+        href={`/dresses?category=${encodeURIComponent(cat.name)}`}
+        className="group relative block overflow-hidden aspect-[3/4] bg-nude/20"
+      >
+        <motion.div className="absolute inset-0" style={{ y: imageY }}>
+          <Image
+            src={cat.image}
+            alt={cat.name}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+        </motion.div>
+        <div className="absolute inset-0 overlay-dark opacity-60 group-hover:opacity-75 transition-opacity duration-400" />
+
+        <div className="absolute inset-0 flex flex-col justify-end p-6">
+          <p className="text-xs tracking-[0.18em] uppercase text-nude/70 font-inter mb-2 group-hover:text-nude transition-colors" style={{ fontFamily: "'Inter', sans-serif" }}>
+            {cat.count} pieces
+          </p>
+          <h3 className="text-2xl font-playfair text-white mb-3 group-hover:text-nude transition-colors duration-300" style={{ fontFamily: "'Playfair Display', serif" }}>
+            {cat.name}
+          </h3>
+          <p className="text-xs text-white/60 font-inter mb-4 opacity-0 group-hover:opacity-100 transition-all duration-400 translate-y-2 group-hover:translate-y-0" style={{ fontFamily: "'Inter', sans-serif" }}>
+            {cat.description}
+          </p>
+          <div className="flex items-center gap-2 text-nude text-xs tracking-[0.15em] uppercase font-inter group-hover:gap-3 transition-all duration-300" style={{ fontFamily: "'Inter', sans-serif" }}>
+            Shop Now <ArrowRight size={13} strokeWidth={2} />
+          </div>
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
 
 export default function CategoryCards({ initialCategories }: { initialCategories?: StoreCategory[] } = {}) {
   const ref = useRef(null);
@@ -70,42 +132,7 @@ export default function CategoryCards({ initialCategories }: { initialCategories
         {!loading && categories.length > 0 && (
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {categories.map((cat, i) => (
-              <motion.div
-                key={cat.id}
-                initial={{ opacity: 0, y: 40 }}
-                animate={inView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.6, delay: i * 0.12 }}
-              >
-                <Link
-                  href={`/dresses?category=${encodeURIComponent(cat.name)}`}
-                  className="group relative block overflow-hidden aspect-[3/4] bg-nude/20"
-                >
-                  <Image
-                    src={cat.image}
-                    alt={cat.name}
-                    fill
-                    className="object-cover transition-transform duration-700 group-hover:scale-110"
-                  />
-                  {/* Overlay */}
-                  <div className="absolute inset-0 overlay-dark opacity-60 group-hover:opacity-75 transition-opacity duration-400" />
-
-                  {/* Content */}
-                  <div className="absolute inset-0 flex flex-col justify-end p-6">
-                    <p className="text-xs tracking-[0.18em] uppercase text-nude/70 font-inter mb-2 group-hover:text-nude transition-colors" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      {cat.count} pieces
-                    </p>
-                    <h3 className="text-2xl font-playfair text-white mb-3 group-hover:text-nude transition-colors duration-300" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      {cat.name}
-                    </h3>
-                    <p className="text-xs text-white/60 font-inter mb-4 opacity-0 group-hover:opacity-100 transition-all duration-400 translate-y-2 group-hover:translate-y-0" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      {cat.description}
-                    </p>
-                    <div className="flex items-center gap-2 text-nude text-xs tracking-[0.15em] uppercase font-inter group-hover:gap-3 transition-all duration-300" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      Shop Now <ArrowRight size={13} strokeWidth={2} />
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
+              <CategoryCardItem key={cat.id} cat={cat} i={i} inView={inView} />
             ))}
           </div>
         )}

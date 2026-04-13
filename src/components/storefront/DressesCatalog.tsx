@@ -1,9 +1,9 @@
 'use client';
 
-import { useMemo, useEffect, useState, Suspense } from 'react';
+import { useMemo, useEffect, useState, Suspense, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
 import { Heart, ShoppingBag, ChevronDown } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
@@ -24,7 +24,21 @@ function ProductCard({ product, index }: { product: StoreProduct; index: number 
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, isWishlisted } = useWishlistStore();
   const wishlisted = isWishlisted(product.id);
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const mx = useMotionValue(0);
+  const my = useMotionValue(0);
+  const smoothX = useSpring(mx, { stiffness: 220, damping: 20, mass: 0.4 });
+  const smoothY = useSpring(my, { stiffness: 220, damping: 20, mass: 0.4 });
+  const { scrollYProgress } = useScroll({ target: cardRef, offset: ['start end', 'end start'] });
+  const imageY = useTransform(scrollYProgress, [0, 1], [-10, 10]);
   const [hovered, setHovered] = useState(false);
+  const badges = product.outOfStock
+    ? [{ text: 'Out', className: 'badge-sale', style: undefined }]
+    : [
+        product.isNew ? { text: 'New', className: 'badge-new', style: undefined } : null,
+        product.isSale ? { text: 'Sale', className: 'badge-sale', style: undefined } : null,
+        product.isBestseller ? { text: 'Best', className: 'badge-new', style: { backgroundColor: '#9B4F5C' } } : null,
+      ].flatMap((v) => (v ? [v] : [])).slice(0, 2);
 
   return (
     <motion.div
@@ -34,22 +48,37 @@ function ProductCard({ product, index }: { product: StoreProduct; index: number 
       exit={{ opacity: 0, scale: 0.95 }}
       transition={{ duration: 0.45, delay: Math.min(index * 0.06, 0.4) }}
       className="product-card group"
+      ref={cardRef}
+      style={{ x: smoothX, y: smoothY }}
       onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseMove={(e) => {
+        const rect = cardRef.current?.getBoundingClientRect();
+        if (!rect) return;
+        const px = (e.clientX - rect.left) / rect.width - 0.5;
+        const py = (e.clientY - rect.top) / rect.height - 0.5;
+        mx.set(px * 8);
+        my.set(py * 8);
+      }}
+      onMouseLeave={() => {
+        setHovered(false);
+        mx.set(0);
+        my.set(0);
+      }}
     >
       <Link href={`/product/${product.id}`}>
         <div className="relative overflow-hidden bg-beige aspect-[3/4]">
-          <Image
-            src={hovered && product.images[1] ? product.images[1] : product.images[0]}
-            alt={product.name}
-            fill
-            className="object-cover transition-all duration-700 group-hover:scale-105"
-          />
+          <motion.div className="absolute inset-0" style={{ y: imageY }}>
+            <Image
+              src={hovered && product.images[1] ? product.images[1] : product.images[0]}
+              alt={product.name}
+              fill
+              className="object-cover transition-all duration-700 group-hover:scale-105"
+            />
+          </motion.div>
           <div className="absolute top-3 left-3 flex flex-col gap-1">
-            {product.isNew && <span className="badge-new">New</span>}
-            {product.isSale && <span className="badge-sale">Sale</span>}
-            {product.isBestseller && <span className="badge-new" style={{ backgroundColor: '#9B4F5C' }}>Best</span>}
-            {product.outOfStock && <span className="badge-sale">Out</span>}
+            {badges.map((badge) => (
+              <span key={badge.text} className={badge.className} style={badge.style}>{badge.text}</span>
+            ))}
           </div>
           <div className="absolute top-3 right-3 flex flex-col gap-2">
             <button
@@ -109,7 +138,6 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
   const [query, setQuery] = useState('');
   const [onlyInStock, setOnlyInStock] = useState(false);
   const [selectedSize, setSelectedSize] = useState('All Sizes');
-  const [maxPrice, setMaxPrice] = useState(600000);
 
   useEffect(() => {
     setActiveCategory(initialCategory);
@@ -177,8 +205,6 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
       );
     }
 
-    result = result.filter((p) => p.price <= maxPrice);
-
     if (onlyInStock) {
       result = result.filter((p) => !p.outOfStock);
     }
@@ -193,7 +219,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
     if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price);
     if (sortBy === 'rating') result.sort((a, b) => b.rating - a.rating);
     return result;
-  }, [products, activeCategory, sortBy, query, maxPrice, onlyInStock, selectedSize]);
+  }, [products, activeCategory, sortBy, query, onlyInStock, selectedSize]);
 
   return (
     <AppShell>
@@ -245,19 +271,19 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-8 items-stretch">
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search dresses"
-              className="input-luxury"
+              className="input-luxury h-[56px]"
             />
 
             <div className="relative">
               <select
                 value={selectedSize}
                 onChange={(e) => setSelectedSize(e.target.value)}
-                className="appearance-none w-full pl-4 pr-10 py-3 bg-transparent border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
+                className="appearance-none w-full h-[56px] pl-4 pr-10 py-3 bg-transparent border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 {sizeOptions.map((s) => (
@@ -267,27 +293,11 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
               <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brown-muted pointer-events-none" />
             </div>
 
-            <div className="border border-nude px-3 py-2.5">
-              <label className="text-[10px] tracking-[0.12em] uppercase text-brown-muted font-inter block mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                Max Price
-              </label>
-              <input
-                type="range"
-                min={10000}
-                max={600000}
-                step={5000}
-                value={maxPrice}
-                onChange={(e) => setMaxPrice(Number(e.target.value))}
-                className="w-full"
-              />
-              <p className="text-xs text-brown font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>Rs {maxPrice.toLocaleString()}</p>
-            </div>
-
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 justify-start lg:justify-end h-[56px]">
               <button
                 type="button"
                 onClick={() => setOnlyInStock((v) => !v)}
-                className={`px-4 py-2.5 text-xs tracking-[0.12em] uppercase font-inter border transition-all duration-300 ${onlyInStock ? 'bg-brown text-cream border-brown' : 'border-nude text-brown hover:border-brown'}`}
+                className={`h-[48px] px-4 text-xs tracking-[0.12em] uppercase font-inter border transition-all duration-300 ${onlyInStock ? 'bg-brown text-cream border-brown' : 'border-nude text-brown hover:border-brown'}`}
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 In Stock Only
@@ -298,11 +308,10 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                   setQuery('');
                   setOnlyInStock(false);
                   setSelectedSize('All Sizes');
-                  setMaxPrice(600000);
                   setActiveCategory('All');
                   setSortBy('featured');
                 }}
-                className="text-xs text-brown-muted underline underline-offset-2 hover:text-brown transition-colors"
+                className="h-[48px] px-2 text-xs text-brown-muted underline underline-offset-2 hover:text-brown transition-colors"
               >
                 Reset
               </button>
