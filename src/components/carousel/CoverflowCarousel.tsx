@@ -22,7 +22,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoplay, setIsAutoplay] = useState(true);
   const containerRef = useRef<HTMLDivElement>(null);
-  const autoplayTimerRef = useRef<NodeJS.Timeout>();
+  const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, isWishlisted } = useWishlistStore();
