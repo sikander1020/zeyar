@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectDB } from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/adminAuth';
@@ -27,6 +28,19 @@ function asColors(value: unknown): Array<{ name: string; hex: string }> {
     .filter((v): v is { name: string; hex: string } => !!v);
 }
 
+function findProductQuery(id: string) {
+  const normalizedId = String(id ?? '').trim();
+  if (mongoose.Types.ObjectId.isValid(normalizedId)) {
+    return {
+      $or: [
+        { productId: normalizedId },
+        { _id: new mongoose.Types.ObjectId(normalizedId) },
+      ],
+    };
+  }
+  return { productId: normalizedId };
+}
+
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const guard = requireAdmin(req);
@@ -34,11 +48,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
     await connectDB();
     const { id } = await params;
+    const query = findProductQuery(id);
     const body = await req.json();
     const stock = Number(body.stock) || 0;
 
     const product = await Product.findOneAndUpdate(
-      { productId: id },
+      query,
       {
         name: body.name,
         category: body.category,
@@ -81,8 +96,9 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
     await connectDB();
     const { id } = await params;
+    const query = findProductQuery(id);
 
-    const product = await Product.findOneAndDelete({ productId: id });
+    const product = await Product.findOneAndDelete(query);
 
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });

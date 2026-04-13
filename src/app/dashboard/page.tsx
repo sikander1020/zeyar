@@ -1121,13 +1121,19 @@ function ProductsTab() {
         isBestseller: formData.isBestseller,
       };
 
-      await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
+      const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(typeof data?.error === 'string' ? data.error : 'Failed to save product');
+      }
+
+      await loadProducts();
       setShowForm(false);
       setEditing(null);
       resetForm();
-      void loadProducts();
     } catch (err) {
       console.error('Failed to save product:', err);
+      alert(err instanceof Error ? err.message : 'Failed to save product');
     }
   }
 
