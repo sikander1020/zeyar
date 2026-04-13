@@ -189,6 +189,17 @@ export default function FeaturedCollections({ initialProducts }: { initialProduc
   const next = () => setStart((s) => (s >= maxStart ? 0 : s + 1));
   const cardWidthPct = 100 / Math.max(visibleCards, 1);
 
+  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: { offset: { x: number } }) => {
+    const swipeThreshold = 50;
+    if (info.offset.x <= -swipeThreshold) {
+      next();
+      return;
+    }
+    if (info.offset.x >= swipeThreshold) {
+      prev();
+    }
+  };
+
   return (
     <section className="section-padding bg-cream">
       <div className="max-w-7xl mx-auto px-6" ref={ref}>
@@ -228,9 +239,13 @@ export default function FeaturedCollections({ initialProducts }: { initialProduc
           <div className="relative">
             <div className="overflow-hidden -mx-3">
               <motion.div
-                className="flex"
+                className="flex cursor-grab active:cursor-grabbing select-none"
                 animate={{ x: `-${start * cardWidthPct}%` }}
                 transition={{ duration: 0.65, ease: [0.2, 0.8, 0.2, 1] }}
+                drag="x"
+                dragConstraints={{ left: 0, right: 0 }}
+                dragElastic={0.12}
+                onDragEnd={handleDragEnd}
               >
                 {featured.map((product, index) => (
                   <div
