@@ -62,6 +62,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoplay, setIsAutoplay] = useState(true);
   const [viewportWidth, setViewportWidth] = useState(1280);
+  const [centerTilt, setCenterTilt] = useState({ x: 0, y: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
   const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -101,6 +102,21 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
     setIsAutoplay(false);
     setActiveIndex((prev) => (prev + 1) % products.length);
     onSlideChange?.(activeIndex + 1);
+  };
+
+  const handlePointerMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (viewportWidth < 1024) return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const px = (event.clientX - bounds.left) / bounds.width;
+    const py = (event.clientY - bounds.top) / bounds.height;
+
+    const tiltY = (px - 0.5) * 7;
+    const tiltX = (0.5 - py) * 5;
+    setCenterTilt({ x: tiltX, y: tiltY });
+  };
+
+  const resetPointerTilt = () => {
+    setCenterTilt({ x: 0, y: 0 });
   };
 
   const getCardPosition = (index: number): { x: number; z: number; angle: number; opacity: number; scale: number } => {
@@ -157,6 +173,8 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
         }}
         onMouseEnter={() => setIsAutoplay(false)}
         onMouseLeave={() => setIsAutoplay(true)}
+        onMouseMove={handlePointerMove}
+        onMouseOut={resetPointerTilt}
       >
         <div className="pointer-events-none absolute inset-x-0 bottom-6 mx-auto h-20 w-[72%] rounded-full bg-brown/15 blur-2xl" />
 
@@ -173,14 +191,16 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
                 animate={{
                   x,
                   z,
-                  rotateY: angle,
+                  rotateY: isCenter ? centerTilt.y : angle,
+                  rotateX: isCenter ? centerTilt.x : 0,
                   opacity,
                   scale,
                 }}
                 transition={{
                   type: 'spring',
-                  stiffness: 300,
-                  damping: 30,
+                  stiffness: isCenter ? 120 : 220,
+                  damping: isCenter ? 24 : 28,
+                  mass: isCenter ? 1 : 0.9,
                 }}
                 style={{
                   transformStyle: 'preserve-3d',
@@ -194,8 +214,8 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
                   }`}
                   style={{
                     boxShadow: isCenter
-                      ? '0 25px 50px -12px rgba(0, 0, 0, 0.4), 0 0 40px rgba(0, 0, 0, 0.2)'
-                      : '0 10px 25px -5px rgba(0, 0, 0, 0.2)',
+                      ? '0 42px 80px -24px rgba(20, 10, 5, 0.55), 0 18px 32px -18px rgba(20, 10, 5, 0.45), 0 0 60px rgba(20, 10, 5, 0.2)'
+                      : '0 20px 38px -16px rgba(20, 10, 5, 0.35)',
                   }}
                 >
                   {/* Product Image */}
