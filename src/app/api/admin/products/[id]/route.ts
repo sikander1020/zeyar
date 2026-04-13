@@ -55,7 +55,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         reviewCount: Number(body.reviewCount) || 0,
         tags: asStringArray(body.tags),
         isActive: body.isActive !== false,
-        outOfStock: body.outOfStock === true || stock <= 0,
+        outOfStock: body.outOfStock === true,
         isNewArrival: body.isNewArrival,
         isSale: body.isSale,
         isBestseller: body.isBestseller,

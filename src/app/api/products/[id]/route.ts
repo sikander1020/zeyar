@@ -50,7 +50,7 @@ function normalizeProduct(p: {
     tags: Array.isArray(p.tags) ? p.tags : [],
     stock: Number(p.stock) || 0,
     isActive: p.isActive !== false,
-    outOfStock: p.outOfStock === true || (Number(p.stock) || 0) <= 0,
+    outOfStock: p.outOfStock === true,
     isNew: p.isNewArrival === true,
     isSale: p.isSale === true,
     isBestseller: p.isBestseller === true,

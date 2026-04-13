@@ -126,7 +126,7 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
                       <p className="text-sm text-nude font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
                         Rs {product.price.toLocaleString()}
                       </p>
-                      {(product.outOfStock || product.stock <= 0) && (
+                      {product.outOfStock && (
                         <p className="text-xs text-rose-gold font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
                           Out of stock
                         </p>

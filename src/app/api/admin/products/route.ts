@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
       reviewCount: Number(body.reviewCount) || 0,
       tags,
       isActive: body.isActive !== false,
-      outOfStock: body.outOfStock === true || stock <= 0,
+      outOfStock: body.outOfStock === true,
       isNewArrival: body.isNewArrival || false,
       isSale: body.isSale || false,
       isBestseller: body.isBestseller || false,

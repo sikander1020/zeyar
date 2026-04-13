@@ -23,7 +23,7 @@ export async function GET() {
     );
 
     let result = categories.map((c) => ({
-      id: c.categoryId,
+      id: c.categoryId || String(c._id ?? ''),
       name: c.name,
       slug: c.slug,
       description: c.description || '',

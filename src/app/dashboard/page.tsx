@@ -1115,7 +1115,7 @@ function ProductsTab() {
         colors: parseColors(formData.colorsText),
         tags: parseCsvOrLines(formData.tagsText),
         isActive: formData.isActive,
-        outOfStock: formData.outOfStock || (Number(formData.stock) || 0) <= 0,
+        outOfStock: formData.outOfStock,
         isNewArrival: formData.isNewArrival,
         isSale: formData.isSale,
         isBestseller: formData.isBestseller,
@@ -1137,7 +1137,7 @@ function ProductsTab() {
     void loadProducts();
   }
 
-  async function quickSetStock(prod: ProductRow, nextStock: number) {
+  async function quickSetStock(prod: ProductRow, nextStock: number, nextOutOfStock = prod.outOfStock) {
     const payload = {
       name: prod.name,
       category: prod.category,
@@ -1154,7 +1154,7 @@ function ProductsTab() {
       reviewCount: prod.reviewCount,
       tags: prod.tags,
       isActive: prod.isActive,
-      outOfStock: nextStock <= 0,
+      outOfStock: nextOutOfStock,
       isNewArrival: prod.isNewArrival,
       isSale: prod.isSale,
       isBestseller: prod.isBestseller,
@@ -1183,7 +1183,7 @@ function ProductsTab() {
       colorsText: (prod.colors ?? []).map((c) => `${c.name}:${c.hex}`).join(', '),
       tagsText: (prod.tags ?? []).join(', '),
       isActive: prod.isActive !== false,
-      outOfStock: prod.outOfStock === true || prod.stock <= 0,
+      outOfStock: prod.outOfStock === true,
       isNewArrival: prod.isNewArrival,
       isSale: prod.isSale,
       isBestseller: prod.isBestseller,
@@ -1193,7 +1193,7 @@ function ProductsTab() {
   }
 
   const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= lowStockThreshold && p.isActive !== false).length;
-  const outOfStockCount = products.filter((p) => p.outOfStock || p.stock <= 0).length;
+  const outOfStockCount = products.filter((p) => p.outOfStock).length;
   const inactiveCount = products.filter((p) => p.isActive === false).length;
   const filteredProducts = showLowStockOnly
     ? products.filter((p) => p.stock > 0 && p.stock <= lowStockThreshold && p.isActive !== false)
@@ -1387,7 +1387,7 @@ function ProductsTab() {
                 </td>
                 <td style={{ padding: '10px 14px' }}>{p.sold}</td>
                 <td style={{ padding: '10px 14px' }}>
-                  {!p.isActive ? 'Hidden' : p.outOfStock || p.stock <= 0 ? 'Out of stock' : 'In stock'}
+                  {!p.isActive ? 'Hidden' : p.outOfStock ? 'Out of stock' : 'In stock'}
                 </td>
                 <td style={{ padding: '10px 14px' }}>
                   <div style={{ display: 'flex', gap: 4 }}>
@@ -1398,10 +1398,10 @@ function ProductsTab() {
                 </td>
                 <td style={{ padding: '10px 14px' }}>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    {p.outOfStock || p.stock <= 0 ? (
-                      <button onClick={() => void quickSetStock(p, Math.max(lowStockThreshold, 1))} style={{ padding: '6px 10px', background: '#3E7B4E', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Restock</button>
+                    {p.outOfStock ? (
+                      <button onClick={() => void quickSetStock(p, Math.max(p.stock, lowStockThreshold, 1), false)} style={{ padding: '6px 10px', background: '#3E7B4E', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Restock</button>
                     ) : (
-                      <button onClick={() => void quickSetStock(p, 0)} style={{ padding: '6px 10px', background: '#B37A3B', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Mark OOS</button>
+                      <button onClick={() => void quickSetStock(p, p.stock, true)} style={{ padding: '6px 10px', background: '#B37A3B', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Mark OOS</button>
                     )}
                     <button onClick={() => startEdit(p)} style={{ padding: '6px 10px', background: '#6B5247', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Edit</button>
                     <button onClick={() => handleDelete(p.productId)} style={{ padding: '6px 10px', background: '#C0504D', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Delete</button>

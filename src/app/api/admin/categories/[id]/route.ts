@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Category from '@/models/Category';
 import { requireAdmin } from '@/lib/adminAuth';
+import mongoose from 'mongoose';
 
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -12,8 +13,12 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const body = await req.json();
 
+    const query = mongoose.Types.ObjectId.isValid(id)
+      ? { $or: [{ categoryId: id }, { _id: new mongoose.Types.ObjectId(id) }] }
+      : { categoryId: id };
+
     const category = await Category.findOneAndUpdate(
-      { categoryId: id },
+      query,
       {
         name: body.name,
         description: body.description,
@@ -44,7 +49,11 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     await connectDB();
     const { id } = await params;
 
-    const category = await Category.findOneAndDelete({ categoryId: id });
+    const query = mongoose.Types.ObjectId.isValid(id)
+      ? { $or: [{ categoryId: id }, { _id: new mongoose.Types.ObjectId(id) }] }
+      : { categoryId: id };
+
+    const category = await Category.findOneAndDelete(query);
 
     if (!category) {
       return NextResponse.json({ error: 'Category not found' }, { status: 404 });

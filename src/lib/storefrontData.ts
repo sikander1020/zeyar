@@ -49,7 +49,7 @@ function normalizeProduct(p: {
     tags: Array.isArray(p.tags) ? p.tags : [],
     stock: Number(p.stock) || 0,
     isActive: p.isActive !== false,
-    outOfStock: p.outOfStock === true || (Number(p.stock) || 0) <= 0,
+    outOfStock: p.outOfStock === true,
     isNew: p.isNewArrival === true,
     isSale: p.isSale === true,
     isBestseller: p.isBestseller === true,
@@ -57,6 +57,7 @@ function normalizeProduct(p: {
 }
 
 function normalizeCategory(c: {
+  _id?: unknown;
   categoryId: string;
   name: string;
   slug: string;
@@ -65,8 +66,12 @@ function normalizeCategory(c: {
   isActive?: boolean;
   sortOrder?: number;
 }, count = 0): StoreCategory {
+  const resolvedId = typeof c.categoryId === 'string' && c.categoryId.trim().length > 0
+    ? c.categoryId.trim()
+    : String(c._id ?? '').trim();
+
   return {
-    id: c.categoryId,
+    id: resolvedId,
     name: c.name,
     slug: c.slug,
     description: c.description || '',

@@ -51,7 +51,7 @@ function ProductCard({ product, index }: { product: StoreProduct; index: number 
           <div className="absolute top-4 left-4 flex flex-col gap-1.5">
             {product.isNew && <span className="badge-new">New</span>}
             {product.isSale && <span className="badge-sale">Sale</span>}
-            {(product.outOfStock || product.stock <= 0) && <span className="badge-sale">Out</span>}
+            {product.outOfStock && <span className="badge-sale">Out</span>}
           </div>
 
           {/* Quick actions */}
@@ -63,7 +63,7 @@ function ProductCard({ product, index }: { product: StoreProduct; index: number 
               <Heart size={14} className={wishlisted ? 'fill-current' : ''} strokeWidth={1.5} />
             </button>
             <button
-              disabled={product.outOfStock || product.stock <= 0}
+              disabled={product.outOfStock}
               onClick={(e) => {
                 e.preventDefault();
                 addItem(product, product.sizes[1] || product.sizes[0], product.colors[0]);
