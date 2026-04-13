@@ -10,12 +10,20 @@ import { useRouter } from 'next/navigation';
 
 const steps = ['Shipping', 'Payment', 'Review'];
 
+function formatMoney(amount: number) {
+  return `Rs ${Math.round(amount).toLocaleString()}`;
+}
+
 export default function CheckoutPage() {
   const [step, setStep] = useState(0);
   const [placed, setPlaced] = useState(false);
   const { items, total, clearCart } = useCartStore();
   const router = useRouter();
   const [submitError, setSubmitError] = useState('');
+  const bankName = process.env.NEXT_PUBLIC_BANK_NAME ?? '';
+  const bankAccountTitle = process.env.NEXT_PUBLIC_BANK_ACCOUNT_TITLE ?? '';
+  const bankAccountNumber = process.env.NEXT_PUBLIC_BANK_ACCOUNT_NUMBER ?? '';
+  const hasBankDetails = Boolean(bankName && bankAccountTitle && bankAccountNumber);
 
   const [form, setForm] = useState({
     firstName: '', lastName: '', email: '', phone: '',
@@ -306,14 +314,22 @@ export default function CheckoutPage() {
                         <p className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
                           Bank Account
                         </p>
-                        <div className="text-sm text-brown font-inter space-y-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          <div><span className="text-brown-muted">Bank:</span> (add your bank name)</div>
-                          <div><span className="text-brown-muted">Account Title:</span> (add title)</div>
-                          <div><span className="text-brown-muted">Account / IBAN:</span> (add number)</div>
-                        </div>
-                        <p className="text-xs text-brown-muted font-inter mt-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          Note: Use your Order ID as reference if your bank app allows it.
-                        </p>
+                        {hasBankDetails ? (
+                          <>
+                            <div className="text-sm text-brown font-inter space-y-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+                              <div><span className="text-brown-muted">Bank:</span> {bankName}</div>
+                              <div><span className="text-brown-muted">Account Title:</span> {bankAccountTitle}</div>
+                              <div><span className="text-brown-muted">Account / IBAN:</span> {bankAccountNumber}</div>
+                            </div>
+                            <p className="text-xs text-brown-muted font-inter mt-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                              Note: Use your Order ID as reference if your bank app allows it.
+                            </p>
+                          </>
+                        ) : (
+                          <p className="text-xs text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                            Bank details are being updated. Place your order and our team will share payment details on WhatsApp/Email right away.
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}
@@ -355,7 +371,7 @@ export default function CheckoutPage() {
                       className="btn-luxury btn-rose flex-1 flex items-center justify-center gap-2"
                     >
                       <ShieldCheck size={16} strokeWidth={2} />
-                      Place Order — ${finalTotal.toFixed(0)}
+                      Place Order - {formatMoney(finalTotal)}
                     </motion.button>
                   </div>
                   {submitError && (
@@ -382,7 +398,7 @@ export default function CheckoutPage() {
                       <div className="flex-1">
                         <p className="font-playfair text-brown text-xs" style={{ fontFamily: "'Playfair Display', serif" }}>{item.product.name}</p>
                         <p className="text-brown-muted font-inter text-xs" style={{ fontFamily: "'Inter', sans-serif" }}>Qty: {item.quantity} · {item.selectedSize}</p>
-                        <p className="text-brown font-semibold font-inter text-xs" style={{ fontFamily: "'Inter', sans-serif" }}>${item.product.price * item.quantity}</p>
+                        <p className="text-brown font-semibold font-inter text-xs" style={{ fontFamily: "'Inter', sans-serif" }}>{formatMoney(item.product.price * item.quantity)}</p>
                       </div>
                     </div>
                   ))}
@@ -420,16 +436,16 @@ export default function CheckoutPage() {
                     )}
                   </div>
                   <div className="flex justify-between text-sm font-inter text-brown-muted" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    <span>Subtotal</span><span>${subtotal.toFixed(0)}</span>
+                    <span>Subtotal</span><span>{formatMoney(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-sm font-inter text-brown-muted" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    <span>Discount</span><span>- ${discount.toFixed(0)}</span>
+                    <span>Discount</span><span>- {formatMoney(discount)}</span>
                   </div>
                   <div className="flex justify-between text-sm font-inter text-brown-muted" style={{ fontFamily: "'Inter', sans-serif" }}>
                     <span>Shipping</span><span className="text-rose-gold">Free</span>
                   </div>
                   <div className="flex justify-between font-playfair font-semibold text-brown pt-2 border-t border-nude/20" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    <span>Total</span><span>${finalTotal.toFixed(0)}</span>
+                    <span>Total</span><span>{formatMoney(finalTotal)}</span>
                   </div>
                 </div>
 

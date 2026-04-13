@@ -250,11 +250,11 @@ export default function ProductPage() {
                   3D View
                 </button>
                 <button
-                  disabled={product.outOfStock}
+                  onClick={() => setActiveTab('images')}
                   className={`flex-1 py-3 text-xs tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeTab === 'images' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
                   style={{ fontFamily: "'Inter', sans-serif" }}
                 >
-                  {product.outOfStock ? 'Out of Stock' : 'Add to Bag'}
+                  Gallery
                 </button>
               </div>
 

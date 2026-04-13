@@ -1,5 +1,6 @@
 'use client';
 
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
@@ -86,9 +87,9 @@ export default function FeaturedCollections({ initialProducts }: { initialProduc
           transition={{ duration: 0.6, delay: 0.5 }}
           className="text-center mt-14"
         >
-          <a href="/dresses" className="btn-luxury btn-outline">
+          <Link href="/dresses" className="btn-luxury btn-outline">
             View All Pieces
-          </a>
+          </Link>
         </motion.div>
       </div>
     </section>

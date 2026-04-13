@@ -129,7 +129,7 @@ export default function CartDrawer() {
                           </button>
                         </div>
                         <span className="text-sm font-semibold text-brown font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          ${(item.product.price * item.quantity).toFixed(0)}
+                          Rs {(item.product.price * item.quantity).toLocaleString()}
                         </span>
                       </div>
                     </div>
@@ -146,7 +146,7 @@ export default function CartDrawer() {
                     Subtotal
                   </span>
                   <span className="text-lg font-playfair font-semibold text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    ${total().toFixed(0)}
+                    Rs {total().toLocaleString()}
                   </span>
                 </div>
                 <p className="text-xs text-brown-muted font-inter text-center" style={{ fontFamily: "'Inter', sans-serif" }}>
