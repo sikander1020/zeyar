@@ -6,6 +6,7 @@ import Testimonials from '@/components/sections/Testimonials';
 import Newsletter from '@/components/sections/Newsletter';
 import RecentlyViewedStrip from '@/components/sections/RecentlyViewedStrip';
 import ShopHeroMotion from '@/components/sections/ShopHeroMotion';
+import ShopHashScroll from '@/components/sections/ShopHashScroll';
 import RevealOnScroll from '@/components/animation/RevealOnScroll';
 import { getStorefrontCategories, getStorefrontProducts } from '@/lib/storefrontData';
 import type { StoreCategory, StoreProduct } from '@/types/storefront';
@@ -21,6 +22,7 @@ export default async function ShopPage() {
   return (
     <AppShell>
       <div className="pt-24 min-h-screen bg-cream">
+        <ShopHashScroll />
         <ShopHeroMotion />
 
         <RevealOnScroll>

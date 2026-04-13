@@ -6,6 +6,18 @@ import { motion, useReducedMotion } from 'framer-motion';
 export default function ShopHeroMotion() {
   const reduceMotion = useReducedMotion();
 
+  const jumpToNewArrivals = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    event.preventDefault();
+    const section = document.getElementById('new-arrivals');
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      window.history.replaceState(null, '', '/shop#new-arrivals');
+      return;
+    }
+
+    window.location.href = '/shop#new-arrivals';
+  };
+
   return (
     <section className="relative overflow-hidden bg-beige py-20 text-center mb-0">
       <motion.div
@@ -58,7 +70,7 @@ export default function ShopHeroMotion() {
           transition={{ duration: 0.6, ease: 'easeOut', delay: 0.22 }}
           className="mt-8 flex flex-wrap items-center justify-center gap-3"
         >
-          <Link href="/shop#new-arrivals" className="btn-luxury btn-primary">
+          <Link href="/shop#new-arrivals" onClick={jumpToNewArrivals} className="btn-luxury btn-primary">
             New Arrivals
           </Link>
           <Link href="/dresses" className="btn-luxury btn-outline">
