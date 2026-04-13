@@ -3,7 +3,25 @@
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Globe, Instagram, Facebook, MessageCircle, Music2, X } from 'lucide-react';
+import { Globe, MessageCircle, Music2, X } from 'lucide-react';
+
+function IconInstagram({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+      <rect x="2" y="2" width="20" height="20" rx="6" ry="6" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" y1="6.5" x2="17.51" y2="6.5" />
+    </svg>
+  );
+}
+
+function IconFacebook({ size = 18 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M24 12.073C24 5.405 18.627 0 12 0S0 5.405 0 12.073C0 18.1 4.388 23.094 10.125 24v-8.437H7.078v-3.49h3.047v-2.66c0-3.025 1.791-4.697 4.533-4.697 1.312 0 2.686.236 2.686.236v2.97h-1.513c-1.491 0-1.956.93-1.956 1.886v2.265h3.328l-.532 3.49h-2.796V24C19.612 23.094 24 18.1 24 12.073z"/>
+    </svg>
+  );
+}
 
 const destinations = [
   {
@@ -15,7 +33,7 @@ const destinations = [
   {
     label: 'Instagram',
     href: 'https://www.instagram.com/zaybaash/',
-    icon: Instagram,
+    icon: IconInstagram,
     style: 'bg-[#E1306C] text-white hover:bg-[#d22d65]',
   },
   {
@@ -27,7 +45,7 @@ const destinations = [
   {
     label: 'Facebook',
     href: 'https://facebook.com/zaybaash',
-    icon: Facebook,
+    icon: IconFacebook,
     style: 'bg-[#1877F2] text-white hover:bg-[#166fe5]',
   },
   {
