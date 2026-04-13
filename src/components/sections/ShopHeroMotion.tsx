@@ -58,7 +58,7 @@ export default function ShopHeroMotion() {
           transition={{ duration: 0.6, ease: 'easeOut', delay: 0.22 }}
           className="mt-8 flex flex-wrap items-center justify-center gap-3"
         >
-          <Link href="/dresses?sort=newest" className="btn-luxury btn-primary">
+          <Link href="/shop#new-arrivals" className="btn-luxury btn-primary">
             New Arrivals
           </Link>
           <Link href="/dresses" className="btn-luxury btn-outline">

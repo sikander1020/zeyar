@@ -43,7 +43,7 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
   const next = () => setStart(s => Math.min(maxStart, s + 1));
 
   return (
-    <section className="section-padding bg-cream-dark overflow-hidden">
+    <section id="new-arrivals" className="section-padding bg-cream-dark overflow-hidden scroll-mt-28">
       <div className="max-w-7xl mx-auto px-6" ref={ref}>
         <div className="flex items-end justify-between mb-14">
           <motion.div
@@ -145,7 +145,7 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
           transition={{ duration: 0.6, delay: 0.3 }}
           className="text-center mt-12"
         >
-          <Link href="/dresses?sort=newest&filter=new" className="btn-luxury btn-outline">
+          <Link href="/shop#new-arrivals" className="btn-luxury btn-outline">
             View All New Arrivals
           </Link>
         </motion.div>

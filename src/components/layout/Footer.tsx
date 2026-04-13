@@ -31,7 +31,7 @@ function IconFacebook({ size = 15 }: { size?: number }) {
 
 const footerLinks = {
   Shop: [
-    { label: 'New Arrivals', href: '/dresses?sort=newest' },
+    { label: 'New Arrivals', href: '/shop#new-arrivals' },
     { label: 'Dresses', href: '/dresses?category=Dresses' },
     { label: 'Two-Piece Sets', href: '/dresses?category=Two-Piece' },
     { label: 'Casual', href: '/dresses?category=Casual' },
