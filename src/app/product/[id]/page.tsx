@@ -287,11 +287,11 @@ export default function ProductPage() {
                         <Image src={img} alt={`View ${i+1}`} fill className="object-cover" />
                       </button>
                     ))}
-                        disabled={product.outOfStock}
+                  </div>
                 </div>
               )}
             </div>
-                        {product.outOfStock ? 'Out of Stock' : 'Add to Bag'}
+
             {/* Right: Product info */}
             <div className="flex flex-col">
               <div className="flex items-start justify-between mb-2">
@@ -395,12 +395,12 @@ export default function ProductPage() {
               <div className="flex gap-3 mb-8">
                 <motion.button
                   whileTap={{ scale: 0.98 }}
-                  disabled={product.outOfStock || product.stock <= 0}
+                  disabled={product.outOfStock}
                   onClick={handleAddToCart}
                   className="btn-luxury btn-primary flex-1 flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <ShoppingBag size={15} strokeWidth={2} />
-                  {product.outOfStock || product.stock <= 0 ? 'Out of Stock' : 'Add to Bag'}
+                  {product.outOfStock ? 'Out of Stock' : 'Add to Bag'}
                 </motion.button>
                 <button
                   onClick={() => toggle(product.id)}
@@ -599,11 +599,11 @@ export default function ProductPage() {
             </div>
             <button
               type="button"
-              disabled={product.outOfStock || product.stock <= 0}
+              disabled={product.outOfStock}
               onClick={handleAddToCart}
               className="btn-luxury btn-primary flex-1 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {product.outOfStock || product.stock <= 0 ? 'Out of Stock' : 'Add to Bag'}
+              {product.outOfStock ? 'Out of Stock' : 'Add to Bag'}
             </button>
           </div>
         </div>

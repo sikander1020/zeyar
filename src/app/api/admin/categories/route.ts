@@ -24,7 +24,7 @@ export async function GET() {
       image: c.image || '',
       isActive: c.isActive !== false,
       sortOrder: Number(c.sortOrder) || 0,
-      productCount: countMap.get(c.name) ?? Number(c.productCount) || 0,
+      productCount: (countMap.get(c.name) ?? Number(c.productCount)) || 0,
     }));
 
     if (result.length === 0 && countMap.size > 0) {
