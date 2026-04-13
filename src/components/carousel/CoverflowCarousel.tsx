@@ -15,12 +15,53 @@ interface CoverflowCarouselProps {
 }
 
 const CARD_ANGLE = 35; // Rotation angle for side cards
-const CARD_WIDTH = 280; // Width of each card in pixels
-const PERSPECTIVE = 1000; // Perspective depth
+
+function getCoverflowMetrics(viewportWidth: number) {
+  if (viewportWidth < 640) {
+    return {
+      cardWidth: 220,
+      containerHeight: 430,
+      perspective: 900,
+      sideOffset: 130,
+      sideDepth: -85,
+      sideScale: 0.84,
+      centerScale: 1.03,
+      farOffset: 180,
+      farDepth: -170,
+    };
+  }
+
+  if (viewportWidth < 1024) {
+    return {
+      cardWidth: 290,
+      containerHeight: 520,
+      perspective: 1200,
+      sideOffset: 180,
+      sideDepth: -110,
+      sideScale: 0.86,
+      centerScale: 1.08,
+      farOffset: 250,
+      farDepth: -210,
+    };
+  }
+
+  return {
+    cardWidth: 360,
+    containerHeight: 620,
+    perspective: 1500,
+    sideOffset: 230,
+    sideDepth: -140,
+    sideScale: 0.87,
+    centerScale: 1.12,
+    farOffset: 330,
+    farDepth: -260,
+  };
+}
 
 export default function CoverflowCarousel({ products, onSlideChange }: CoverflowCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isAutoplay, setIsAutoplay] = useState(true);
+  const [viewportWidth, setViewportWidth] = useState(1280);
   const containerRef = useRef<HTMLDivElement>(null);
   const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -40,6 +81,16 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
     };
   }, [isAutoplay, products.length]);
 
+  useEffect(() => {
+    const updateViewport = () => {
+      setViewportWidth(window.innerWidth);
+    };
+
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+    return () => window.removeEventListener('resize', updateViewport);
+  }, []);
+
   const handlePrev = () => {
     setIsAutoplay(false);
     setActiveIndex((prev) => (prev - 1 + products.length) % products.length);
@@ -53,6 +104,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
   };
 
   const getCardPosition = (index: number): { x: number; z: number; angle: number; opacity: number; scale: number } => {
+    const metrics = getCoverflowMetrics(viewportWidth);
     let position = index - activeIndex;
 
     // Normalize position to -1, 0, 1 range
@@ -64,33 +116,50 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
 
     if (position === 0) {
       // Center card - focused
-      return { x: 0, z: 0, angle: 0, opacity: 1, scale: 1.1 };
+      return { x: 0, z: 0, angle: 0, opacity: 1, scale: metrics.centerScale };
     } else if (position === 1) {
       // Right card - rotated right
-      return { x: CARD_WIDTH * 0.5, z: -100, angle: CARD_ANGLE, opacity: 0.7, scale: 0.85 };
+      return { x: metrics.sideOffset, z: metrics.sideDepth, angle: CARD_ANGLE, opacity: 0.72, scale: metrics.sideScale };
     } else if (position === -1) {
       // Left card - rotated left
-      return { x: -CARD_WIDTH * 0.5, z: -100, angle: -CARD_ANGLE, opacity: 0.7, scale: 0.85 };
+      return { x: -metrics.sideOffset, z: metrics.sideDepth, angle: -CARD_ANGLE, opacity: 0.72, scale: metrics.sideScale };
     } else if (Math.abs(position) === 2) {
       // Far cards - barely visible
-      return { x: position > 0 ? CARD_WIDTH * 0.8 : -CARD_WIDTH * 0.8, z: -200, angle: position > 0 ? CARD_ANGLE * 1.5 : -CARD_ANGLE * 1.5, opacity: 0, scale: 0.7 };
+      return {
+        x: position > 0 ? metrics.farOffset : -metrics.farOffset,
+        z: metrics.farDepth,
+        angle: position > 0 ? CARD_ANGLE * 1.5 : -CARD_ANGLE * 1.5,
+        opacity: 0.2,
+        scale: 0.7,
+      };
     }
 
-    return { x: position * CARD_WIDTH, z: -300, angle: position > 0 ? CARD_ANGLE * 2 : -CARD_ANGLE * 2, opacity: 0, scale: 0.6 };
+    return {
+      x: position * metrics.farOffset,
+      z: metrics.farDepth - 80,
+      angle: position > 0 ? CARD_ANGLE * 2 : -CARD_ANGLE * 2,
+      opacity: 0,
+      scale: 0.55,
+    };
   };
 
+  const metrics = getCoverflowMetrics(viewportWidth);
+
   return (
-    <div className="relative w-full py-12">
+    <div className="relative w-full py-8 md:py-12">
       {/* Perspective container */}
       <div
         ref={containerRef}
-        className="relative h-96 flex items-center justify-center overflow-hidden"
+        className="relative flex items-center justify-center overflow-hidden"
         style={{
-          perspective: `${PERSPECTIVE}px`,
+          perspective: `${metrics.perspective}px`,
+          height: `${metrics.containerHeight}px`,
         }}
         onMouseEnter={() => setIsAutoplay(false)}
         onMouseLeave={() => setIsAutoplay(true)}
       >
+        <div className="pointer-events-none absolute inset-x-0 bottom-6 mx-auto h-20 w-[72%] rounded-full bg-brown/15 blur-2xl" />
+
         {/* Cards */}
         <div className="relative w-full h-full flex items-center justify-center">
           {products.map((product, index) => {
@@ -100,7 +169,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
             return (
               <motion.div
                 key={product.id}
-                className="absolute w-72"
+                className="absolute"
                 animate={{
                   x,
                   z,
@@ -115,6 +184,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
                 }}
                 style={{
                   transformStyle: 'preserve-3d',
+                  width: `${metrics.cardWidth}px`,
                 }}
               >
                 {/* Card container with shadow */}
@@ -156,7 +226,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
                         <motion.div
                           initial={{ opacity: 0, y: 10 }}
                           whileInView={{ opacity: 1, y: 0 }}
-                          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-brown/95 to-brown/60 p-6 text-cream"
+                          className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-brown/95 to-brown/60 p-4 md:p-6 text-cream"
                         >
                           <div className="flex gap-3 mb-4">
                             <button
@@ -207,18 +277,18 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
         {/* Navigation Arrows */}
         <button
           onClick={handlePrev}
-          className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-brown hover:bg-brown hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
+          className="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-brown hover:bg-brown hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
           aria-label="Previous"
         >
-          <ChevronLeft size={24} strokeWidth={1.5} />
+          <ChevronLeft size={20} strokeWidth={1.5} />
         </button>
 
         <button
           onClick={handleNext}
-          className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-brown hover:bg-brown hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
+          className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-brown hover:bg-brown hover:text-white transition-all duration-300 shadow-lg hover:shadow-xl"
           aria-label="Next"
         >
-          <ChevronRight size={24} strokeWidth={1.5} />
+          <ChevronRight size={20} strokeWidth={1.5} />
         </button>
       </div>
 
