@@ -1381,9 +1381,32 @@ function ProductsTab() {
     }
   }
 
+  async function replaceCatalogWithMarketData() {
+    const ok = confirm('This will delete all current products, categories, and reviews, then insert a new market catalog. Continue?');
+    if (!ok) return;
+
+    try {
+      const res = await fetch('/api/admin/catalog/replace-market', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ confirm: 'REPLACE_WITH_MARKET_CATALOG' }),
+      });
+
+      const data = await res.json() as { success?: boolean; error?: string; productsInserted?: number };
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Failed to replace catalog');
+      }
+
+      alert(`Catalog replaced successfully. Inserted ${data.productsInserted ?? 0} products.`);
+      void loadProducts();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to replace catalog');
+    }
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>{products.length} products</p>
           <span style={{ fontSize: 12, color: '#A0613E', background: '#FDF3EC', border: '1px solid #F1D9C7', borderRadius: 999, padding: '4px 10px' }}>
@@ -1398,10 +1421,19 @@ function ProductsTab() {
             </span>
           )}
         </div>
-        <button onClick={() => { setShowForm(!showForm); setEditing(null); resetForm(); }}
-          style={{ padding: '10px 16px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-          {showForm ? 'Cancel' : '+ Add Product'}
-        </button>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <button
+            onClick={() => void replaceCatalogWithMarketData()}
+            style={{ padding: '10px 12px', background: '#6B5247', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+            title="Delete current catalog and insert new market catalog"
+          >
+            Replace Catalog
+          </button>
+          <button onClick={() => { setShowForm(!showForm); setEditing(null); resetForm(); }}
+            style={{ padding: '10px 16px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            {showForm ? 'Cancel' : '+ Add Product'}
+          </button>
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>

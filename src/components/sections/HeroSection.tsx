@@ -2,10 +2,19 @@
 
 import { useEffect } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ArrowRight, Play } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
+
+const HeroScene = dynamic(() => import('@/components/3d/HeroScene'), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-full flex items-center justify-center">
+      <div className="w-32 h-32 rounded-full border border-nude/30 animate-pulse" />
+    </div>
+  ),
+});
 
 export default function HeroSection() {
   const router = useRouter();
@@ -124,7 +133,7 @@ export default function HeroSection() {
             </motion.div>
           </div>
 
-          {/* Right: Hero visual */}
+          {/* Right: 3D Hero scene */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -132,17 +141,10 @@ export default function HeroSection() {
             className="order-1 lg:order-2 relative"
           >
             <div className="relative w-full aspect-square max-w-lg mx-auto">
-              {/* Glow ring behind visual */}
+              {/* Glow ring behind scene */}
               <div className="absolute inset-0 rounded-full bg-gradient-to-br from-nude/40 to-rose-gold/20 blur-3xl scale-90" />
               <div className="relative w-full h-full rounded-[2.5rem] overflow-hidden border border-white/60 shadow-[0_36px_90px_-40px_rgba(74,46,38,0.5)]">
-                <Image
-                  src="https://images.unsplash.com/photo-1594938298603-c8148c4b69c8?w=1200&q=80"
-                  alt="ZAYBAASH luxury collection"
-                  fill
-                  className="object-cover"
-                  priority
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-brown/35 via-brown/10 to-transparent" />
+                <HeroScene />
               </div>
             </div>
 

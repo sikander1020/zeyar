@@ -353,7 +353,9 @@ export default function ProductPage() {
 
   const related = allProducts.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 3);
   const showRelatedLoading = catalogLoading && related.length === 0;
+  const has3dSourceImages = Boolean(product.frontImageUrl || product.backImageUrl || product.images.length >= 2);
   const hasModel3d = Boolean(product.model3dUrl && product.model3dStatus === 'ready');
+  const show3dTab = hasModel3d || has3dSourceImages;
 
   return (
     <AppShell>
@@ -375,7 +377,7 @@ export default function ProductPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20">
             {/* Left: Media */}
             <div>
-              {hasModel3d && (
+              {show3dTab && (
                 <div className="flex mb-4 border border-nude/30">
                   <button
                     type="button"
@@ -396,8 +398,21 @@ export default function ProductPage() {
                 </div>
               )}
 
-              {activeTab === '3d' && hasModel3d ? (
-                <ModelViewer3D modelUrl={product.model3dUrl || ''} posterUrl={product.frontImageUrl || product.images[0]} />
+              {activeTab === '3d' && show3dTab ? (
+                hasModel3d ? (
+                  <ModelViewer3D modelUrl={product.model3dUrl || ''} posterUrl={product.frontImageUrl || product.images[0]} />
+                ) : (
+                  <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-beige to-cream-dark mb-3 border border-nude/30 flex items-center justify-center">
+                    <div className="max-w-md px-6 text-center">
+                      <p className="text-xs tracking-[0.18em] uppercase text-rose-gold font-semibold font-inter mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        3D Preview Preparing
+                      </p>
+                      <p className="text-sm text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                        3D model is not ready yet for this product. Use the dashboard 3D button to generate it from front and back images.
+                      </p>
+                    </div>
+                  </div>
+                )
               ) : (
                 <div className="aspect-square relative overflow-hidden bg-beige mb-3">
                   <Image
