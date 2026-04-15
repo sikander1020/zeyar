@@ -23,10 +23,6 @@ export async function POST(req: NextRequest) {
     const guard = requireAdmin(req);
     if (guard) return guard;
 
-    if (!hasVirtualThreadsConfig()) {
-      return NextResponse.json({ error: 'VirtualThreads API is not configured' }, { status: 400 });
-    }
-
     const body = await req.json().catch(() => ({})) as { productId?: string };
     const productId = String(body.productId ?? '').trim();
     if (!productId) {
@@ -55,6 +51,27 @@ export async function POST(req: NextRequest) {
         },
       );
       return NextResponse.json({ error: 'Both front and back images are required' }, { status: 400 });
+    }
+
+    if (!hasVirtualThreadsConfig()) {
+      await Product.updateOne(
+        { _id: product._id },
+        {
+          $set: {
+            model3dStatus: 'ready',
+            model3dError: 'VirtualThreads not configured; using image-based 3D preview state',
+            model3dUpdatedAt: new Date(),
+          },
+        },
+      );
+
+      const freshWithoutProvider = await Product.findById(product._id).lean();
+      return NextResponse.json({
+        success: true,
+        providerConfigured: false,
+        message: 'VirtualThreads is not configured. Product remains available with image-based 3D preview.',
+        product: freshWithoutProvider,
+      });
     }
 
     await Product.updateOne(
