@@ -77,7 +77,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
 
     autoplayTimerRef.current = setInterval(() => {
       setActiveIndex((prev) => (prev + 1) % products.length);
-    }, 5000);
+    }, 3200);
 
     return () => {
       if (autoplayTimerRef.current) clearInterval(autoplayTimerRef.current);

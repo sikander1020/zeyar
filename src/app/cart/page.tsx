@@ -43,7 +43,7 @@ export default function CartPage() {
               <div className="lg:col-span-2 space-y-6">
                 {items.map((item, i) => (
                   <motion.div
-                    key={`${item.product.id}-${item.selectedSize}`}
+                    key={`${item.product.id}-${item.selectedSize}-${item.selectedColor.name}`}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: i * 0.08 }}
@@ -63,7 +63,7 @@ export default function CartPage() {
                           </h3>
                         </div>
                         <button
-                          onClick={() => removeItem(item.product.id, item.selectedSize)}
+                          onClick={() => removeItem(item.product.id, item.selectedSize, item.selectedColor.name)}
                           className="p-2 text-brown-muted hover:text-rose-gold transition-colors"
                         >
                           <Trash2 size={16} strokeWidth={1.5} />
@@ -78,11 +78,11 @@ export default function CartPage() {
                       </div>
                       <div className="flex items-center justify-between mt-4">
                         <div className="flex items-center gap-3 border border-nude/40">
-                          <button onClick={() => updateQuantity(item.product.id, item.selectedSize, item.quantity - 1)} className="p-2 text-brown hover:text-rose-gold transition-colors">
+                          <button onClick={() => updateQuantity(item.product.id, item.selectedSize, item.quantity - 1, item.selectedColor.name)} className="p-2 text-brown hover:text-rose-gold transition-colors">
                             <Minus size={13} strokeWidth={2} />
                           </button>
                           <span className="w-6 text-center text-sm font-inter text-brown" style={{ fontFamily: "'Inter', sans-serif" }}>{item.quantity}</span>
-                          <button onClick={() => updateQuantity(item.product.id, item.selectedSize, item.quantity + 1)} className="p-2 text-brown hover:text-rose-gold transition-colors">
+                          <button onClick={() => updateQuantity(item.product.id, item.selectedSize, item.quantity + 1, item.selectedColor.name)} className="p-2 text-brown hover:text-rose-gold transition-colors">
                             <Plus size={13} strokeWidth={2} />
                           </button>
                         </div>

@@ -7,9 +7,16 @@ import CookieConsentBanner from '@/components/layout/CookieConsentBanner';
 import WhatsAppFab from '@/components/layout/WhatsAppFab';
 import { motion, AnimatePresence } from 'framer-motion';
 import { usePathname } from 'next/navigation';
+import { useEffect } from 'react';
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    document.documentElement.scrollTop = 0;
+    document.body.scrollTop = 0;
+  }, [pathname]);
 
   return (
     <>

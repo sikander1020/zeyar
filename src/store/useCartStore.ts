@@ -13,8 +13,8 @@ interface CartStore {
   items: CartItem[];
   isOpen: boolean;
   addItem: (product: StoreProduct, size: string, color: { name: string; hex: string }) => void;
-  removeItem: (productId: string, size: string) => void;
-  updateQuantity: (productId: string, size: string, quantity: number) => void;
+  removeItem: (productId: string, size: string, colorName?: string) => void;
+  updateQuantity: (productId: string, size: string, quantity: number, colorName?: string) => void;
   clearCart: () => void;
   toggleCart: () => void;
   total: () => number;
@@ -30,12 +30,12 @@ export const useCartStore = create<CartStore>()(
       addItem: (product, size, color) => {
         set((state) => {
           const existing = state.items.find(
-            (i) => i.product.id === product.id && i.selectedSize === size
+            (i) => i.product.id === product.id && i.selectedSize === size && i.selectedColor.name === color.name
           );
           if (existing) {
             return {
               items: state.items.map((i) =>
-                i.product.id === product.id && i.selectedSize === size
+                i.product.id === product.id && i.selectedSize === size && i.selectedColor.name === color.name
                   ? { ...i, quantity: i.quantity + 1 }
                   : i
               ),
@@ -47,22 +47,27 @@ export const useCartStore = create<CartStore>()(
         });
       },
 
-      removeItem: (productId, size) => {
+      removeItem: (productId, size, colorName) => {
         set((state) => ({
           items: state.items.filter(
-            (i) => !(i.product.id === productId && i.selectedSize === size)
+            (i) => {
+              if (colorName) {
+                return !(i.product.id === productId && i.selectedSize === size && i.selectedColor.name === colorName);
+              }
+              return !(i.product.id === productId && i.selectedSize === size);
+            }
           ),
         }));
       },
 
-      updateQuantity: (productId, size, quantity) => {
+      updateQuantity: (productId, size, quantity, colorName) => {
         if (quantity <= 0) {
-          get().removeItem(productId, size);
+          get().removeItem(productId, size, colorName);
           return;
         }
         set((state) => ({
           items: state.items.map((i) =>
-            i.product.id === productId && i.selectedSize === size
+            i.product.id === productId && i.selectedSize === size && (!colorName || i.selectedColor.name === colorName)
               ? { ...i, quantity }
               : i
           ),

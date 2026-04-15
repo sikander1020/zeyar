@@ -75,9 +75,15 @@ interface ProductRow {
   stock: number;
   sold: number;
   images?: string[];
+  frontImageUrl?: string;
+  backImageUrl?: string;
+  model3dUrl?: string;
+  model3dStatus?: 'none' | 'pending' | 'ready' | 'failed';
+  model3dError?: string;
   description?: string;
   details?: string[];
   sizes?: string[];
+  sizeChartRows?: Array<{ size: string; chest: number; waist: number; hips: number; length: number }>;
   colors?: Array<{ name: string; hex: string }>;
   rating?: number;
   reviewCount?: number;
@@ -1057,8 +1063,12 @@ function ProductsTab() {
     costPrice: 0,
     stock: 0,
     description: '',
+    frontImageUrl: '',
+    backImageUrl: '',
+    model3dUrl: '',
     detailsText: '',
     sizesText: 'S, M, L',
+    sizeChartText: 'XS,18,16,20,41\nS,19,17,21,42\nM,20,18,22,43\nL,22,20,24,44\nXL,24,22,26,45',
     colorsText: 'Default:#E6B7A9',
     tagsText: '',
     isActive: true,
@@ -1090,6 +1100,26 @@ function ProductsTab() {
     return parsed.length > 0 ? parsed : [{ name: 'Default', hex: '#E6B7A9' }];
   }
 
+  function parseSizeChartRows(value: string): Array<{ size: string; chest: number; waist: number; hips: number; length: number }> {
+    return value
+      .split(/\n/g)
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .map((line) => {
+        const [sizeRaw, chestRaw, waistRaw, hipsRaw, lengthRaw] = line.split(',').map((s) => s.trim());
+        const size = sizeRaw || '';
+        const chest = Number(chestRaw);
+        const waist = Number(waistRaw);
+        const hips = Number(hipsRaw);
+        const length = Number(lengthRaw);
+        if (!size || !Number.isFinite(chest) || !Number.isFinite(waist) || !Number.isFinite(hips) || !Number.isFinite(length)) {
+          return null;
+        }
+        return { size, chest, waist, hips, length };
+      })
+      .filter((v): v is { size: string; chest: number; waist: number; hips: number; length: number } => !!v);
+  }
+
   function resetForm() {
     setFormData({
       name: '',
@@ -1099,8 +1129,12 @@ function ProductsTab() {
       costPrice: 0,
       stock: 0,
       description: '',
+      frontImageUrl: '',
+      backImageUrl: '',
+      model3dUrl: '',
       detailsText: '',
       sizesText: 'S, M, L',
+      sizeChartText: 'XS,18,16,20,41\nS,19,17,21,42\nM,20,18,22,43\nL,22,20,24,44\nXL,24,22,26,45',
       colorsText: 'Default:#E6B7A9',
       tagsText: '',
       isActive: true,
@@ -1112,26 +1146,54 @@ function ProductsTab() {
     setUploadedImages([]);
   }
 
+  function readFileAsDataUrl(file: File): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const value = typeof reader.result === 'string' ? reader.result : '';
+        if (!value) {
+          reject(new Error('Could not read image file'));
+          return;
+        }
+        resolve(value);
+      };
+      reader.onerror = () => reject(new Error('Could not read image file'));
+      reader.readAsDataURL(file);
+    });
+  }
+
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.currentTarget.files;
     if (!files) return;
-    
+
     setUploadingImage(true);
-    for (let i = 0; i < files.length; i++) {
-      const file = files[i];
-      try {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          const dataUrl = event.target?.result as string;
-          setUploadedImages((prev) => [...(prev ?? []), dataUrl]);
-        };
-        reader.readAsDataURL(file);
-      } catch (err) {
-        console.error('Error reading file:', err);
-      }
+    try {
+      const nextImages = await Promise.all(Array.from(files).map((file) => readFileAsDataUrl(file)));
+      setUploadedImages((prev) => [...(prev ?? []), ...nextImages]);
+    } catch (err) {
+      console.error('Error reading file:', err);
+      alert('Failed to read one or more images. Please try again.');
+    } finally {
+      setUploadingImage(false);
     }
-    setUploadingImage(false);
     e.currentTarget.value = '';
+  }
+
+  async function handleFrontBackImageUpload(
+    e: React.ChangeEvent<HTMLInputElement>,
+    key: 'frontImageUrl' | 'backImageUrl'
+  ) {
+    const file = e.currentTarget.files?.[0];
+    if (!file) return;
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      setFormData((prev) => ({ ...prev, [key]: dataUrl }));
+    } catch (err) {
+      console.error('Error reading front/back image:', err);
+      alert('Failed to read image. Please try again.');
+    } finally {
+      e.currentTarget.value = '';
+    }
   }
 
   function removeUploadedImage(index: number) {
@@ -1164,6 +1226,8 @@ function ProductsTab() {
     try {
       const url = editing ? `/api/admin/products/${editing.productId}` : '/api/admin/products';
       const method = editing ? 'PUT' : 'POST';
+      const inferredFrontImage = formData.frontImageUrl.trim() || uploadedImages[0] || '';
+      const inferredBackImage = formData.backImageUrl.trim() || uploadedImages[1] || uploadedImages[0] || '';
 
       const payload = {
         name: formData.name,
@@ -1174,8 +1238,12 @@ function ProductsTab() {
         stock: Number(formData.stock) || 0,
         description: formData.description,
         images: uploadedImages,
+        frontImageUrl: inferredFrontImage,
+        backImageUrl: inferredBackImage,
+        model3dUrl: formData.model3dUrl,
         details: parseCsvOrLines(formData.detailsText),
         sizes: parseCsvOrLines(formData.sizesText),
+        sizeChartRows: parseSizeChartRows(formData.sizeChartText),
         colors: parseColors(formData.colorsText),
         tags: parseCsvOrLines(formData.tagsText),
         isActive: formData.isActive,
@@ -1207,6 +1275,24 @@ function ProductsTab() {
     void loadProducts();
   }
 
+  async function generate3D(prod: ProductRow) {
+    try {
+      const res = await fetch('/api/admin/products/generate-3d', {
+        method: 'POST',
+        headers: authHeaders(),
+        body: JSON.stringify({ productId: prod.productId }),
+      });
+      const data = await res.json() as { error?: string };
+      if (!res.ok) {
+        throw new Error(data.error || 'Could not generate 3D model');
+      }
+      alert('3D model generated successfully.');
+      void loadProducts();
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Could not generate 3D model');
+    }
+  }
+
   async function quickSetStock(prod: ProductRow, nextStock: number, nextOutOfStock = prod.outOfStock) {
     const payload = {
       name: prod.name,
@@ -1217,8 +1303,14 @@ function ProductsTab() {
       stock: nextStock,
       description: prod.description,
       images: prod.images,
+      frontImageUrl: prod.frontImageUrl,
+      backImageUrl: prod.backImageUrl,
+      model3dUrl: prod.model3dUrl,
+      model3dStatus: prod.model3dStatus,
+      model3dError: prod.model3dError,
       details: prod.details,
       sizes: prod.sizes,
+      sizeChartRows: prod.sizeChartRows,
       colors: prod.colors,
       rating: prod.rating,
       reviewCount: prod.reviewCount,
@@ -1247,8 +1339,12 @@ function ProductsTab() {
       costPrice: prod.costPrice,
       stock: prod.stock,
       description: prod.description || '',
+      frontImageUrl: prod.frontImageUrl || '',
+      backImageUrl: prod.backImageUrl || '',
+      model3dUrl: prod.model3dUrl || '',
       detailsText: (prod.details ?? []).join('\n'),
       sizesText: (prod.sizes ?? []).join(', '),
+      sizeChartText: (prod.sizeChartRows ?? []).map((r) => `${r.size},${r.chest},${r.waist},${r.hips},${r.length}`).join('\n'),
       colorsText: (prod.colors ?? []).map((c) => `${c.name}:${c.hex}`).join(', '),
       tagsText: (prod.tags ?? []).join(', '),
       isActive: prod.isActive !== false,
@@ -1354,6 +1450,54 @@ function ProductsTab() {
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
             <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Description"
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1', minHeight: 90 }} />
+            <div style={{ border: '1px solid #EBD9CC', borderRadius: 8, padding: 10, background: CREAM }}>
+              <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 6, fontWeight: 600 }}>Front Image (for 3D)</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => void handleFrontBackImageUpload(e, 'frontImageUrl')}
+                style={{ display: 'block', width: '100%', fontSize: 12, color: BROWN }}
+              />
+              {formData.frontImageUrl && (
+                <div style={{ marginTop: 8 }}>
+                  <img src={formData.frontImageUrl} alt="Front preview" style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8, border: '1px solid #EBD9CC' }} />
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData((prev) => ({ ...prev, frontImageUrl: '' }))}
+                      style={{ marginTop: 8, padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12 }}
+                    >
+                      Remove Front
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div style={{ border: '1px solid #EBD9CC', borderRadius: 8, padding: 10, background: CREAM }}>
+              <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 6, fontWeight: 600 }}>Back Image (for 3D)</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => void handleFrontBackImageUpload(e, 'backImageUrl')}
+                style={{ display: 'block', width: '100%', fontSize: 12, color: BROWN }}
+              />
+              {formData.backImageUrl && (
+                <div style={{ marginTop: 8 }}>
+                  <img src={formData.backImageUrl} alt="Back preview" style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8, border: '1px solid #EBD9CC' }} />
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData((prev) => ({ ...prev, backImageUrl: '' }))}
+                      style={{ marginTop: 8, padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12 }}
+                    >
+                      Remove Back
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <input value={formData.model3dUrl} onChange={(e) => setFormData({ ...formData, model3dUrl: e.target.value })} placeholder="3D Model URL (.glb)"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 8, fontWeight: 600 }}>Product Images</label>
               <input
@@ -1383,11 +1527,16 @@ function ProductsTab() {
               {uploadedImages.length === 0 && (
                 <p style={{ fontSize: 12, color: MUTED, marginTop: 8 }}>No images uploaded yet.</p>
               )}
+              <p style={{ fontSize: 12, color: MUTED, marginTop: 8 }}>
+                3D generation uses Front/Back uploads above first. If empty, it falls back to Product Images #1 and #2.
+              </p>
             </div>
             <textarea value={formData.detailsText} onChange={(e) => setFormData({ ...formData, detailsText: e.target.value })} placeholder="Details (comma or line separated)"
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 90 }} />
             <input value={formData.sizesText} onChange={(e) => setFormData({ ...formData, sizesText: e.target.value })} placeholder="Sizes (e.g. XS,S,M,L)"
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <textarea value={formData.sizeChartText} onChange={(e) => setFormData({ ...formData, sizeChartText: e.target.value })} placeholder="Size chart rows: size,chest,waist,hips,length"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 90 }} />
             <input value={formData.colorsText} onChange={(e) => setFormData({ ...formData, colorsText: e.target.value })} placeholder="Colors (e.g. Rose:#E6B7A9, Black:#1A1A1A)"
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
             <input value={formData.tagsText} onChange={(e) => setFormData({ ...formData, tagsText: e.target.value })} placeholder="Tags (comma separated)"
@@ -1465,6 +1614,7 @@ function ProductsTab() {
                 </td>
                 <td style={{ padding: '10px 14px' }}>
                   <div style={{ display: 'flex', gap: 8 }}>
+                    <button onClick={() => void generate3D(p)} style={{ padding: '6px 10px', background: '#4A5F8C', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>3D</button>
                     {p.outOfStock ? (
                       <button onClick={() => void quickSetStock(p, Math.max(p.stock, lowStockThreshold, 1), false)} style={{ padding: '6px 10px', background: '#3E7B4E', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Restock</button>
                     ) : (

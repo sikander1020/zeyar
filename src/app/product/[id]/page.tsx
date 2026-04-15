@@ -9,29 +9,51 @@ import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import AppShell from '@/components/layout/AppShell';
 import dynamic from 'next/dynamic';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import type { StoreProduct } from '@/types/storefront';
 
-const ProductViewer = dynamic(() => import('@/components/3d/ProductViewer'), {
+const ModelViewer3D = dynamic(() => import('@/components/storefront/ModelViewer3D'), {
   ssr: false,
-  loading: () => (
-    <div className="w-full h-full bg-beige animate-pulse flex items-center justify-center">
-      <span className="text-brown-muted text-sm font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>Loading 3D View...</span>
-    </div>
-  ),
 });
+
+type ProductEventPayload = {
+  productId: string;
+  productName: string;
+  category: string;
+  price: number;
+  size?: string;
+  color?: string;
+};
+
+function trackProductEvent(eventName: string, payload: ProductEventPayload) {
+  if (typeof window === 'undefined') return;
+
+  const event = {
+    event: eventName,
+    ...payload,
+  };
+
+  const win = window as Window & { dataLayer?: Array<Record<string, unknown>> };
+  if (Array.isArray(win.dataLayer)) {
+    win.dataLayer.push(event);
+  }
+
+  window.dispatchEvent(new CustomEvent('zaybaash:product-event', { detail: event }));
+}
 
 export default function ProductPage() {
   const params = useParams();
+  const router = useRouter();
   const id = Array.isArray(params.id) ? params.id[0] : params.id;
   const [product, setProduct] = useState<StoreProduct | null>(null);
   const [allProducts, setAllProducts] = useState<StoreProduct[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [productLoading, setProductLoading] = useState(true);
+  const [catalogLoading, setCatalogLoading] = useState(true);
 
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState({ name: '', hex: '' });
   const [activeImage, setActiveImage] = useState(0);
-  const [activeTab, setActiveTab] = useState<'3d' | 'images'>('3d');
+  const [activeTab, setActiveTab] = useState<'3d' | 'images'>('images');
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [reviews, setReviews] = useState<Array<{
     reviewId: string;
@@ -62,50 +84,66 @@ export default function ProductPage() {
     let mounted = true;
 
     const pid = String(id ?? '').trim();
+    setProductLoading(true);
     if (!pid) {
       setProduct(null);
-      setAllProducts([]);
-      setLoading(false);
+      setProductLoading(false);
       return () => {
         mounted = false;
       };
     }
 
-    Promise.all([
-      fetch(`/api/products/${encodeURIComponent(pid)}`, { cache: 'no-store' })
-        .then(async (res) => {
-          if (!res.ok) return { product: null } as { product: StoreProduct | null };
-          return res.json() as Promise<{ product?: StoreProduct }>;
-        }),
-      fetch('/api/products?sort=featured', { cache: 'no-store' })
-        .then(async (res) => {
-          if (!res.ok) return { products: [] } as { products: StoreProduct[] };
-          return res.json() as Promise<{ products?: StoreProduct[] }>;
-        }),
-    ])
-      .then(([single, list]) => {
+    fetch(`/api/products/${encodeURIComponent(pid)}`, { cache: 'no-store' })
+      .then(async (res) => {
+        if (!res.ok) return { product: null } as { product: StoreProduct | null };
+        return res.json() as Promise<{ product?: StoreProduct }>;
+      })
+      .then((single) => {
         if (!mounted) return;
         const p = single.product ?? null;
         setProduct(p);
-        setAllProducts(list.products ?? []);
         if (p) {
-          setSelectedSize(p.sizes[1] || p.sizes[0] || '');
+          setSelectedSize(p.sizes[0] || '');
           setSelectedColor(p.colors[0] || { name: '', hex: '' });
+          setActiveImage(0);
         }
       })
       .catch(() => {
         if (!mounted) return;
         setProduct(null);
-        setAllProducts([]);
       })
       .finally(() => {
-        if (mounted) setLoading(false);
+        if (mounted) setProductLoading(false);
       });
 
     return () => {
       mounted = false;
     };
   }, [id]);
+
+  useEffect(() => {
+    let mounted = true;
+
+    fetch('/api/products?sort=featured', { cache: 'no-store' })
+      .then(async (res) => {
+        if (!res.ok) return { products: [] } as { products: StoreProduct[] };
+        return res.json() as Promise<{ products?: StoreProduct[] }>;
+      })
+      .then((list) => {
+        if (!mounted) return;
+        setAllProducts(list.products ?? []);
+      })
+      .catch(() => {
+        if (mounted) setAllProducts([]);
+      })
+      .finally(() => {
+        if (mounted) setCatalogLoading(false);
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!product?.id) return;
@@ -146,6 +184,19 @@ export default function ProductPage() {
     }
   }, [product?.id]);
 
+  useEffect(() => {
+    if (!product?.id) return;
+
+    trackProductEvent('view_product', {
+      productId: product.id,
+      productName: product.name,
+      category: product.category,
+      price: product.price,
+      size: selectedSize || undefined,
+      color: selectedColor.name || undefined,
+    });
+  }, [product?.id, product?.name, product?.category, product?.price, selectedSize, selectedColor.name]);
+
   const recentlyViewed = useMemo(() => {
     if (!product || recentlyViewedIds.length === 0) return [] as StoreProduct[];
     const byId = new Map(allProducts.map((p) => [p.id, p]));
@@ -155,7 +206,7 @@ export default function ProductPage() {
       .slice(0, 4);
   }, [allProducts, recentlyViewedIds, product]);
 
-  if (loading) {
+  if (productLoading) {
     return (
       <AppShell>
         <div className="pt-24 min-h-screen bg-cream flex items-center justify-center">
@@ -177,10 +228,92 @@ export default function ProductPage() {
 
   const wishlisted = isWishlisted(product.id);
 
+  const selectedSizeSafe = selectedSize || product.sizes[0] || '';
+  const selectedColorSafe = selectedColor.name ? selectedColor : (product.colors[0] || { name: '', hex: '' });
+
+  const handleSelectColor = (color: { name: string; hex: string }) => {
+    setSelectedColor(color);
+    trackProductEvent('select_color', {
+      productId: product.id,
+      productName: product.name,
+      category: product.category,
+      price: product.price,
+      size: selectedSizeSafe || undefined,
+      color: color.name,
+    });
+  };
+
+  const handleSelectSize = (size: string) => {
+    setSelectedSize(size);
+    trackProductEvent('select_size', {
+      productId: product.id,
+      productName: product.name,
+      category: product.category,
+      price: product.price,
+      size,
+      color: selectedColorSafe.name || undefined,
+    });
+  };
+
   const handleAddToCart = () => {
-    addItem(product, selectedSize, selectedColor);
+    if (!selectedSizeSafe || !selectedColorSafe.name) return;
+
+    addItem(product, selectedSizeSafe, selectedColorSafe);
+    trackProductEvent('add_to_cart', {
+      productId: product.id,
+      productName: product.name,
+      category: product.category,
+      price: product.price,
+      size: selectedSizeSafe,
+      color: selectedColorSafe.name,
+    });
     toggleCart();
   };
+
+  const handleBuyNow = () => {
+    if (product.outOfStock || !selectedSizeSafe || !selectedColorSafe.name) return;
+
+    addItem(product, selectedSizeSafe, selectedColorSafe);
+    trackProductEvent('buy_now_click', {
+      productId: product.id,
+      productName: product.name,
+      category: product.category,
+      price: product.price,
+      size: selectedSizeSafe,
+      color: selectedColorSafe.name,
+    });
+    router.push('/checkout');
+  };
+
+  async function handleShare() {
+    if (!product) return;
+    const currentProduct = product;
+    const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+    if (!shareUrl) return;
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: currentProduct.name,
+          text: `${currentProduct.name} at ZAYBAASH`,
+          url: shareUrl,
+        });
+      } else if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      }
+
+      trackProductEvent('share_product', {
+        productId: currentProduct.id,
+        productName: currentProduct.name,
+        category: currentProduct.category,
+        price: currentProduct.price,
+        size: selectedSizeSafe || undefined,
+        color: selectedColorSafe.name || undefined,
+      });
+    } catch {
+      // Ignore cancelled share actions.
+    }
+  }
 
   async function submitReview() {
     if (!product) {
@@ -219,10 +352,12 @@ export default function ProductPage() {
   }
 
   const related = allProducts.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 3);
+  const showRelatedLoading = catalogLoading && related.length === 0;
+  const hasModel3d = Boolean(product.model3dUrl && product.model3dStatus === 'ready');
 
   return (
     <AppShell>
-      <div className="pt-24 bg-cream min-h-screen pb-24 md:pb-0">
+      <div className="pt-24 bg-cream min-h-screen pb-24 md:pb-28">
         {/* Breadcrumb */}
         <div className="max-w-7xl mx-auto px-6 py-6">
           <nav className="flex items-center gap-2 text-xs text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -240,56 +375,51 @@ export default function ProductPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20">
             {/* Left: Media */}
             <div>
-              {/* Tab switcher */}
-              <div className="flex mb-4 border border-nude/30">
-                <button
-                  onClick={() => setActiveTab('3d')}
-                  className={`flex-1 py-3 text-xs tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeTab === '3d' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
-                  style={{ fontFamily: "'Inter', sans-serif" }}
-                >
-                  3D View
-                </button>
-                <button
-                  onClick={() => setActiveTab('images')}
-                  className={`flex-1 py-3 text-xs tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeTab === 'images' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
-                  style={{ fontFamily: "'Inter', sans-serif" }}
-                >
-                  Gallery
-                </button>
-              </div>
-
-              {activeTab === '3d' ? (
-                <div className="relative aspect-square bg-gradient-to-br from-beige to-cream-dark rounded-none overflow-hidden">
-                  <div className="absolute inset-0">
-                    <ProductViewer color={selectedColor.hex} />
-                  </div>
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 glass px-4 py-2 text-xs text-brown-muted font-inter tracking-[0.1em]" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Drag to rotate · Tap to interact
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <div className="aspect-square relative overflow-hidden bg-beige mb-3">
-                    <Image
-                      src={product.images[activeImage]}
-                      alt={product.name}
-                      fill
-                      className="object-cover"
-                    />
-                  </div>
-                  <div className="grid grid-cols-4 gap-2">
-                    {product.images.map((img, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setActiveImage(i)}
-                        className={`aspect-square relative overflow-hidden border-2 transition-all duration-300 ${activeImage === i ? 'border-rose-gold' : 'border-transparent'}`}
-                      >
-                        <Image src={img} alt={`View ${i+1}`} fill className="object-cover" />
-                      </button>
-                    ))}
-                  </div>
+              {hasModel3d && (
+                <div className="flex mb-4 border border-nude/30">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('images')}
+                    className={`flex-1 py-3 text-xs tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeTab === 'images' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
+                    style={{ fontFamily: "'Inter', sans-serif" }}
+                  >
+                    Gallery
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('3d')}
+                    className={`flex-1 py-3 text-xs tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeTab === '3d' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
+                    style={{ fontFamily: "'Inter', sans-serif" }}
+                  >
+                    3D View
+                  </button>
                 </div>
               )}
+
+              {activeTab === '3d' && hasModel3d ? (
+                <ModelViewer3D modelUrl={product.model3dUrl || ''} posterUrl={product.frontImageUrl || product.images[0]} />
+              ) : (
+                <div className="aspect-square relative overflow-hidden bg-beige mb-3">
+                  <Image
+                    src={product.images[activeImage]}
+                    alt={product.name}
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+              )}
+
+              <div className="grid grid-cols-4 gap-2">
+                {product.images.map((img, i) => (
+                  <button
+                    key={i}
+                    onClick={() => setActiveImage(i)}
+                    className={`aspect-square relative overflow-hidden border-2 transition-all duration-300 ${activeImage === i ? 'border-rose-gold' : 'border-transparent'}`}
+                  >
+                    <Image src={img} alt={`View ${i+1}`} fill className="object-cover" />
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Right: Product info */}
@@ -305,7 +435,10 @@ export default function ProductPage() {
                   >
                     <Heart size={16} className={wishlisted ? 'fill-current' : ''} strokeWidth={1.5} />
                   </button>
-                  <button className="p-2 border border-nude text-brown hover:border-rose-gold hover:text-rose-gold transition-all duration-300">
+                  <button
+                    onClick={handleShare}
+                    className="p-2 border border-nude text-brown hover:border-rose-gold hover:text-rose-gold transition-all duration-300"
+                  >
                     <Share2 size={16} strokeWidth={1.5} />
                   </button>
                 </div>
@@ -358,7 +491,7 @@ export default function ProductPage() {
                   {product.colors.map((color) => (
                     <button
                       key={color.name}
-                      onClick={() => setSelectedColor(color)}
+                      onClick={() => handleSelectColor(color)}
                       className={`w-8 h-8 rounded-full border-2 transition-all duration-300 ${selectedColor.name === color.name ? 'border-rose-gold scale-110' : 'border-transparent hover:scale-105'}`}
                       style={{ backgroundColor: color.hex }}
                       title={color.name}
@@ -373,15 +506,15 @@ export default function ProductPage() {
                   <p className="text-xs tracking-[0.15em] uppercase text-brown font-semibold font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
                     Size — <span className="normal-case font-normal text-brown-muted tracking-normal">{selectedSize}</span>
                   </p>
-                  <button className="text-xs underline text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  <Link href="/size-guide" className="text-xs underline text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
                     Size Guide
-                  </button>
+                  </Link>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   {product.sizes.map((size) => (
                     <button
                       key={size}
-                      onClick={() => setSelectedSize(size)}
+                      onClick={() => handleSelectSize(size)}
                       className={`min-w-[52px] py-2.5 px-3 border text-xs font-semibold font-inter transition-all duration-300 ${selectedSize === size ? 'bg-brown text-cream border-brown' : 'border-nude text-brown hover:border-brown'}`}
                       style={{ fontFamily: "'Inter', sans-serif" }}
                     >
@@ -392,16 +525,24 @@ export default function ProductPage() {
               </div>
 
               {/* Add to cart */}
-              <div className="flex gap-3 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 mb-8">
                 <motion.button
                   whileTap={{ scale: 0.98 }}
                   disabled={product.outOfStock}
                   onClick={handleAddToCart}
-                  className="btn-luxury btn-primary flex-1 flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="btn-luxury btn-primary flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <ShoppingBag size={15} strokeWidth={2} />
                   {product.outOfStock ? 'Out of Stock' : 'Add to Bag'}
                 </motion.button>
+                <button
+                  type="button"
+                  disabled={product.outOfStock}
+                  onClick={handleBuyNow}
+                  className="btn-luxury btn-outline disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  Buy Now
+                </button>
                 <button
                   onClick={() => toggle(product.id)}
                   className={`btn-luxury px-5 border ${wishlisted ? 'bg-rose-gold border-rose-gold text-white' : 'border-nude text-brown hover:border-rose-gold hover:text-rose-gold'} transition-all duration-300`}
@@ -454,6 +595,51 @@ export default function ProductPage() {
                   )}
                 </div>
               ))}
+
+              {product.sizeChartRows.length > 0 && (
+                <div className="border-t border-nude/20 py-4">
+                  <button
+                    type="button"
+                    onClick={() => setExpandedSection(expandedSection === 'size-chart' ? null : 'size-chart')}
+                    className="w-full flex justify-between items-center text-left"
+                  >
+                    <span className="text-xs tracking-[0.15em] uppercase font-semibold text-brown font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      Size Chart
+                    </span>
+                    <ChevronDown
+                      size={16}
+                      className={`text-brown-muted transition-transform duration-300 ${expandedSection === 'size-chart' ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+
+                  {expandedSection === 'size-chart' && (
+                    <div className="mt-4 overflow-x-auto border border-nude/20">
+                      <table className="w-full text-left min-w-[540px]">
+                        <thead>
+                          <tr className="bg-brown text-cream text-[10px] tracking-[0.12em] uppercase">
+                            <th className="px-3 py-2">Size</th>
+                            <th className="px-3 py-2">Chest</th>
+                            <th className="px-3 py-2">Waist</th>
+                            <th className="px-3 py-2">Hips</th>
+                            <th className="px-3 py-2">Length</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {product.sizeChartRows.map((row) => (
+                            <tr key={row.size} className="border-t border-nude/20 bg-white">
+                              <td className="px-3 py-2 text-xs text-brown font-semibold">{row.size}</td>
+                              <td className="px-3 py-2 text-xs text-brown-muted">{row.chest}&quot;</td>
+                              <td className="px-3 py-2 text-xs text-brown-muted">{row.waist}&quot;</td>
+                              <td className="px-3 py-2 text-xs text-brown-muted">{row.hips}&quot;</td>
+                              <td className="px-3 py-2 text-xs text-brown-muted">{row.length}&quot;</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
           </div>
 
@@ -548,22 +734,30 @@ export default function ProductPage() {
           </div>
 
           {/* Related products */}
-          {related.length > 0 && (
+          {(related.length > 0 || showRelatedLoading) && (
             <div className="mt-24">
               <h2 className="text-3xl font-playfair text-brown mb-10 text-center" style={{ fontFamily: "'Playfair Display', serif" }}>
                 You May Also <span className="italic gradient-rose-text">Love</span>
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                {related.map(p => (
-                  <Link key={p.id} href={`/product/${p.id}`} className="group product-card">
-                    <div className="relative aspect-[3/4] overflow-hidden bg-beige mb-4">
-                      <Image src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
-                    </div>
-                    <h3 className="text-sm font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>{p.name}</h3>
-                    <p className="text-sm text-brown-muted font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>Rs {p.price.toLocaleString()}</p>
-                  </Link>
-                ))}
-              </div>
+              {showRelatedLoading ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6 animate-pulse">
+                  {Array.from({ length: 3 }).map((_, i) => (
+                    <div key={i} className="h-80 rounded-2xl bg-white/70" />
+                  ))}
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                  {related.map((p) => (
+                    <Link key={p.id} href={`/product/${p.id}`} className="group product-card">
+                      <div className="relative aspect-[3/4] overflow-hidden bg-beige mb-4">
+                        <Image src={p.images[0]} alt={p.name} fill className="object-cover group-hover:scale-105 transition-transform duration-700" />
+                      </div>
+                      <h3 className="text-sm font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>{p.name}</h3>
+                      <p className="text-sm text-brown-muted font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>Rs {p.price.toLocaleString()}</p>
+                    </Link>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
@@ -604,6 +798,43 @@ export default function ProductPage() {
               className="btn-luxury btn-primary flex-1 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               {product.outOfStock ? 'Out of Stock' : 'Add to Bag'}
+            </button>
+            <button
+              type="button"
+              disabled={product.outOfStock}
+              onClick={handleBuyNow}
+              className="btn-luxury btn-outline disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              Buy Now
+            </button>
+          </div>
+        </div>
+
+        <div className="hidden md:block fixed bottom-0 left-0 right-0 z-[85] bg-cream/95 backdrop-blur border-t border-nude/30 p-3">
+          <div className="max-w-7xl mx-auto flex items-center gap-4">
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] tracking-[0.12em] uppercase text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                {selectedSizeSafe ? `Size ${selectedSizeSafe}` : 'Select size'} · {selectedColorSafe.name || 'Select color'}
+              </p>
+              <p className="text-base font-semibold text-brown font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                Rs {product.price.toLocaleString()} · Free shipping and easy returns
+              </p>
+            </div>
+            <button
+              type="button"
+              disabled={product.outOfStock}
+              onClick={handleAddToCart}
+              className="btn-luxury btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              {product.outOfStock ? 'Out of Stock' : 'Add to Bag'}
+            </button>
+            <button
+              type="button"
+              disabled={product.outOfStock}
+              onClick={handleBuyNow}
+              className="btn-luxury btn-outline disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+              Buy Now
             </button>
           </div>
         </div>

@@ -27,6 +27,25 @@ function asColors(value: unknown): Array<{ name: string; hex: string }> {
     .filter((v): v is { name: string; hex: string } => !!v);
 }
 
+function asSizeChartRows(value: unknown): Array<{ size: string; chest: number; waist: number; hips: number; length: number }> {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((v) => {
+      if (!v || typeof v !== 'object') return null;
+      const row = v as Record<string, unknown>;
+      const size = typeof row.size === 'string' ? row.size.trim() : '';
+      const chest = Number(row.chest);
+      const waist = Number(row.waist);
+      const hips = Number(row.hips);
+      const length = Number(row.length);
+      if (!size || !Number.isFinite(chest) || !Number.isFinite(waist) || !Number.isFinite(hips) || !Number.isFinite(length)) {
+        return null;
+      }
+      return { size, chest, waist, hips, length };
+    })
+    .filter((v): v is { size: string; chest: number; waist: number; hips: number; length: number } => !!v);
+}
+
 export async function GET(req: NextRequest) {
   try {
     const guard = requireAdmin(req);
@@ -54,6 +73,9 @@ export async function POST(req: NextRequest) {
     const details = asStringArray(body.details);
     const tags = asStringArray(body.tags);
     const colors = asColors(body.colors);
+    const sizeChartRows = asSizeChartRows(body.sizeChartRows);
+    const frontImageUrl = typeof body.frontImageUrl === 'string' ? body.frontImageUrl.trim() : '';
+    const backImageUrl = typeof body.backImageUrl === 'string' ? body.backImageUrl.trim() : '';
 
     const product = new Product({
       productId: `prod_${Date.now()}`,
@@ -68,10 +90,16 @@ export async function POST(req: NextRequest) {
       description: body.description || '',
       details,
       sizes,
+      sizeChartRows,
       colors,
       rating: Number(body.rating) || 4.8,
       reviewCount: Number(body.reviewCount) || 0,
       tags,
+      frontImageUrl,
+      backImageUrl,
+      model3dUrl: typeof body.model3dUrl === 'string' ? body.model3dUrl.trim() : '',
+      model3dStatus: body.model3dStatus === 'ready' ? 'ready' : 'none',
+      model3dError: '',
       isActive: body.isActive !== false,
       outOfStock: body.outOfStock === true,
       isNewArrival: body.isNewArrival || false,

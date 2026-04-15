@@ -28,6 +28,25 @@ function asColors(value: unknown): Array<{ name: string; hex: string }> {
     .filter((v): v is { name: string; hex: string } => !!v);
 }
 
+function asSizeChartRows(value: unknown): Array<{ size: string; chest: number; waist: number; hips: number; length: number }> {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((v) => {
+      if (!v || typeof v !== 'object') return null;
+      const row = v as Record<string, unknown>;
+      const size = typeof row.size === 'string' ? row.size.trim() : '';
+      const chest = Number(row.chest);
+      const waist = Number(row.waist);
+      const hips = Number(row.hips);
+      const length = Number(row.length);
+      if (!size || !Number.isFinite(chest) || !Number.isFinite(waist) || !Number.isFinite(hips) || !Number.isFinite(length)) {
+        return null;
+      }
+      return { size, chest, waist, hips, length };
+    })
+    .filter((v): v is { size: string; chest: number; waist: number; hips: number; length: number } => !!v);
+}
+
 function findProductQuery(id: string) {
   const normalizedId = String(id ?? '').trim();
   if (mongoose.Types.ObjectId.isValid(normalizedId)) {
@@ -62,9 +81,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         costPrice: body.costPrice,
         stock,
         images: asStringArray(body.images),
+        frontImageUrl: typeof body.frontImageUrl === 'string' ? body.frontImageUrl.trim() : '',
+        backImageUrl: typeof body.backImageUrl === 'string' ? body.backImageUrl.trim() : '',
+        model3dUrl: typeof body.model3dUrl === 'string' ? body.model3dUrl.trim() : '',
+        model3dStatus: body.model3dStatus === 'ready' || body.model3dStatus === 'pending' || body.model3dStatus === 'failed' ? body.model3dStatus : 'none',
+        model3dError: typeof body.model3dError === 'string' ? body.model3dError : '',
         description: body.description || '',
         details: asStringArray(body.details),
         sizes: asStringArray(body.sizes),
+        sizeChartRows: asSizeChartRows(body.sizeChartRows),
         colors: asColors(body.colors),
         rating: Number(body.rating) || 4.8,
         reviewCount: Number(body.reviewCount) || 0,

@@ -13,6 +13,13 @@ export interface IProduct extends Document {
   description: string;
   details: string[];
   sizes: string[];
+  sizeChartRows: Array<{
+    size: string;
+    chest: number;
+    waist: number;
+    hips: number;
+    length: number;
+  }>;
   colors: Array<{ name: string; hex: string }>;
   rating: number;
   reviewCount: number;
@@ -22,6 +29,12 @@ export interface IProduct extends Document {
   isNewArrival?: boolean;
   isSale?: boolean;
   isBestseller?: boolean;
+  frontImageUrl?: string;
+  backImageUrl?: string;
+  model3dUrl?: string;
+  model3dStatus?: 'none' | 'pending' | 'ready' | 'failed';
+  model3dError?: string;
+  model3dUpdatedAt?: Date;
 }
 
 const ProductSchema = new Schema<IProduct>(
@@ -38,6 +51,16 @@ const ProductSchema = new Schema<IProduct>(
     description:   { type: String, default: '' },
     details:       { type: [String], default: [] },
     sizes:         { type: [String], default: ['S', 'M', 'L'] },
+    sizeChartRows: {
+      type: [{
+        size: { type: String, required: true },
+        chest: { type: Number, required: true },
+        waist: { type: Number, required: true },
+        hips: { type: Number, required: true },
+        length: { type: Number, required: true },
+      }],
+      default: [],
+    },
     colors: {
       type: [{
         name: { type: String, required: true },
@@ -53,6 +76,12 @@ const ProductSchema = new Schema<IProduct>(
     isNewArrival:  { type: Boolean, default: false },
     isSale:        { type: Boolean, default: false },
     isBestseller:  { type: Boolean, default: false },
+    frontImageUrl: { type: String, default: '' },
+    backImageUrl:  { type: String, default: '' },
+    model3dUrl:    { type: String, default: '' },
+    model3dStatus: { type: String, enum: ['none', 'pending', 'ready', 'failed'], default: 'none' },
+    model3dError:  { type: String, default: '' },
+    model3dUpdatedAt: { type: Date },
   },
   { timestamps: true }
 );

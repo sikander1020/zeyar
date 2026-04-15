@@ -12,6 +12,13 @@ export interface StoreProduct {
   images: string[];
   colors: StoreColor[];
   sizes: string[];
+  sizeChartRows: Array<{
+    size: string;
+    chest: number;
+    waist: number;
+    hips: number;
+    length: number;
+  }>;
   description: string;
   details: string[];
   rating: number;
@@ -23,6 +30,10 @@ export interface StoreProduct {
   isNew?: boolean;
   isSale?: boolean;
   isBestseller?: boolean;
+  frontImageUrl?: string;
+  backImageUrl?: string;
+  model3dUrl?: string;
+  model3dStatus?: 'none' | 'pending' | 'ready' | 'failed';
 }
 
 export interface StoreCategory {

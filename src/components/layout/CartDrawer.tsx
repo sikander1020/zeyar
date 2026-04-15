@@ -77,7 +77,7 @@ export default function CartDrawer() {
               ) : (
                 items.map((item) => (
                   <motion.div
-                    key={`${item.product.id}-${item.selectedSize}`}
+                    key={`${item.product.id}-${item.selectedSize}-${item.selectedColor.name}`}
                     layout
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -101,7 +101,7 @@ export default function CartDrawer() {
                           {item.product.name}
                         </h3>
                         <button
-                          onClick={() => removeItem(item.product.id, item.selectedSize)}
+                          onClick={() => removeItem(item.product.id, item.selectedSize, item.selectedColor.name)}
                           className="text-brown-muted hover:text-rose-gold transition-colors flex-shrink-0"
                         >
                           <Trash2 size={14} strokeWidth={1.5} />
@@ -113,7 +113,7 @@ export default function CartDrawer() {
                       <div className="flex items-center justify-between mt-3">
                         <div className="flex items-center gap-3 border border-nude/40">
                           <button
-                            onClick={() => updateQuantity(item.product.id, item.selectedSize, item.quantity - 1)}
+                            onClick={() => updateQuantity(item.product.id, item.selectedSize, item.quantity - 1, item.selectedColor.name)}
                             className="p-1.5 text-brown hover:text-rose-gold transition-colors"
                           >
                             <Minus size={12} strokeWidth={2} />
@@ -122,7 +122,7 @@ export default function CartDrawer() {
                             {item.quantity}
                           </span>
                           <button
-                            onClick={() => updateQuantity(item.product.id, item.selectedSize, item.quantity + 1)}
+                            onClick={() => updateQuantity(item.product.id, item.selectedSize, item.quantity + 1, item.selectedColor.name)}
                             className="p-1.5 text-brown hover:text-rose-gold transition-colors"
                           >
                             <Plus size={12} strokeWidth={2} />

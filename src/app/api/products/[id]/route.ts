@@ -13,8 +13,13 @@ function normalizeProduct(p: {
   price: number;
   originalPrice?: number;
   images?: string[];
+  frontImageUrl?: string;
+  backImageUrl?: string;
+  model3dUrl?: string;
+  model3dStatus?: 'none' | 'pending' | 'ready' | 'failed';
   colors?: Array<{ name: string; hex: string }>;
   sizes?: string[];
+  sizeChartRows?: Array<{ size: string; chest: number; waist: number; hips: number; length: number }>;
   description?: string;
   details?: string[];
   rating?: number;
@@ -33,6 +38,7 @@ function normalizeProduct(p: {
   const images = Array.isArray(p.images) && p.images.length > 0 ? p.images : [FALLBACK_IMAGE];
   const colors = Array.isArray(p.colors) && p.colors.length > 0 ? p.colors : [{ name: 'Default', hex: '#E6B7A9' }];
   const sizes = Array.isArray(p.sizes) && p.sizes.length > 0 ? p.sizes : ['S', 'M', 'L'];
+  const sizeChartRows = Array.isArray(p.sizeChartRows) ? p.sizeChartRows : [];
 
   return {
     id: resolvedId,
@@ -41,8 +47,13 @@ function normalizeProduct(p: {
     price: Number(p.price) || 0,
     originalPrice: p.originalPrice,
     images,
+    frontImageUrl: typeof p.frontImageUrl === 'string' ? p.frontImageUrl : '',
+    backImageUrl: typeof p.backImageUrl === 'string' ? p.backImageUrl : '',
+    model3dUrl: typeof p.model3dUrl === 'string' ? p.model3dUrl : '',
+    model3dStatus: p.model3dStatus ?? 'none',
     colors,
     sizes,
+    sizeChartRows,
     description: p.description ?? '',
     details: Array.isArray(p.details) ? p.details : [],
     rating: Number(p.rating) || 4.8,
