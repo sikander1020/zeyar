@@ -4,7 +4,7 @@ import { useMemo, useEffect, useState, Suspense, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
-import { Heart, ShoppingBag, ChevronDown } from 'lucide-react';
+import { Heart, ShoppingBag, ChevronDown, SlidersHorizontal, X } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import { useSearchParams } from 'next/navigation';
@@ -135,9 +135,12 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
   const [categories] = useState<StoreCategory[]>(initialCategories);
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
   const [sortBy, setSortBy] = useState(initialSort || 'featured');
+  const [queryInput, setQueryInput] = useState('');
   const [query, setQuery] = useState('');
   const [onlyInStock, setOnlyInStock] = useState(false);
   const [selectedSize, setSelectedSize] = useState('All Sizes');
+  const [selectedColor, setSelectedColor] = useState('All Colors');
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
   useEffect(() => {
     setActiveCategory(initialCategory);
@@ -174,11 +177,70 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
     return ['All', ...Array.from(new Set(dynamic))];
   }, [categories]);
 
+  const bounds = useMemo(() => {
+    if (products.length === 0) {
+      return { min: 0, max: 0 };
+    }
+
+    const prices = products.map((p) => p.price).filter((v) => Number.isFinite(v));
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    return { min, max };
+  }, [products]);
+
+  const [priceMin, setPriceMin] = useState<number>(bounds.min);
+  const [priceMax, setPriceMax] = useState<number>(bounds.max);
+
+  useEffect(() => {
+    setPriceMin(bounds.min);
+    setPriceMax(bounds.max);
+  }, [bounds.min, bounds.max]);
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => {
+      setQuery(queryInput.trim());
+    }, 180);
+    return () => window.clearTimeout(timer);
+  }, [queryInput]);
+
   const sizeOptions = useMemo(() => {
     const set = new Set<string>();
     products.forEach((p) => p.sizes.forEach((s) => set.add(s)));
     return ['All Sizes', ...Array.from(set)];
   }, [products]);
+
+  const colorOptions = useMemo(() => {
+    const names = new Set<string>();
+    products.forEach((p) => p.colors.forEach((c) => names.add(c.name)));
+    return ['All Colors', ...Array.from(names)];
+  }, [products]);
+
+  const activeFilters = useMemo(() => {
+    const filters: Array<{ key: string; label: string }> = [];
+
+    if (query) filters.push({ key: 'query', label: `Search: ${query}` });
+    if (activeCategory !== 'All') filters.push({ key: 'category', label: activeCategory });
+    if (selectedSize !== 'All Sizes') filters.push({ key: 'size', label: `Size: ${selectedSize}` });
+    if (selectedColor !== 'All Colors') filters.push({ key: 'color', label: `Color: ${selectedColor}` });
+    if (onlyInStock) filters.push({ key: 'stock', label: 'In Stock' });
+    if (priceMin > bounds.min || priceMax < bounds.max) {
+      filters.push({ key: 'price', label: `Price: Rs ${priceMin.toLocaleString()} - Rs ${priceMax.toLocaleString()}` });
+    }
+
+    return filters;
+  }, [query, activeCategory, selectedSize, selectedColor, onlyInStock, priceMin, priceMax, bounds.min, bounds.max]);
+
+  const clearSingleFilter = (key: string) => {
+    if (key === 'query') setQueryInput('');
+    if (key === 'category') setActiveCategory('All');
+    if (key === 'size') setSelectedSize('All Sizes');
+    if (key === 'color') setSelectedColor('All Colors');
+    if (key === 'stock') setOnlyInStock(false);
+    if (key === 'price') {
+      setPriceMin(bounds.min);
+      setPriceMax(bounds.max);
+    }
+  };
 
   const filtered = useMemo(() => {
     let result = [...products];
@@ -213,13 +275,19 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
       result = result.filter((p) => p.sizes.includes(selectedSize));
     }
 
+    if (selectedColor !== 'All Colors') {
+      result = result.filter((p) => p.colors.some((c) => c.name === selectedColor));
+    }
+
+    result = result.filter((p) => p.price >= priceMin && p.price <= priceMax);
+
     if (sortBy === 'newest') result = result.filter(p => p.isNew).concat(result.filter(p => !p.isNew));
     if (sortBy === 'popular') result.sort((a, b) => b.reviewCount - a.reviewCount);
     if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price);
     if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price);
     if (sortBy === 'rating') result.sort((a, b) => b.rating - a.rating);
     return result;
-  }, [products, activeCategory, sortBy, query, onlyInStock, selectedSize]);
+  }, [products, activeCategory, sortBy, query, onlyInStock, selectedSize, selectedColor, priceMin, priceMax]);
 
   return (
     <AppShell>
@@ -237,7 +305,8 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
         </div>
 
         <div className="max-w-7xl mx-auto px-6 py-10">
-          <div className="flex items-center justify-between gap-4 mb-5 flex-wrap">
+          <div className="sticky top-20 z-30 mb-5 bg-cream/95 backdrop-blur border border-nude/20 p-4">
+            <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex gap-2 flex-wrap">
               {categoryPills.map((cat) => (
                 <button
@@ -252,6 +321,14 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
             </div>
 
             <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setShowAdvancedFilters((v) => !v)}
+                className="inline-flex items-center gap-2 px-3 py-2 border border-nude text-xs tracking-[0.12em] uppercase text-brown hover:border-brown transition-colors"
+              >
+                <SlidersHorizontal size={14} />
+                Filters
+              </button>
               <div className="relative">
                 <select
                   value={sortBy}
@@ -269,12 +346,13 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                 {filtered.length} pieces
               </span>
             </div>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-8 items-stretch">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4 items-stretch">
             <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              value={queryInput}
+              onChange={(e) => setQueryInput(e.target.value)}
               placeholder="Search dresses"
               className="input-luxury h-[56px]"
             />
@@ -305,10 +383,13 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
               <button
                 type="button"
                 onClick={() => {
-                  setQuery('');
+                  setQueryInput('');
                   setOnlyInStock(false);
                   setSelectedSize('All Sizes');
+                  setSelectedColor('All Colors');
                   setActiveCategory('All');
+                  setPriceMin(bounds.min);
+                  setPriceMax(bounds.max);
                   setSortBy('featured');
                 }}
                 className="h-[48px] px-2 text-xs text-brown-muted underline underline-offset-2 hover:text-brown transition-colors"
@@ -317,6 +398,88 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
               </button>
             </div>
           </div>
+
+          <AnimatePresence initial={false}>
+            {showAdvancedFilters && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.25 }}
+                className="overflow-hidden border border-nude/20 p-4 mb-6"
+              >
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+                  <div className="relative">
+                    <label className="block text-[10px] tracking-[0.12em] uppercase text-brown-muted mb-2">Color</label>
+                    <select
+                      value={selectedColor}
+                      onChange={(e) => setSelectedColor(e.target.value)}
+                      className="appearance-none w-full h-[48px] pl-4 pr-10 py-3 bg-transparent border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
+                    >
+                      {colorOptions.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={14} className="absolute right-3 top-[36px] -translate-y-1/2 text-brown-muted pointer-events-none" />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] tracking-[0.12em] uppercase text-brown-muted mb-2">Min Price</label>
+                    <input
+                      type="number"
+                      min={bounds.min}
+                      max={priceMax}
+                      value={priceMin}
+                      onChange={(e) => {
+                        const next = Number(e.target.value) || bounds.min;
+                        setPriceMin(Math.min(next, priceMax));
+                      }}
+                      className="input-luxury h-[48px]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-[10px] tracking-[0.12em] uppercase text-brown-muted mb-2">Max Price</label>
+                    <input
+                      type="number"
+                      min={priceMin}
+                      max={bounds.max}
+                      value={priceMax}
+                      onChange={(e) => {
+                        const next = Number(e.target.value) || bounds.max;
+                        setPriceMax(Math.max(next, priceMin));
+                      }}
+                      className="input-luxury h-[48px]"
+                    />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvancedFilters(false)}
+                    className="h-[48px] px-4 text-xs tracking-[0.12em] uppercase font-inter border border-nude text-brown hover:border-brown"
+                  >
+                    Done
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {activeFilters.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              {activeFilters.map((filter) => (
+                <button
+                  key={filter.key}
+                  type="button"
+                  onClick={() => clearSingleFilter(filter.key)}
+                  className="inline-flex items-center gap-1 rounded-full border border-nude bg-white px-3 py-1.5 text-xs text-brown hover:border-brown transition-colors"
+                >
+                  {filter.label}
+                  <X size={12} />
+                </button>
+              ))}
+            </div>
+          )}
 
           <AnimatePresence mode="popLayout">
             <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
