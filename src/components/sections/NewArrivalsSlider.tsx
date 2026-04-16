@@ -139,6 +139,8 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: i * 0.1 }}
                 className="product-card group"
+                onMouseEnter={() => setQuickViewProduct(product)}
+                onFocus={() => setQuickViewProduct(product)}
               >
                 <Link href={`/product/${product.id}`}>
                   <div className="relative overflow-hidden bg-beige aspect-[3/4]">
