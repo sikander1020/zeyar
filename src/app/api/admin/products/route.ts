@@ -3,6 +3,8 @@ import { connectDB } from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/adminAuth';
 
+const BLOCKED_SIZES = new Set(['XS', 'XL', 'EXTRA SMALL', 'EXTRA LARGE']);
+
 function asStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value
@@ -46,6 +48,14 @@ function asSizeChartRows(value: unknown): Array<{ size: string; chest: number; w
     .filter((v): v is { size: string; chest: number; waist: number; hips: number; length: number } => !!v);
 }
 
+function asSizes(value: unknown): string[] {
+  return asStringArray(value).filter((size) => !BLOCKED_SIZES.has(size.toUpperCase()));
+}
+
+function asFilteredSizeChartRows(value: unknown): Array<{ size: string; chest: number; waist: number; hips: number; length: number }> {
+  return asSizeChartRows(value).filter((row) => !BLOCKED_SIZES.has(row.size.toUpperCase()));
+}
+
 export async function GET(req: NextRequest) {
   try {
     const guard = requireAdmin(req);
@@ -69,11 +79,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const stock = Number(body.stock) || 0;
     const images = asStringArray(body.images);
-    const sizes = asStringArray(body.sizes);
+    const sizes = asSizes(body.sizes);
     const details = asStringArray(body.details);
     const tags = asStringArray(body.tags);
     const colors = asColors(body.colors);
-    const sizeChartRows = asSizeChartRows(body.sizeChartRows);
+    const sizeChartRows = asFilteredSizeChartRows(body.sizeChartRows);
     const frontImageUrl = typeof body.frontImageUrl === 'string' ? body.frontImageUrl.trim() : '';
     const backImageUrl = typeof body.backImageUrl === 'string' ? body.backImageUrl.trim() : '';
 

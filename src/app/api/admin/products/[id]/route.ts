@@ -4,6 +4,8 @@ import { connectDB } from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/adminAuth';
 
+const BLOCKED_SIZES = new Set(['XS', 'XL', 'EXTRA SMALL', 'EXTRA LARGE']);
+
 function asStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) return [];
   return value
@@ -47,6 +49,14 @@ function asSizeChartRows(value: unknown): Array<{ size: string; chest: number; w
     .filter((v): v is { size: string; chest: number; waist: number; hips: number; length: number } => !!v);
 }
 
+function asSizes(value: unknown): string[] {
+  return asStringArray(value).filter((size) => !BLOCKED_SIZES.has(size.toUpperCase()));
+}
+
+function asFilteredSizeChartRows(value: unknown): Array<{ size: string; chest: number; waist: number; hips: number; length: number }> {
+  return asSizeChartRows(value).filter((row) => !BLOCKED_SIZES.has(row.size.toUpperCase()));
+}
+
 function findProductQuery(id: string) {
   const normalizedId = String(id ?? '').trim();
   if (mongoose.Types.ObjectId.isValid(normalizedId)) {
@@ -88,8 +98,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         model3dError: typeof body.model3dError === 'string' ? body.model3dError : '',
         description: body.description || '',
         details: asStringArray(body.details),
-        sizes: asStringArray(body.sizes),
-        sizeChartRows: asSizeChartRows(body.sizeChartRows),
+        sizes: asSizes(body.sizes),
+        sizeChartRows: asFilteredSizeChartRows(body.sizeChartRows),
         colors: asColors(body.colors),
         rating: Number(body.rating) || 4.8,
         reviewCount: Number(body.reviewCount) || 0,

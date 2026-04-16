@@ -3,6 +3,40 @@ import { connectDB } from '@/lib/mongodb';
 import Product from '@/models/Product';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=800&q=80';
+const BLOCKED_SIZES = new Set(['XS', 'XL', 'EXTRA SMALL', 'EXTRA LARGE']);
+
+function sanitizeSizes(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+
+  const filtered = value
+    .map((v) => (typeof v === 'string' ? v.trim() : ''))
+    .filter((size) => size.length > 0)
+    .filter((size) => !BLOCKED_SIZES.has(size.toUpperCase()));
+
+  return filtered;
+}
+
+function sanitizeSizeChartRows(value: unknown): Array<{ size: string; chest: number; waist: number; hips: number; length: number }> {
+  if (!Array.isArray(value)) return [];
+
+  return value
+    .filter((row): row is { size?: unknown; chest?: unknown; waist?: unknown; hips?: unknown; length?: unknown } => Boolean(row) && typeof row === 'object')
+    .map((row) => {
+      const size = typeof row.size === 'string' ? row.size.trim() : '';
+      const chest = Number(row.chest);
+      const waist = Number(row.waist);
+      const hips = Number(row.hips);
+      const length = Number(row.length);
+
+      if (!size || BLOCKED_SIZES.has(size.toUpperCase())) return null;
+      if (!Number.isFinite(chest) || !Number.isFinite(waist) || !Number.isFinite(hips) || !Number.isFinite(length)) {
+        return null;
+      }
+
+      return { size, chest, waist, hips, length };
+    })
+    .filter((row): row is { size: string; chest: number; waist: number; hips: number; length: number } => Boolean(row));
+}
 
 function normalizeProduct(p: {
   _id?: unknown;
@@ -36,8 +70,9 @@ function normalizeProduct(p: {
     : String(p._id ?? '').trim();
   const images = Array.isArray(p.images) && p.images.length > 0 ? p.images : [FALLBACK_IMAGE];
   const colors = Array.isArray(p.colors) && p.colors.length > 0 ? p.colors : [{ name: 'Default', hex: '#E6B7A9' }];
-  const sizes = Array.isArray(p.sizes) && p.sizes.length > 0 ? p.sizes : ['S', 'M', 'L'];
-  const sizeChartRows = Array.isArray(p.sizeChartRows) ? p.sizeChartRows : [];
+  const sanitizedSizes = sanitizeSizes(p.sizes);
+  const sizes = sanitizedSizes.length > 0 ? sanitizedSizes : ['S', 'M', 'L'];
+  const sizeChartRows = sanitizeSizeChartRows(p.sizeChartRows);
 
   return {
     id: resolvedId,

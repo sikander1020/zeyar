@@ -16,6 +16,8 @@ const ModelViewer3D = dynamic(() => import('@/components/storefront/ModelViewer3
   ssr: false,
 });
 
+const BLOCKED_SIZES = new Set(['XS', 'XL', 'EXTRA SMALL', 'EXTRA LARGE']);
+
 type ProductEventPayload = {
   productId: string;
   productName: string;
@@ -103,7 +105,8 @@ export default function ProductPage() {
         const p = single.product ?? null;
         setProduct(p);
         if (p) {
-          setSelectedSize(p.sizes[0] || '');
+          const firstAllowedSize = p.sizes.find((size) => !BLOCKED_SIZES.has(size.toUpperCase()));
+          setSelectedSize(firstAllowedSize || p.sizes[0] || '');
           setSelectedColor(p.colors[0] || { name: '', hex: '' });
           setActiveImage(0);
         }
@@ -228,8 +231,18 @@ export default function ProductPage() {
 
   const wishlisted = isWishlisted(product.id);
 
-  const selectedSizeSafe = selectedSize || product.sizes[0] || '';
+  const filteredSizes = product.sizes.filter((size) => !BLOCKED_SIZES.has(size.toUpperCase()));
+  const displaySizes = filteredSizes.length > 0 ? filteredSizes : product.sizes;
+
+  const selectedSizeSafe = selectedSize || displaySizes[0] || '';
   const selectedColorSafe = selectedColor.name ? selectedColor : (product.colors[0] || { name: '', hex: '' });
+
+  useEffect(() => {
+    if (!displaySizes.length) return;
+    if (!selectedSize || !displaySizes.includes(selectedSize)) {
+      setSelectedSize(displaySizes[0]);
+    }
+  }, [displaySizes, selectedSize]);
 
   const handleSelectColor = (color: { name: string; hex: string }) => {
     setSelectedColor(color);
@@ -353,9 +366,14 @@ export default function ProductPage() {
 
   const related = allProducts.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 3);
   const showRelatedLoading = catalogLoading && related.length === 0;
-  const has3dSourceImages = Boolean(product.frontImageUrl || product.backImageUrl || product.images.length >= 2);
-  const hasModel3d = Boolean(product.model3dUrl && product.model3dStatus === 'ready');
-  const show3dTab = hasModel3d || has3dSourceImages;
+  const hasModel3d = Boolean((product.model3dUrl || '').trim());
+  const show3dTab = hasModel3d;
+
+  useEffect(() => {
+    if (!show3dTab && activeTab === '3d') {
+      setActiveTab('images');
+    }
+  }, [show3dTab, activeTab]);
 
   return (
     <AppShell>
@@ -526,7 +544,7 @@ export default function ProductPage() {
                   </Link>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  {product.sizes.map((size) => (
+                  {displaySizes.map((size) => (
                     <button
                       key={size}
                       onClick={() => handleSelectSize(size)}
