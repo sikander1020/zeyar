@@ -1054,6 +1054,7 @@ function ProductsTab() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<ProductRow | null>(null);
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
+  const [imageUrlInputs, setImageUrlInputs] = useState<string[]>(['']);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -1144,6 +1145,22 @@ function ProductsTab() {
       isBestseller: false,
     });
     setUploadedImages([]);
+    setImageUrlInputs(['']);
+  }
+
+  function updateImageUrlInput(index: number, value: string) {
+    setImageUrlInputs((prev) => prev.map((item, i) => (i === index ? value : item)));
+  }
+
+  function addImageUrlInput() {
+    setImageUrlInputs((prev) => [...prev, '']);
+  }
+
+  function removeImageUrlInput(index: number) {
+    setImageUrlInputs((prev) => {
+      const next = prev.filter((_, i) => i !== index);
+      return next.length > 0 ? next : [''];
+    });
   }
 
   function readFileAsDataUrl(file: File): Promise<string> {
@@ -1226,8 +1243,12 @@ function ProductsTab() {
     try {
       const url = editing ? `/api/admin/products/${editing.productId}` : '/api/admin/products';
       const method = editing ? 'PUT' : 'POST';
-      const inferredFrontImage = formData.frontImageUrl.trim() || uploadedImages[0] || '';
-      const inferredBackImage = formData.backImageUrl.trim() || uploadedImages[1] || uploadedImages[0] || '';
+      const manualImageUrls = imageUrlInputs
+        .map((v) => v.trim())
+        .filter(Boolean);
+      const mergedImages = Array.from(new Set([...(uploadedImages ?? []), ...manualImageUrls]));
+      const inferredFrontImage = formData.frontImageUrl.trim() || mergedImages[0] || '';
+      const inferredBackImage = formData.backImageUrl.trim() || mergedImages[1] || mergedImages[0] || '';
 
       const payload = {
         name: formData.name,
@@ -1237,7 +1258,7 @@ function ProductsTab() {
         costPrice: Number(formData.costPrice) || 0,
         stock: Number(formData.stock) || 0,
         description: formData.description,
-        images: uploadedImages,
+        images: mergedImages,
         frontImageUrl: inferredFrontImage,
         backImageUrl: inferredBackImage,
         model3dUrl: formData.model3dUrl,
@@ -1354,6 +1375,7 @@ function ProductsTab() {
       isBestseller: prod.isBestseller,
     });
     setUploadedImages(prod.images ?? []);
+    setImageUrlInputs((prod.images ?? []).length > 0 ? (prod.images ?? []) : ['']);
     setShowForm(true);
   }
 
@@ -1559,6 +1581,44 @@ function ProductsTab() {
               {uploadedImages.length === 0 && (
                 <p style={{ fontSize: 12, color: MUTED, marginTop: 8 }}>No images uploaded yet.</p>
               )}
+
+              <div style={{ marginTop: 14, borderTop: '1px dashed #EBD9CC', paddingTop: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                  <p style={{ margin: 0, fontSize: 12, color: BROWN, fontWeight: 600 }}>Image URLs (dynamic count)</p>
+                  <button
+                    type="button"
+                    onClick={addImageUrlInput}
+                    style={{ padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
+                  >
+                    + Add URL Field
+                  </button>
+                </div>
+
+                <p style={{ margin: '0 0 8px', fontSize: 11, color: MUTED }}>
+                  Add as many image links as you want. Current URL fields: {imageUrlInputs.length}
+                </p>
+
+                <div style={{ display: 'grid', gap: 8 }}>
+                  {imageUrlInputs.map((value, index) => (
+                    <div key={index} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 8 }}>
+                      <input
+                        value={value}
+                        onChange={(e) => updateImageUrlInput(index, e.target.value)}
+                        placeholder={`Image URL #${index + 1}`}
+                        style={{ padding: '8px 10px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: '#fff', outline: 'none' }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImageUrlInput(index)}
+                        style={{ padding: '6px 10px', border: '1px solid #D9BCA8', borderRadius: 8, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               <p style={{ fontSize: 12, color: MUTED, marginTop: 8 }}>
                 3D generation uses Front/Back uploads above first. If empty, it falls back to Product Images #1 and #2.
               </p>

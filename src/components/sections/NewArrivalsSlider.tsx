@@ -11,6 +11,7 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const [start, setStart] = useState(0);
+  const [isAutoplay, setIsAutoplay] = useState(true);
   const [products, setProducts] = useState<StoreProduct[]>(initialProducts ?? []);
   const [loading, setLoading] = useState(!initialProducts);
 
@@ -39,8 +40,25 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
   const visible = 3;
   const maxStart = Math.max(0, sliderProducts.length - visible);
 
-  const prev = () => setStart(s => Math.max(0, s - 1));
-  const next = () => setStart(s => Math.min(maxStart, s + 1));
+  useEffect(() => {
+    if (!isAutoplay || maxStart === 0) return;
+
+    const timer = setInterval(() => {
+      setStart((current) => (current >= maxStart ? 0 : current + 1));
+    }, 3200);
+
+    return () => clearInterval(timer);
+  }, [isAutoplay, maxStart]);
+
+  const prev = () => {
+    setIsAutoplay(false);
+    setStart((s) => (s <= 0 ? maxStart : s - 1));
+  };
+
+  const next = () => {
+    setIsAutoplay(false);
+    setStart((s) => (s >= maxStart ? 0 : s + 1));
+  };
 
   return (
     <section id="new-arrivals" className="section-padding bg-cream-dark overflow-hidden scroll-mt-28">
@@ -95,7 +113,15 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
         )}
 
         {!loading && sliderProducts.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <motion.div
+            key={start}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35, ease: [0.2, 0.8, 0.2, 1] }}
+            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            onMouseEnter={() => setIsAutoplay(false)}
+            onMouseLeave={() => setIsAutoplay(true)}
+          >
             {sliderProducts.slice(start, start + visible).map((product, i) => (
               <motion.div
                 key={product.id}
@@ -136,7 +162,7 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
                 </Link>
               </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
 
         <motion.div
