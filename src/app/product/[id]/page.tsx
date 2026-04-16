@@ -237,13 +237,6 @@ export default function ProductPage() {
   const selectedSizeSafe = selectedSize || displaySizes[0] || '';
   const selectedColorSafe = selectedColor.name ? selectedColor : (product.colors[0] || { name: '', hex: '' });
 
-  useEffect(() => {
-    if (!displaySizes.length) return;
-    if (!selectedSize || !displaySizes.includes(selectedSize)) {
-      setSelectedSize(displaySizes[0]);
-    }
-  }, [displaySizes, selectedSize]);
-
   const handleSelectColor = (color: { name: string; hex: string }) => {
     setSelectedColor(color);
     trackProductEvent('select_color', {
@@ -368,12 +361,7 @@ export default function ProductPage() {
   const showRelatedLoading = catalogLoading && related.length === 0;
   const hasModel3d = Boolean((product.model3dUrl || '').trim());
   const show3dTab = hasModel3d;
-
-  useEffect(() => {
-    if (!show3dTab && activeTab === '3d') {
-      setActiveTab('images');
-    }
-  }, [show3dTab, activeTab]);
+  const activeMediaTab: 'images' | '3d' = show3dTab ? activeTab : 'images';
 
   return (
     <AppShell>
@@ -400,7 +388,7 @@ export default function ProductPage() {
                   <button
                     type="button"
                     onClick={() => setActiveTab('images')}
-                    className={`flex-1 py-3 text-xs tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeTab === 'images' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
+                    className={`flex-1 py-3 text-xs tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeMediaTab === 'images' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
                     style={{ fontFamily: "'Inter', sans-serif" }}
                   >
                     Gallery
@@ -408,7 +396,7 @@ export default function ProductPage() {
                   <button
                     type="button"
                     onClick={() => setActiveTab('3d')}
-                    className={`flex-1 py-3 text-xs tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeTab === '3d' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
+                    className={`flex-1 py-3 text-xs tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeMediaTab === '3d' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
                     style={{ fontFamily: "'Inter', sans-serif" }}
                   >
                     3D View
@@ -416,7 +404,7 @@ export default function ProductPage() {
                 </div>
               )}
 
-              {activeTab === '3d' && show3dTab ? (
+              {activeMediaTab === '3d' && show3dTab ? (
                 hasModel3d ? (
                   <ModelViewer3D modelUrl={product.model3dUrl || ''} posterUrl={product.frontImageUrl || product.images[0]} />
                 ) : (
