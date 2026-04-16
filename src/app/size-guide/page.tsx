@@ -4,11 +4,9 @@ import AppShell from '@/components/layout/AppShell';
 import { motion } from 'framer-motion';
 
 const dimensions = [
-  { size: 'XS', pk: '8', shoulders: '13.5', chest: '18.5', waist: '17', hips: '19.5', length: '38' },
   { size: 'S',  pk: '10', shoulders: '14.0', chest: '19.5', waist: '18', hips: '20.5', length: '39' },
   { size: 'M',  pk: '12', shoulders: '14.5', chest: '20.5', waist: '19.5', hips: '22.5', length: '40' },
   { size: 'L',  pk: '14', shoulders: '15.5', chest: '22.0', waist: '21', hips: '24.5', length: '41' },
-  { size: 'XL', pk: '16', shoulders: '16.5', chest: '23.5', waist: '22.5', hips: '26.0', length: '42' },
 ];
 
 export default function SizeGuidePage() {

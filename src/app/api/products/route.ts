@@ -48,6 +48,7 @@ function normalizeProduct(p: {
   images?: string[];
   frontImageUrl?: string;
   backImageUrl?: string;
+  sizeChartImageUrl?: string;
   videoUrl?: string;
   model3dUrl?: string;
   model3dStatus?: 'none' | 'pending' | 'ready' | 'failed';
@@ -84,6 +85,7 @@ function normalizeProduct(p: {
     images,
     frontImageUrl: typeof p.frontImageUrl === 'string' ? p.frontImageUrl : '',
     backImageUrl: typeof p.backImageUrl === 'string' ? p.backImageUrl : '',
+    sizeChartImageUrl: typeof p.sizeChartImageUrl === 'string' ? p.sizeChartImageUrl : '',
     videoUrl: typeof p.videoUrl === 'string' ? p.videoUrl : '',
     model3dUrl: typeof p.model3dUrl === 'string' ? p.model3dUrl : '',
     model3dStatus: p.model3dStatus ?? 'none',
@@ -131,7 +133,7 @@ export async function GET(req: NextRequest) {
     }
 
     const docs = await Product.find(q)
-      .select('productId name category price originalPrice images frontImageUrl backImageUrl videoUrl model3dUrl model3dStatus colors sizes sizeChartRows description details rating reviewCount tags stock isActive outOfStock isNewArrival isSale isBestseller')
+      .select('productId name category price originalPrice images frontImageUrl backImageUrl sizeChartImageUrl videoUrl model3dUrl model3dStatus colors sizes sizeChartRows description details rating reviewCount tags stock isActive outOfStock isNewArrival isSale isBestseller')
       .limit(limit || 0)
       .lean();
     const products = docs.map((d) => normalizeProduct(d as never));

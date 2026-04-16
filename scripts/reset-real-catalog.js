@@ -1,6 +1,7 @@
 /* eslint-disable no-console */
 const path = require('path');
 const fs = require('fs');
+const dns = require('dns').promises;
 const mongoose = require('mongoose');
 
 function loadEnvFile(filePath) {
@@ -31,12 +32,73 @@ if (!MONGODB_URI) {
   process.exit(1);
 }
 
+async function buildDirectMongoUriFromSrv(uri) {
+  const parsed = new URL(uri);
+  if (parsed.protocol !== 'mongodb+srv:') {
+    return uri;
+  }
+
+  const srvHosts = await dns.resolveSrv(parsed.hostname);
+  if (!srvHosts.length) {
+    throw new Error(`No SRV records found for ${parsed.hostname}`);
+  }
+
+  const txtRecords = await dns.resolveTxt(parsed.hostname).catch(() => []);
+  const txtQuery = txtRecords
+    .flat()
+    .join('&')
+    .trim();
+
+  const query = new URLSearchParams(parsed.searchParams);
+  if (txtQuery) {
+    const txtParams = new URLSearchParams(txtQuery);
+    for (const [key, value] of txtParams.entries()) {
+      if (!query.has(key)) {
+        query.set(key, value);
+      }
+    }
+  }
+
+  if (!query.has('tls')) {
+    query.set('tls', 'true');
+  }
+
+  const hosts = srvHosts.map((host) => `${host.name}:${host.port}`).join(',');
+  const username = parsed.username ? decodeURIComponent(parsed.username) : '';
+  const password = parsed.password ? decodeURIComponent(parsed.password) : '';
+  const auth = username
+    ? `${encodeURIComponent(username)}:${encodeURIComponent(password)}@`
+    : '';
+  const database = parsed.pathname.replace(/^\//, '');
+  const queryString = query.toString();
+
+  return `mongodb://${auth}${hosts}/${database}${queryString ? `?${queryString}` : ''}`;
+}
+
+async function connectWithFallback(uri) {
+  try {
+    await mongoose.connect(uri, { dbName: process.env.MONGODB_DB || undefined });
+    return uri;
+  } catch (err) {
+    if (!uri.startsWith('mongodb+srv://')) {
+      throw err;
+    }
+
+    const directUri = await buildDirectMongoUriFromSrv(uri);
+    if (directUri === uri) {
+      throw err;
+    }
+
+    console.warn('SRV connection failed, retrying with direct MongoDB URI...');
+    await mongoose.connect(directUri, { dbName: process.env.MONGODB_DB || undefined });
+    return directUri;
+  }
+}
+
 const baseSizeChart = [
-  { size: 'XS', chest: 18, waist: 16, hips: 20, length: 41 },
   { size: 'S', chest: 19, waist: 17, hips: 21, length: 42 },
   { size: 'M', chest: 20, waist: 18, hips: 22, length: 43 },
   { size: 'L', chest: 22, waist: 20, hips: 24, length: 44 },
-  { size: 'XL', chest: 24, waist: 22, hips: 26, length: 45 },
 ];
 
 function shiftChart(lengthDelta) {
@@ -58,7 +120,7 @@ const products = [
     frontImageUrl: 'https://images.unsplash.com/photo-1495385794356-15371f348c31?w=1200&q=80',
     backImageUrl: 'https://images.unsplash.com/photo-1509631179647-0177331693ae?w=1200&q=80',
     colors: [{ name: 'Sea Green', hex: '#6B8F81' }, { name: 'Ivory', hex: '#F3EFE8' }],
-    sizes: ['XS', 'S', 'M', 'L', 'XL'],
+    sizes: ['S', 'M', 'L'],
     sizeChartRows: shiftChart(0),
     description: 'Two-piece stitched lawn suit tailored for warm weather with breathable finish and straight shirt silhouette.',
     details: ['Premium summer lawn', 'Dyed trouser included', 'Lightweight and breathable', 'Machine wash cold'],
@@ -86,7 +148,7 @@ const products = [
     frontImageUrl: 'https://images.unsplash.com/photo-1581044777550-4cfa60707c03?w=1200&q=80',
     backImageUrl: 'https://images.unsplash.com/photo-1515372039744-b8f02a3ae446?w=1200&q=80',
     colors: [{ name: 'Off White', hex: '#F5F1EA' }, { name: 'Sandal', hex: '#CDAA7D' }],
-    sizes: ['XS', 'S', 'M', 'L', 'XL'],
+    sizes: ['S', 'M', 'L'],
     sizeChartRows: shiftChart(1),
     description: 'Classic embroidered kurta with matching trouser inspired by contemporary Lahore pret cuts.',
     details: ['Dyed cotton base', 'Neckline embroidery', 'Straight fit', 'Hand wash recommended'],
@@ -114,7 +176,7 @@ const products = [
     frontImageUrl: 'https://images.unsplash.com/photo-1512436991641-6745cdb1723f?w=1200&q=80',
     backImageUrl: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&q=80',
     colors: [{ name: 'Mauve', hex: '#B68AA0' }],
-    sizes: ['XS', 'S', 'M', 'L', 'XL'],
+    sizes: ['S', 'M', 'L'],
     sizeChartRows: shiftChart(-1),
     description: 'Single stitched lawn shirt with all-over print and everyday fit for daily wear.',
     details: ['Premium printed lawn', 'Single shirt', 'Soft finish', 'Easy care fabric'],
@@ -143,7 +205,7 @@ const products = [
     frontImageUrl: 'https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=1200&q=80',
     backImageUrl: 'https://images.unsplash.com/photo-1529139574466-a303027614a9?w=1200&q=80',
     colors: [{ name: 'Pista', hex: '#BFD8C0' }, { name: 'Stone', hex: '#C8BCAC' }],
-    sizes: ['XS', 'S', 'M', 'L', 'XL'],
+    sizes: ['S', 'M', 'L'],
     sizeChartRows: shiftChart(1),
     description: 'Luxury pret set in cotton silk blend with subtle sheen and clean tailoring lines.',
     details: ['Cotton silk blend', 'Two-piece stitched', 'Premium finish', 'Dry clean preferred'],
@@ -171,7 +233,7 @@ const products = [
     frontImageUrl: 'https://images.unsplash.com/photo-1566479179817-0c9c4acec19b?w=1200&q=80',
     backImageUrl: 'https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=1200&q=80',
     colors: [{ name: 'Ice Blue', hex: '#B8D5E3' }],
-    sizes: ['XS', 'S', 'M', 'L', 'XL'],
+    sizes: ['S', 'M', 'L'],
     sizeChartRows: shiftChart(0),
     description: 'Chikankari-inspired stitched pret suit with delicate detailing and premium fall.',
     details: ['Fine lawn-cotton blend', 'Handfeel embroidery look', 'Straight trouser', 'Do not bleach'],
@@ -199,7 +261,7 @@ const products = [
     frontImageUrl: 'https://images.unsplash.com/photo-1548624313-0396c75e4b1a?w=1200&q=80',
     backImageUrl: 'https://images.unsplash.com/photo-1543087903-1ac2ec7aa8cd?w=1200&q=80',
     colors: [{ name: 'Charcoal', hex: '#4A4A4A' }, { name: 'Deep Olive', hex: '#58614B' }],
-    sizes: ['XS', 'S', 'M', 'L', 'XL'],
+    sizes: ['S', 'M', 'L'],
     sizeChartRows: shiftChart(2),
     description: 'Jacquard textured long kurta designed for evening semi-formal occasions.',
     details: ['Textured jacquard', 'Long silhouette', 'Two-piece set', 'Steam press for best look'],
@@ -228,7 +290,7 @@ const products = [
     frontImageUrl: 'https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=1200&q=80',
     backImageUrl: 'https://images.unsplash.com/photo-1551232864-3f0890e580d9?w=1200&q=80',
     colors: [{ name: 'Ruby', hex: '#8E3B46' }, { name: 'Navy', hex: '#22314D' }],
-    sizes: ['XS', 'S', 'M', 'L', 'XL'],
+    sizes: ['S', 'M', 'L'],
     sizeChartRows: shiftChart(5),
     description: 'Heavily finished formal maxi suitable for wedding events and evening functions.',
     details: ['Formal net blend', 'Inner lining included', 'Flare silhouette', 'Dry clean only'],
@@ -256,7 +318,7 @@ const products = [
     frontImageUrl: 'https://images.unsplash.com/photo-1464863979621-258859e62245?w=1200&q=80',
     backImageUrl: 'https://images.unsplash.com/photo-1492707892479-7bc8d5a4ee93?w=1200&q=80',
     colors: [{ name: 'Rose Pink', hex: '#C989A0' }],
-    sizes: ['XS', 'S', 'M', 'L', 'XL'],
+    sizes: ['S', 'M', 'L'],
     sizeChartRows: shiftChart(4),
     description: 'Organza shirt with inner and trouser, crafted for festive dinners and formal gatherings.',
     details: ['Organza outer', 'Dyed grip trouser', 'Embellished neckline', 'Dry clean preferred'],
@@ -284,7 +346,7 @@ const products = [
     frontImageUrl: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=1200&q=80',
     backImageUrl: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=1200&q=80',
     colors: [{ name: 'Mint', hex: '#9ABDAA' }, { name: 'Cream', hex: '#F2ECE1' }],
-    sizes: ['XS', 'S', 'M', 'L', 'XL'],
+    sizes: ['S', 'M', 'L'],
     sizeChartRows: shiftChart(1),
     description: 'Festive stitched kurta with subtle embellishment suitable for Eid day and family events.',
     details: ['Festive cotton-net blend', 'Soft lining', 'Straight cut', 'Delicate wash'],
@@ -313,7 +375,7 @@ const products = [
     frontImageUrl: 'https://images.unsplash.com/photo-1485230895905-ec40ba36b9bc?w=1200&q=80',
     backImageUrl: 'https://images.unsplash.com/photo-1495385794356-15371f348c31?w=1200&q=80',
     colors: [{ name: 'Gold Beige', hex: '#C7AA7A' }],
-    sizes: ['XS', 'S', 'M', 'L', 'XL'],
+    sizes: ['S', 'M', 'L'],
     sizeChartRows: shiftChart(2),
     description: 'Banarsi-inspired festive outfit with refined texture and occasion-ready silhouette.',
     details: ['Banarsi-inspired weave look', 'Lined shirt', 'Matching trouser', 'Dry clean only'],
@@ -338,7 +400,7 @@ const categories = [
 ];
 
 async function run() {
-  await mongoose.connect(MONGODB_URI, { dbName: process.env.MONGODB_DB || undefined });
+  await connectWithFallback(MONGODB_URI);
 
   const db = mongoose.connection.db;
   const now = new Date();

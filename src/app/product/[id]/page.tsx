@@ -716,8 +716,21 @@ export default function ProductPage() {
                   </button>
 
                   {expandedSection === 'size-chart' && (
-                    <div className="mt-4 overflow-x-auto border border-nude/20">
-                      <table className="w-full text-left min-w-[540px]">
+                    <div className="mt-4 space-y-4">
+                      {product.sizeChartImageUrl && (
+                        <div className="overflow-hidden border border-nude/20 bg-white">
+                          <div className="relative aspect-[4/5] w-full">
+                            <Image
+                              src={product.sizeChartImageUrl}
+                              alt={`${product.name} size chart`}
+                              fill
+                              className="object-contain bg-white"
+                            />
+                          </div>
+                        </div>
+                      )}
+                      <div className="overflow-x-auto border border-nude/20">
+                        <table className="w-full text-left min-w-[540px]">
                         <thead>
                           <tr className="bg-brown text-cream text-[10px] tracking-[0.12em] uppercase">
                             <th className="px-3 py-2">Size</th>
@@ -738,7 +751,8 @@ export default function ProductPage() {
                             </tr>
                           ))}
                         </tbody>
-                      </table>
+                        </table>
+                      </div>
                     </div>
                   )}
                 </div>

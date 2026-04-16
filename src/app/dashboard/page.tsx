@@ -77,6 +77,7 @@ interface ProductRow {
   images?: string[];
   frontImageUrl?: string;
   backImageUrl?: string;
+  sizeChartImageUrl?: string;
   videoUrl?: string;
   model3dUrl?: string;
   model3dStatus?: 'none' | 'pending' | 'ready' | 'failed';
@@ -1057,6 +1058,7 @@ function ProductsTab() {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [imageUrlInputs, setImageUrlInputs] = useState<string[]>(['']);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingSizeChartImage, setUploadingSizeChartImage] = useState(false);
   const [uploadingVideo, setUploadingVideo] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -1068,6 +1070,7 @@ function ProductsTab() {
     description: '',
     frontImageUrl: '',
     backImageUrl: '',
+    sizeChartImageUrl: '',
     videoUrl: '',
     model3dUrl: '',
     detailsText: '',
@@ -1135,6 +1138,7 @@ function ProductsTab() {
       description: '',
       frontImageUrl: '',
       backImageUrl: '',
+      sizeChartImageUrl: '',
       videoUrl: '',
       model3dUrl: '',
       detailsText: '',
@@ -1213,6 +1217,23 @@ function ProductsTab() {
       console.error('Error reading front/back image:', err);
       alert('Failed to read image. Please try again.');
     } finally {
+      e.currentTarget.value = '';
+    }
+  }
+
+  async function handleSizeChartImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.currentTarget.files?.[0];
+    if (!file) return;
+
+    setUploadingSizeChartImage(true);
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      setFormData((prev) => ({ ...prev, sizeChartImageUrl: dataUrl }));
+    } catch (err) {
+      console.error('Error reading size chart image:', err);
+      alert('Failed to read size chart image. Please try again.');
+    } finally {
+      setUploadingSizeChartImage(false);
       e.currentTarget.value = '';
     }
   }
@@ -1297,6 +1318,7 @@ function ProductsTab() {
         images: mergedImages,
         frontImageUrl: inferredFrontImage,
         backImageUrl: inferredBackImage,
+        sizeChartImageUrl: formData.sizeChartImageUrl,
         videoUrl: formData.videoUrl,
         model3dUrl: formData.model3dUrl,
         details: parseCsvOrLines(formData.detailsText),
@@ -1400,6 +1422,7 @@ function ProductsTab() {
       description: prod.description || '',
       frontImageUrl: prod.frontImageUrl || '',
       backImageUrl: prod.backImageUrl || '',
+      sizeChartImageUrl: prod.sizeChartImageUrl || '',
       videoUrl: prod.videoUrl || '',
       model3dUrl: prod.model3dUrl || '',
       detailsText: (prod.details ?? []).join('\n'),
@@ -1584,6 +1607,33 @@ function ProductsTab() {
                       style={{ marginTop: 8, padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12 }}
                     >
                       Remove Back
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div style={{ border: '1px solid #EBD9CC', borderRadius: 8, padding: 10, background: CREAM }}>
+              <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 6, fontWeight: 600 }}>Size Chart Image</label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => void handleSizeChartImageUpload(e)}
+                disabled={uploadingSizeChartImage}
+                style={{ display: 'block', width: '100%', fontSize: 12, color: BROWN }}
+              />
+              <p style={{ margin: '6px 0 0', fontSize: 11, color: MUTED }}>
+                {uploadingSizeChartImage ? 'Uploading size chart image...' : 'Upload an image version of the size chart for the product page.'}
+              </p>
+              {formData.sizeChartImageUrl && (
+                <div style={{ marginTop: 8 }}>
+                  <img src={formData.sizeChartImageUrl} alt="Size chart preview" style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 8, border: '1px solid #EBD9CC' }} />
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData((prev) => ({ ...prev, sizeChartImageUrl: '' }))}
+                      style={{ marginTop: 8, padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12 }}
+                    >
+                      Remove Size Chart Image
                     </button>
                   </div>
                 </div>

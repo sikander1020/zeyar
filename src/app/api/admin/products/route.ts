@@ -86,6 +86,7 @@ export async function POST(req: NextRequest) {
     const sizeChartRows = asFilteredSizeChartRows(body.sizeChartRows);
     const frontImageUrl = typeof body.frontImageUrl === 'string' ? body.frontImageUrl.trim() : '';
     const backImageUrl = typeof body.backImageUrl === 'string' ? body.backImageUrl.trim() : '';
+    const sizeChartImageUrl = typeof body.sizeChartImageUrl === 'string' ? body.sizeChartImageUrl.trim() : '';
     const videoUrl = typeof body.videoUrl === 'string' ? body.videoUrl.trim() : '';
 
     const product = new Product({
@@ -108,6 +109,7 @@ export async function POST(req: NextRequest) {
       tags,
       frontImageUrl,
       backImageUrl,
+      sizeChartImageUrl,
       videoUrl,
       model3dUrl: typeof body.model3dUrl === 'string' ? body.model3dUrl.trim() : '',
       model3dStatus: body.model3dStatus === 'ready' ? 'ready' : 'none',
