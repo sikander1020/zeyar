@@ -5,6 +5,10 @@ import { useSearchParams } from 'next/navigation';
 import AppShell from '@/components/layout/AppShell';
 
 export default function PaymentProofClient() {
+  const bankName = process.env.NEXT_PUBLIC_BANK_NAME ?? 'JazzCash';
+  const bankAccountTitle = process.env.NEXT_PUBLIC_BANK_ACCOUNT_TITLE ?? 'ZAYBAASH';
+  const bankAccountNumber = process.env.NEXT_PUBLIC_BANK_ACCOUNT_NUMBER ?? '03219643246';
+
   const params = useSearchParams();
   const orderId = useMemo(() => (params.get('orderId') ?? '').trim(), [params]);
   const token = useMemo(() => (params.get('token') ?? '').trim(), [params]);
@@ -66,9 +70,9 @@ export default function PaymentProofClient() {
               Where to pay
             </p>
             <div className="text-sm text-brown font-inter space-y-1" style={{ fontFamily: "'Inter', sans-serif" }}>
-              <div><span className="text-brown-muted">Bank:</span> (add your bank name)</div>
-              <div><span className="text-brown-muted">Account Title:</span> (add title)</div>
-              <div><span className="text-brown-muted">Account / IBAN:</span> (add number)</div>
+              <div><span className="text-brown-muted">Bank:</span> {bankName}</div>
+              <div><span className="text-brown-muted">Account Title:</span> {bankAccountTitle}</div>
+              <div><span className="text-brown-muted">Account / IBAN:</span> {bankAccountNumber}</div>
             </div>
             <p className="text-xs text-brown-muted font-inter mt-3" style={{ fontFamily: "'Inter', sans-serif" }}>
               After paying, upload the screenshot below and enter the transaction reference.
