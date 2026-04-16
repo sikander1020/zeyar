@@ -4,7 +4,7 @@ import { useMemo, useEffect, useState, Suspense, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence, useMotionValue, useScroll, useSpring, useTransform } from 'framer-motion';
-import { Heart, ShoppingBag, ChevronDown, SlidersHorizontal, X } from 'lucide-react';
+import { Heart, ShoppingBag, ChevronDown, SlidersHorizontal, X, Eye } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import { useSearchParams } from 'next/navigation';
@@ -21,7 +21,7 @@ const sortOptions = [
   { value: 'rating', label: 'Top Rated' },
 ];
 
-function ProductCard({ product, index }: { product: StoreProduct; index: number }) {
+function ProductCard({ product, index, onQuickView }: { product: StoreProduct; index: number; onQuickView: (product: StoreProduct) => void }) {
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, isWishlisted } = useWishlistStore();
   const { toast } = useToast();
@@ -117,6 +117,17 @@ function ProductCard({ product, index }: { product: StoreProduct; index: number 
           <div className={`absolute bottom-0 inset-x-0 bg-brown/90 text-cream text-center py-2.5 text-[10px] tracking-[0.15em] uppercase font-inter transition-transform duration-400 ${hovered ? 'translate-y-0' : 'translate-y-full'}`}>
             {adding ? 'Adding...' : 'Quick Add'}
           </div>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              onQuickView(product);
+            }}
+            className={`absolute left-1/2 top-1/2 z-20 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-xs tracking-[0.1em] uppercase text-brown shadow transition-all duration-300 ${hovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+          >
+            <Eye size={13} />
+            Quick View
+          </button>
         </div>
       </Link>
       <div className="pt-4">
@@ -160,6 +171,15 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
   const [selectedSize, setSelectedSize] = useState('All Sizes');
   const [selectedColor, setSelectedColor] = useState('All Colors');
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [quickViewProduct, setQuickViewProduct] = useState<StoreProduct | null>(null);
+  const [quickViewImage, setQuickViewImage] = useState(0);
+  const [quickViewSize, setQuickViewSize] = useState('');
+  const [quickViewColor, setQuickViewColor] = useState<{ name: string; hex: string }>({ name: '', hex: '' });
+  const [quickViewAdding, setQuickViewAdding] = useState(false);
+  const addItem = useCartStore((s) => s.addItem);
+  const toggleCart = useCartStore((s) => s.toggleCart);
+  const { toggle, isWishlisted } = useWishlistStore();
+  const { toast } = useToast();
 
   useEffect(() => {
     setActiveCategory(initialCategory);
@@ -259,6 +279,49 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
       setPriceMin(bounds.min);
       setPriceMax(bounds.max);
     }
+  };
+
+  useEffect(() => {
+    if (!quickViewProduct) return;
+    const nextSize = quickViewProduct.sizes[0] || '';
+    const nextColor = quickViewProduct.colors[0] || { name: '', hex: '' };
+    setQuickViewSize(nextSize);
+    setQuickViewColor(nextColor);
+    setQuickViewImage(0);
+    setQuickViewAdding(false);
+  }, [quickViewProduct]);
+
+  useEffect(() => {
+    if (!quickViewProduct) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [quickViewProduct]);
+
+  const closeQuickView = () => {
+    setQuickViewProduct(null);
+  };
+
+  const handleQuickViewAdd = () => {
+    if (!quickViewProduct || !quickViewSize || !quickViewColor.name || quickViewProduct.outOfStock || quickViewAdding) return;
+    setQuickViewAdding(true);
+    addItem(quickViewProduct, quickViewSize, quickViewColor);
+    toast({ type: 'success', title: 'Added to bag', message: quickViewProduct.name });
+    toggleCart();
+    window.setTimeout(() => setQuickViewAdding(false), 500);
+  };
+
+  const handleQuickViewWishlist = () => {
+    if (!quickViewProduct) return;
+    const wasWishlisted = isWishlisted(quickViewProduct.id);
+    toggle(quickViewProduct.id);
+    toast({
+      type: 'success',
+      title: wasWishlisted ? 'Removed from wishlist' : 'Saved to wishlist',
+      message: quickViewProduct.name,
+    });
   };
 
   const filtered = useMemo(() => {
@@ -503,7 +566,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
           <AnimatePresence mode="popLayout">
             <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {filtered.map((product, i) => (
-                <ProductCard key={product.id} product={product} index={i} />
+                <ProductCard key={product.id} product={product} index={i} onQuickView={setQuickViewProduct} />
               ))}
             </motion.div>
           </AnimatePresence>
@@ -518,6 +581,140 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
               </button>
             </div>
           )}
+
+          <AnimatePresence>
+            {quickViewProduct && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-[120] bg-brown/50 backdrop-blur-sm"
+                  onClick={closeQuickView}
+                />
+
+                <motion.div
+                  initial={{ opacity: 0, y: 24, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 14, scale: 0.98 }}
+                  transition={{ duration: 0.22 }}
+                  className="fixed left-1/2 top-1/2 z-[130] w-[min(96vw,980px)] -translate-x-1/2 -translate-y-1/2 border border-nude/30 bg-cream shadow-[0_38px_120px_-40px_rgba(58,46,42,0.6)]"
+                >
+                  <button
+                    type="button"
+                    onClick={closeQuickView}
+                    className="absolute right-3 top-3 z-10 rounded-full border border-nude/40 bg-white/90 p-2 text-brown hover:text-rose-gold"
+                    aria-label="Close quick view"
+                  >
+                    <X size={16} />
+                  </button>
+
+                  <div className="grid grid-cols-1 md:grid-cols-[1fr_1.1fr]">
+                    <div className="border-b border-nude/20 md:border-b-0 md:border-r md:border-nude/20 p-4">
+                      <div className="relative aspect-[3/4] overflow-hidden bg-beige">
+                        <Image
+                          src={quickViewProduct.images[quickViewImage] || quickViewProduct.images[0]}
+                          alt={quickViewProduct.name}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+
+                      {quickViewProduct.images.length > 1 && (
+                        <div className="mt-3 grid grid-cols-5 gap-2">
+                          {quickViewProduct.images.slice(0, 5).map((img, i) => (
+                            <button
+                              key={`${quickViewProduct.id}-img-${i}`}
+                              type="button"
+                              onClick={() => setQuickViewImage(i)}
+                              className={`relative aspect-square overflow-hidden border ${quickViewImage === i ? 'border-rose-gold' : 'border-nude/30'}`}
+                            >
+                              <Image src={img} alt={`${quickViewProduct.name} ${i + 1}`} fill className="object-cover" />
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="p-6 md:p-7">
+                      <p className="text-[10px] tracking-[0.18em] uppercase text-rose-gold mb-2">{quickViewProduct.category}</p>
+                      <h3 className="text-2xl font-playfair text-brown leading-tight">{quickViewProduct.name}</h3>
+
+                      <div className="mt-3 flex items-baseline gap-2">
+                        <span className="text-xl font-semibold text-brown">Rs {quickViewProduct.price.toLocaleString()}</span>
+                        {quickViewProduct.originalPrice && (
+                          <span className="text-sm text-brown-muted line-through">Rs {quickViewProduct.originalPrice.toLocaleString()}</span>
+                        )}
+                      </div>
+
+                      <p className="mt-4 text-sm text-brown-muted leading-relaxed">
+                        {quickViewProduct.description || 'A refined ZAYBAASH piece designed for statement elegance.'}
+                      </p>
+
+                      <div className="mt-5">
+                        <p className="text-[10px] tracking-[0.15em] uppercase text-brown-muted mb-2">Size</p>
+                        <div className="flex flex-wrap gap-2">
+                          {quickViewProduct.sizes.map((size) => (
+                            <button
+                              key={`${quickViewProduct.id}-size-${size}`}
+                              type="button"
+                              onClick={() => setQuickViewSize(size)}
+                              className={`min-w-[44px] border px-3 py-2 text-xs ${quickViewSize === size ? 'border-brown bg-brown text-cream' : 'border-nude text-brown hover:border-brown'}`}
+                            >
+                              {size}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="mt-4">
+                        <p className="text-[10px] tracking-[0.15em] uppercase text-brown-muted mb-2">Color</p>
+                        <div className="flex gap-2">
+                          {quickViewProduct.colors.map((color) => (
+                            <button
+                              key={`${quickViewProduct.id}-color-${color.name}`}
+                              type="button"
+                              onClick={() => setQuickViewColor(color)}
+                              className={`h-8 w-8 rounded-full border-2 ${quickViewColor.name === color.name ? 'border-rose-gold' : 'border-transparent'}`}
+                              style={{ backgroundColor: color.hex }}
+                              title={color.name}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button
+                          type="button"
+                          disabled={quickViewProduct.outOfStock || quickViewAdding}
+                          onClick={handleQuickViewAdd}
+                          className="btn-luxury btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
+                        >
+                          {quickViewProduct.outOfStock ? 'Out of Stock' : quickViewAdding ? 'Adding...' : 'Add to Bag'}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleQuickViewWishlist}
+                          className={`btn-luxury ${isWishlisted(quickViewProduct.id) ? 'btn-primary' : 'btn-outline'}`}
+                        >
+                          {isWishlisted(quickViewProduct.id) ? 'Saved' : 'Save'}
+                        </button>
+                      </div>
+
+                      <Link
+                        href={`/product/${quickViewProduct.id}`}
+                        onClick={closeQuickView}
+                        className="mt-3 inline-flex text-xs tracking-[0.12em] uppercase text-brown-muted hover:text-brown underline underline-offset-4"
+                      >
+                        View Full Details
+                      </Link>
+                    </div>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
         </div>
       </div>
     </AppShell>
