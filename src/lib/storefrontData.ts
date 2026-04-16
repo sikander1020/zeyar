@@ -50,6 +50,7 @@ function normalizeProduct(p: {
   images?: string[];
   frontImageUrl?: string;
   backImageUrl?: string;
+  videoUrl?: string;
   model3dUrl?: string;
   model3dStatus?: 'none' | 'pending' | 'ready' | 'failed';
   colors?: Array<{ name: string; hex: string }>;
@@ -89,6 +90,7 @@ function normalizeProduct(p: {
     images,
     frontImageUrl: typeof p.frontImageUrl === 'string' ? p.frontImageUrl : '',
     backImageUrl: typeof p.backImageUrl === 'string' ? p.backImageUrl : '',
+    videoUrl: typeof p.videoUrl === 'string' ? p.videoUrl : '',
     model3dUrl: typeof p.model3dUrl === 'string' ? p.model3dUrl : '',
     model3dStatus: p.model3dStatus ?? 'none',
     colors: Array.isArray(p.colors) && p.colors.length > 0 ? p.colors : [{ name: 'Default', hex: '#E6B7A9' }],

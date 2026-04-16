@@ -77,6 +77,7 @@ interface ProductRow {
   images?: string[];
   frontImageUrl?: string;
   backImageUrl?: string;
+  videoUrl?: string;
   model3dUrl?: string;
   model3dStatus?: 'none' | 'pending' | 'ready' | 'failed';
   model3dError?: string;
@@ -1066,6 +1067,7 @@ function ProductsTab() {
     description: '',
     frontImageUrl: '',
     backImageUrl: '',
+    videoUrl: '',
     model3dUrl: '',
     detailsText: '',
     sizesText: 'S, M, L',
@@ -1132,6 +1134,7 @@ function ProductsTab() {
       description: '',
       frontImageUrl: '',
       backImageUrl: '',
+      videoUrl: '',
       model3dUrl: '',
       detailsText: '',
       sizesText: 'S, M, L',
@@ -1213,6 +1216,37 @@ function ProductsTab() {
     }
   }
 
+  async function handleVideoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.currentTarget.files?.[0];
+    if (!file) return;
+
+    try {
+      const headers = authHeaders();
+      delete headers['Content-Type'];
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/admin/upload', {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+
+      const data = await res.json() as { success?: boolean; url?: string; error?: string };
+      if (!res.ok || !data.success || !data.url) {
+        throw new Error(data.error || 'Failed to upload video');
+      }
+
+      setFormData((prev) => ({ ...prev, videoUrl: data.url as string }));
+    } catch (err) {
+      console.error('Error uploading video file:', err);
+      alert(err instanceof Error ? err.message : 'Failed to upload video. Please try again.');
+    } finally {
+      e.currentTarget.value = '';
+    }
+  }
+
   function removeUploadedImage(index: number) {
     setUploadedImages((prev) => prev.filter((_, i) => i !== index));
   }
@@ -1261,6 +1295,7 @@ function ProductsTab() {
         images: mergedImages,
         frontImageUrl: inferredFrontImage,
         backImageUrl: inferredBackImage,
+        videoUrl: formData.videoUrl,
         model3dUrl: formData.model3dUrl,
         details: parseCsvOrLines(formData.detailsText),
         sizes: parseCsvOrLines(formData.sizesText),
@@ -1326,6 +1361,7 @@ function ProductsTab() {
       images: prod.images,
       frontImageUrl: prod.frontImageUrl,
       backImageUrl: prod.backImageUrl,
+      videoUrl: prod.videoUrl,
       model3dUrl: prod.model3dUrl,
       model3dStatus: prod.model3dStatus,
       model3dError: prod.model3dError,
@@ -1362,6 +1398,7 @@ function ProductsTab() {
       description: prod.description || '',
       frontImageUrl: prod.frontImageUrl || '',
       backImageUrl: prod.backImageUrl || '',
+      videoUrl: prod.videoUrl || '',
       model3dUrl: prod.model3dUrl || '',
       detailsText: (prod.details ?? []).join('\n'),
       sizesText: (prod.sizes ?? []).join(', '),
@@ -1545,6 +1582,34 @@ function ProductsTab() {
                       style={{ marginTop: 8, padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12 }}
                     >
                       Remove Back
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div style={{ border: '1px solid #EBD9CC', borderRadius: 8, padding: 10, background: CREAM }}>
+              <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 6, fontWeight: 600 }}>Product Video</label>
+              <input
+                type="file"
+                accept="video/*"
+                onChange={(e) => void handleVideoUpload(e)}
+                style={{ display: 'block', width: '100%', fontSize: 12, color: BROWN }}
+              />
+              {formData.videoUrl && (
+                <div style={{ marginTop: 8 }}>
+                  <video
+                    src={formData.videoUrl}
+                    controls
+                    playsInline
+                    style={{ width: '100%', maxWidth: 280, borderRadius: 8, border: '1px solid #EBD9CC', background: '#000' }}
+                  />
+                  <div>
+                    <button
+                      type="button"
+                      onClick={() => setFormData((prev) => ({ ...prev, videoUrl: '' }))}
+                      style={{ marginTop: 8, padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12 }}
+                    >
+                      Remove Video
                     </button>
                   </div>
                 </div>

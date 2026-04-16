@@ -1,7 +1,28 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { v2 as cloudinary } from 'cloudinary';
 import { requireAdmin } from '@/lib/adminAuth';
 
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+cloudinary.config({
+  cloud_name: (process.env.CLOUDINARY_CLOUD_NAME ?? '').trim(),
+  api_key: (process.env.CLOUDINARY_API_KEY ?? '').trim(),
+  api_secret: (process.env.CLOUDINARY_API_SECRET ?? '').trim(),
+});
+
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+
+const ALLOWED_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'video/mp4',
+  'video/webm',
+  'video/quicktime',
+]);
+
+function getResourceType(fileType: string) {
+  return fileType.startsWith('video/') ? 'video' : 'image';
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,21 +36,35 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    if (!file.type.startsWith('image/')) {
-      return NextResponse.json({ error: 'File must be an image' }, { status: 400 });
+    if (!ALLOWED_TYPES.has(file.type)) {
+      return NextResponse.json({ error: 'File must be an image or video' }, { status: 400 });
     }
 
     if (file.size > MAX_FILE_SIZE) {
-      return NextResponse.json({ error: 'File too large (max 5MB)' }, { status: 400 });
+      return NextResponse.json({ error: 'File too large (max 50MB)' }, { status: 400 });
     }
 
-    const buffer = await file.arrayBuffer();
-    const base64 = Buffer.from(buffer).toString('base64');
-    const dataUrl = `data:${file.type};base64,${base64}`;
+    const cloudName = (process.env.CLOUDINARY_CLOUD_NAME ?? '').trim();
+    const apiKey = (process.env.CLOUDINARY_API_KEY ?? '').trim();
+    const apiSecret = (process.env.CLOUDINARY_API_SECRET ?? '').trim();
+    if (!cloudName || !apiKey || !apiSecret) {
+      return NextResponse.json({ error: 'Server configuration error' }, { status: 500 });
+    }
+
+    const buffer = Buffer.from(await file.arrayBuffer());
+    const dataUrl = `data:${file.type};base64,${buffer.toString('base64')}`;
+    const resourceType = getResourceType(file.type);
+    const ext = file.type.includes('webp') ? 'webp' : file.type.includes('png') ? 'png' : file.type.includes('gif') ? 'gif' : file.type.includes('quicktime') ? 'mov' : file.type.startsWith('video/') ? 'mp4' : 'jpg';
+    const uploaded = await cloudinary.uploader.upload(dataUrl, {
+      folder: 'zaybaash/admin-uploads',
+      resource_type: resourceType,
+      public_id: `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]+/g, '-')}.${ext}`,
+      overwrite: true,
+    });
 
     return NextResponse.json({ 
       success: true, 
-      url: dataUrl,
+      url: uploaded.secure_url,
       fileName: file.name,
       type: file.type,
       size: file.size,

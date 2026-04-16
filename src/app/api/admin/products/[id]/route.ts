@@ -80,6 +80,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const query = findProductQuery(id);
     const body = await req.json();
     const stock = Number(body.stock) || 0;
+    const videoUrl = typeof body.videoUrl === 'string' ? body.videoUrl.trim() : '';
 
     const product = await Product.findOneAndUpdate(
       query,
@@ -93,6 +94,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         images: asStringArray(body.images),
         frontImageUrl: typeof body.frontImageUrl === 'string' ? body.frontImageUrl.trim() : '',
         backImageUrl: typeof body.backImageUrl === 'string' ? body.backImageUrl.trim() : '',
+        videoUrl,
         model3dUrl: typeof body.model3dUrl === 'string' ? body.model3dUrl.trim() : '',
         model3dStatus: body.model3dStatus === 'ready' || body.model3dStatus === 'pending' || body.model3dStatus === 'failed' ? body.model3dStatus : 'none',
         model3dError: typeof body.model3dError === 'string' ? body.model3dError : '',

@@ -85,7 +85,7 @@ export default function ProductPage() {
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState({ name: '', hex: '' });
   const [activeImage, setActiveImage] = useState(0);
-  const [activeTab, setActiveTab] = useState<'3d' | 'images'>('images');
+  const [activeTab, setActiveTab] = useState<'3d' | 'images' | 'video'>('images');
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [reviews, setReviews] = useState<Array<{
     reviewId: string;
@@ -126,6 +126,7 @@ export default function ProductPage() {
       setSelectedSize(firstAllowedSize || cachedProduct.sizes[0] || '');
       setSelectedColor(cachedProduct.colors[0] || { name: '', hex: '' });
       setActiveImage(0);
+      setActiveTab('images');
       setProductLoading(false);
     } else {
       setProductLoading(true);
@@ -154,6 +155,7 @@ export default function ProductPage() {
           setSelectedSize(firstAllowedSize || p.sizes[0] || '');
           setSelectedColor(p.colors[0] || { name: '', hex: '' });
           setActiveImage(0);
+          setActiveTab('images');
         }
       })
       .catch(() => {
@@ -421,8 +423,9 @@ export default function ProductPage() {
   const related = allProducts.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 3);
   const showRelatedLoading = catalogLoading && related.length === 0;
   const hasModel3d = Boolean((product.model3dUrl || '').trim());
-  const show3dTab = hasModel3d;
-  const activeMediaTab: 'images' | '3d' = show3dTab ? activeTab : 'images';
+  const hasVideo = Boolean((product.videoUrl || '').trim());
+  const showMediaTabs = hasModel3d || hasVideo;
+  const activeMediaTab: 'images' | 'video' | '3d' = showMediaTabs ? activeTab : 'images';
 
   return (
     <AppShell>
@@ -444,7 +447,7 @@ export default function ProductPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20">
             {/* Left: Media */}
             <div>
-              {show3dTab && (
+              {showMediaTabs && (
                 <div className="flex mb-4 border border-nude/30">
                   <button
                     type="button"
@@ -454,32 +457,41 @@ export default function ProductPage() {
                   >
                     Gallery
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('3d')}
-                    className={`flex-1 py-3 text-xs tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeMediaTab === '3d' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
-                    style={{ fontFamily: "'Inter', sans-serif" }}
-                  >
-                    3D View
-                  </button>
+                  {hasVideo && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('video')}
+                      className={`flex-1 py-3 text-xs tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeMediaTab === 'video' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                    >
+                      Video
+                    </button>
+                  )}
+                  {hasModel3d && (
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab('3d')}
+                      className={`flex-1 py-3 text-xs tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeMediaTab === '3d' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                    >
+                      3D View
+                    </button>
+                  )}
                 </div>
               )}
 
-              {activeMediaTab === '3d' && show3dTab ? (
-                hasModel3d ? (
-                  <ModelViewer3D modelUrl={product.model3dUrl || ''} posterUrl={product.frontImageUrl || product.images[0]} />
-                ) : (
-                  <div className="aspect-square relative overflow-hidden bg-gradient-to-br from-beige to-cream-dark mb-3 border border-nude/30 flex items-center justify-center">
-                    <div className="max-w-md px-6 text-center">
-                      <p className="text-xs tracking-[0.18em] uppercase text-rose-gold font-semibold font-inter mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        3D Preview Preparing
-                      </p>
-                      <p className="text-sm text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                        3D model is not ready yet for this product. Use the dashboard 3D button to generate it from front and back images.
-                      </p>
-                    </div>
-                  </div>
-                )
+              {activeMediaTab === 'video' && hasVideo ? (
+                <div className="aspect-square relative overflow-hidden bg-black mb-3 border border-nude/30">
+                  <video
+                    src={product.videoUrl}
+                    controls
+                    playsInline
+                    className="h-full w-full object-cover"
+                    poster={product.frontImageUrl || product.images[0]}
+                  />
+                </div>
+              ) : activeMediaTab === '3d' && hasModel3d ? (
+                <ModelViewer3D modelUrl={product.model3dUrl || ''} posterUrl={product.frontImageUrl || product.images[0]} />
               ) : (
                 <div className="aspect-square relative overflow-hidden bg-beige mb-3">
                   <Image
@@ -502,6 +514,15 @@ export default function ProductPage() {
                   </button>
                 ))}
               </div>
+              {hasVideo && activeMediaTab !== 'video' && (
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('video')}
+                  className="mt-3 inline-flex items-center gap-2 text-xs tracking-[0.14em] uppercase text-brown-muted hover:text-brown"
+                >
+                  Watch product video
+                </button>
+              )}
             </div>
 
             {/* Right: Product info */}

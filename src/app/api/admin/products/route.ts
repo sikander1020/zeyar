@@ -86,6 +86,7 @@ export async function POST(req: NextRequest) {
     const sizeChartRows = asFilteredSizeChartRows(body.sizeChartRows);
     const frontImageUrl = typeof body.frontImageUrl === 'string' ? body.frontImageUrl.trim() : '';
     const backImageUrl = typeof body.backImageUrl === 'string' ? body.backImageUrl.trim() : '';
+    const videoUrl = typeof body.videoUrl === 'string' ? body.videoUrl.trim() : '';
 
     const product = new Product({
       productId: `prod_${Date.now()}`,
@@ -107,6 +108,7 @@ export async function POST(req: NextRequest) {
       tags,
       frontImageUrl,
       backImageUrl,
+      videoUrl,
       model3dUrl: typeof body.model3dUrl === 'string' ? body.model3dUrl.trim() : '',
       model3dStatus: body.model3dStatus === 'ready' ? 'ready' : 'none',
       model3dError: '',

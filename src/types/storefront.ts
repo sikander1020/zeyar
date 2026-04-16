@@ -32,6 +32,7 @@ export interface StoreProduct {
   isBestseller?: boolean;
   frontImageUrl?: string;
   backImageUrl?: string;
+  videoUrl?: string;
   model3dUrl?: string;
   model3dStatus?: 'none' | 'pending' | 'ready' | 'failed';
 }

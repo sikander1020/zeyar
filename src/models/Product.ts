@@ -31,6 +31,7 @@ export interface IProduct extends Document {
   isBestseller?: boolean;
   frontImageUrl?: string;
   backImageUrl?: string;
+  videoUrl?: string;
   model3dUrl?: string;
   model3dStatus?: 'none' | 'pending' | 'ready' | 'failed';
   model3dError?: string;
@@ -78,6 +79,7 @@ const ProductSchema = new Schema<IProduct>(
     isBestseller:  { type: Boolean, default: false },
     frontImageUrl: { type: String, default: '' },
     backImageUrl:  { type: String, default: '' },
+    videoUrl:      { type: String, default: '' },
     model3dUrl:    { type: String, default: '' },
     model3dStatus: { type: String, enum: ['none', 'pending', 'ready', 'failed'], default: 'none' },
     model3dError:  { type: String, default: '' },

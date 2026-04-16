@@ -137,6 +137,22 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
                 ))}
               </div>
             )}
+
+            {product.videoUrl && (
+              <div className="mt-4 overflow-hidden border border-nude/30 bg-black">
+                <div className="px-3 py-2 text-[10px] tracking-[0.15em] uppercase text-cream/80 bg-brown/90">
+                  Product Video
+                </div>
+                <video
+                  src={product.videoUrl}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="w-full max-h-64 object-cover"
+                  poster={product.frontImageUrl || product.images[0]}
+                />
+              </div>
+            )}
           </div>
 
           <div className="p-6 md:p-7">
