@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight, Heart, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import { useToast } from '@/components/layout/ToastProvider';
+import ProductQuickViewModal from '@/components/storefront/ProductQuickViewModal';
 import type { StoreProduct } from '@/types/storefront';
 
 interface CoverflowCarouselProps {
@@ -65,6 +66,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
   const [viewportWidth, setViewportWidth] = useState(1280);
   const [centerTilt, setCenterTilt] = useState({ x: 0, y: 0 });
   const [addingId, setAddingId] = useState<string | null>(null);
+  const [quickViewProduct, setQuickViewProduct] = useState<StoreProduct | null>(null);
   const reduceMotion = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
   const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -328,6 +330,17 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
                             </button>
                           </div>
 
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setQuickViewProduct(product);
+                            }}
+                            className="mb-3 w-full rounded border border-cream/35 bg-cream/10 py-2 text-[11px] tracking-[0.14em] uppercase hover:bg-cream/20 transition-colors"
+                          >
+                            Quick View
+                          </button>
+
                           <div className="text-center">
                             <p className="text-xs tracking-widest uppercase font-inter mb-1">{product.category}</p>
                             <h3 className="text-lg font-playfair font-semibold mb-2">{product.name}</h3>
@@ -386,6 +399,8 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
         <span className="font-semibold text-brown">{activeIndex + 1}</span>
         <span> / {total}</span>
       </div>
+
+      <ProductQuickViewModal product={quickViewProduct} onClose={() => setQuickViewProduct(null)} />
     </div>
   );
 }

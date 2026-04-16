@@ -60,8 +60,13 @@ export default function FeaturedCollections({ initialProducts }: { initialProduc
         </motion.div>
 
         {loading && (
-          <div className="text-center py-20 text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-            Loading featured pieces...
+          <div className="py-10">
+            <div className="mx-auto mb-6 h-[420px] max-w-[420px] skeleton rounded-xl" />
+            <div className="flex justify-center gap-2">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="h-2.5 w-2.5 rounded-full skeleton" />
+              ))}
+            </div>
           </div>
         )}
 

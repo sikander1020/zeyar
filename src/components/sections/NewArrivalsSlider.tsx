@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { motion, useInView } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import ProductQuickViewModal from '@/components/storefront/ProductQuickViewModal';
 import type { StoreProduct } from '@/types/storefront';
 
 export default function NewArrivalsSlider({ initialProducts }: { initialProducts?: StoreProduct[] } = {}) {
@@ -14,6 +15,7 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
   const [isAutoplay, setIsAutoplay] = useState(true);
   const [products, setProducts] = useState<StoreProduct[]>(initialProducts ?? []);
   const [loading, setLoading] = useState(!initialProducts);
+  const [quickViewProduct, setQuickViewProduct] = useState<StoreProduct | null>(null);
 
   useEffect(() => {
     if (initialProducts) return;
@@ -87,6 +89,7 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
               onClick={prev}
               disabled={start === 0}
               className="w-11 h-11 border border-nude flex items-center justify-center text-brown hover:bg-nude hover:text-white transition-all duration-300 disabled:opacity-30"
+              aria-label="Previous new arrivals"
             >
               <ChevronLeft size={18} strokeWidth={1.5} />
             </button>
@@ -94,6 +97,7 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
               onClick={next}
               disabled={start >= maxStart}
               className="w-11 h-11 border border-nude flex items-center justify-center text-brown hover:bg-nude hover:text-white transition-all duration-300 disabled:opacity-30"
+              aria-label="Next new arrivals"
             >
               <ChevronRight size={18} strokeWidth={1.5} />
             </button>
@@ -101,8 +105,14 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
         </div>
 
         {loading && (
-          <div className="text-center py-10 text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-            Loading arrivals...
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className="space-y-3">
+                <div className="aspect-[3/4] skeleton" />
+                <div className="h-4 w-2/3 skeleton" />
+                <div className="h-3 w-1/2 skeleton" />
+              </div>
+            ))}
           </div>
         )}
 
@@ -157,6 +167,16 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
                           Out of stock
                         </p>
                       )}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setQuickViewProduct(product);
+                        }}
+                        className="mt-3 inline-flex rounded-full bg-white/90 px-3 py-1.5 text-[10px] tracking-[0.14em] uppercase text-brown hover:bg-white"
+                      >
+                        Quick View
+                      </button>
                     </div>
                   </div>
                 </Link>
@@ -175,6 +195,8 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
             View All New Arrivals
           </Link>
         </motion.div>
+
+        <ProductQuickViewModal product={quickViewProduct} onClose={() => setQuickViewProduct(null)} />
       </div>
     </section>
   );
