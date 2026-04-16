@@ -19,6 +19,24 @@
   --glass-border: rgba(230, 183, 169, 0.3);
 }
 
+:root[data-theme='dark'] {
+  --nude: #C58D7D;
+  --nude-light: #D7A697;
+  --nude-dark: #A26D5E;
+  --beige: #271F1C;
+  --beige-dark: #312724;
+  --cream: #171311;
+  --cream-dark: #201916;
+  --rose-gold: #C88490;
+  --rose-gold-light: #DAA4AE;
+  --brown: #F3E8E1;
+  --brown-light: #E6D7CE;
+  --brown-muted: #C7B2A7;
+  --white: #FFFFFF;
+  --glass-bg: rgba(23, 19, 17, 0.7);
+  --glass-border: rgba(200, 132, 144, 0.28);
+}
+
 @theme inline {
   --color-nude: var(--nude);
   --color-nude-light: var(--nude-light);
@@ -47,6 +65,19 @@ body {
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+body,
+nav,
+main,
+section,
+footer,
+div,
+button,
+input,
+textarea,
+a {
+  transition: background-color 220ms ease, border-color 220ms ease, color 220ms ease;
 }
 
 /* Glassmorphism utility */
@@ -78,6 +109,10 @@ body {
 
 .gradient-beige {
   background: linear-gradient(135deg, #FAF7F4 0%, #F5EDE6 50%, #EBD9CC 100%);
+}
+
+:root[data-theme='dark'] .gradient-beige {
+  background: linear-gradient(135deg, #201916 0%, #271F1C 50%, #312724 100%);
 }
 
 /* Elegant serif title */

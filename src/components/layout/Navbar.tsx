@@ -4,10 +4,11 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Heart, Search, Menu, X, ArrowRight } from 'lucide-react';
+import { ShoppingBag, Heart, Search, Menu, X, ArrowRight, Moon, Sun } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import type { StoreProduct } from '@/types/storefront';
+import { useTheme } from '@/components/layout/ThemeProvider';
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -26,6 +27,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [products, setProducts] = useState<StoreProduct[]>([]);
+  const { theme, toggleTheme } = useTheme();
   const itemCount = useCartStore((s) => s.itemCount());
   const wishlistCount = useWishlistStore((s) => s.items.length);
   const toggleCart = useCartStore((s) => s.toggleCart);
@@ -128,6 +130,14 @@ export default function Navbar() {
           {/* Icons */}
           <div className="flex items-center gap-4">
             <button
+              onClick={toggleTheme}
+              className="p-2 text-brown hover:text-rose-gold transition-colors duration-300"
+              aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? <Sun size={18} strokeWidth={1.5} /> : <Moon size={18} strokeWidth={1.5} />}
+            </button>
+            <button
               onClick={() => { setSearchOpen(true); setTimeout(() => document.getElementById('searchInput')?.focus(), 100); }}
               className="hidden md:flex p-2 text-brown hover:text-rose-gold transition-colors duration-300"
               aria-label="Search"
@@ -222,6 +232,14 @@ export default function Navbar() {
                   </motion.li>
                 ))}
               </ul>
+              <button
+                onClick={toggleTheme}
+                className="mt-8 inline-flex w-fit items-center gap-2 rounded-full border border-nude/40 px-4 py-2 text-sm text-brown hover:border-rose-gold hover:text-rose-gold transition-colors duration-300"
+                aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {theme === 'dark' ? <Sun size={16} strokeWidth={1.5} /> : <Moon size={16} strokeWidth={1.5} />}
+                {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+              </button>
               <div className="mt-auto pt-8 border-t border-nude/30">
                 <p className="text-[11px] tracking-[0.15em] uppercase text-brown-muted font-inter">
                   © 2026 ZAYBAASH. Beauty with Style.
