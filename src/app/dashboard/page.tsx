@@ -1221,15 +1221,14 @@ function ProductsTab() {
     if (!file) return;
 
     try {
-      const headers = authHeaders();
-      delete headers['Content-Type'];
+      const { ['Content-Type']: _contentType, ...uploadHeaders } = authHeaders();
 
       const formData = new FormData();
       formData.append('file', file);
 
       const res = await fetch('/api/admin/upload', {
         method: 'POST',
-        headers,
+        headers: uploadHeaders,
         body: formData,
       });
 
