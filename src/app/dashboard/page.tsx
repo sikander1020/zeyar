@@ -2240,6 +2240,7 @@ export default function DashboardPage() {
   const [liveOn, setLiveOn]   = useState(true);
   const [error, setError]     = useState('');
   const [isMobile, setIsMobile] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const verify = useCallback(async () => {
     const token = localStorage.getItem('zaybaash_admin_token');
@@ -2309,6 +2310,12 @@ export default function DashboardPage() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  useEffect(() => {
+    if (!isMobile) {
+      setSidebarOpen(false);
+    }
+  }, [isMobile]);
+
   // Live updates: poll MongoDB on an interval; pause when tab is in background
   useEffect(() => {
     if (!authed || !liveOn) return;
@@ -2349,49 +2356,88 @@ export default function DashboardPage() {
   if (!authed) return <LoginWall onLogin={() => { setAuthed(true); }} />;
 
   return (
-    <div style={{ display: isMobile ? 'block' : 'flex', minHeight: '100vh', fontFamily: 'Inter, sans-serif', background: CREAM }}>
+    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Inter, sans-serif', background: CREAM }}>
+      {isMobile && sidebarOpen && (
+        <div
+          onClick={() => setSidebarOpen(false)}
+          style={{
+            position: 'fixed',
+            inset: 0,
+            background: 'rgba(0,0,0,0.45)',
+            zIndex: 120,
+          }}
+        />
+      )}
       {/* Sidebar */}
       <aside style={{
-        width: isMobile ? '100%' : 220,
+        width: isMobile ? 260 : 220,
         background: BROWN,
         color: '#fff',
         display: 'flex',
         flexDirection: 'column',
-        padding: isMobile ? '14px 0' : '28px 0',
-        position: isMobile ? 'sticky' : 'fixed',
+        padding: isMobile ? '20px 0' : '28px 0',
+        position: 'fixed',
         left: 0,
         top: 0,
-        height: isMobile ? 'auto' : '100vh',
+        height: '100vh',
         flexShrink: 0,
-        zIndex: 100,
+        zIndex: 130,
         overflowY: 'auto',
+        transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
+        transition: 'transform .25s ease',
+        boxShadow: isMobile ? '0 12px 36px rgba(0,0,0,.35)' : 'none',
       }}>
-        <div style={{ padding: isMobile ? '0 14px 12px' : '0 20px 28px', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
-          <p style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: '0.04em' }}>ZAYBAASH</p>
-          <p style={{ margin: '4px 0 0', fontSize: 11, color: '#9A7B72', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Admin Dashboard</p>
+        <div style={{ padding: isMobile ? '0 16px 16px' : '0 20px 28px', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10 }}>
+            <div>
+              <p style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: '0.04em' }}>ZAYBAASH</p>
+              <p style={{ margin: '4px 0 0', fontSize: 11, color: '#9A7B72', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Admin Dashboard</p>
+            </div>
+            {isMobile && (
+              <button
+                type="button"
+                onClick={() => setSidebarOpen(false)}
+                aria-label="Close sidebar"
+                style={{
+                  width: 30,
+                  height: 30,
+                  borderRadius: 8,
+                  border: '1px solid rgba(255,255,255,.2)',
+                  background: 'rgba(255,255,255,.08)',
+                  color: '#fff',
+                  cursor: 'pointer',
+                  fontSize: 16,
+                  lineHeight: '28px',
+                  textAlign: 'center',
+                }}
+              >
+                ✕
+              </button>
+            )}
+          </div>
         </div>
         <nav style={{
           flex: 1,
-          padding: isMobile ? '10px 0' : '16px 0',
+          padding: isMobile ? '12px 0' : '16px 0',
           display: 'flex',
-          flexDirection: isMobile ? 'row' : 'column',
-          overflowX: isMobile ? 'auto' : 'visible',
+          flexDirection: 'column',
+          overflowX: 'hidden',
           overflowY: 'hidden',
           WebkitOverflowScrolling: 'touch',
         }}>
           {TABS.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)}
+            <button key={t.id} onClick={() => { setTab(t.id); if (isMobile) setSidebarOpen(false); }}
               style={{
                 display: 'flex', alignItems: 'center', gap: 8,
-                width: isMobile ? 'auto' : '100%',
-                minWidth: isMobile ? 120 : undefined,
+                width: '100%',
+                minWidth: undefined,
                 whiteSpace: 'nowrap',
-                padding: isMobile ? '10px 12px' : '12px 20px',
+                padding: isMobile ? '11px 16px' : '12px 20px',
                 border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500,
                 background: tab === t.id ? 'rgba(183,110,121,.25)' : 'transparent',
                 color: tab === t.id ? '#F0C9BF' : 'rgba(255,255,255,.7)',
-                borderLeft: isMobile ? 'none' : (tab === t.id ? `3px solid ${ROSE}` : '3px solid transparent'),
-                borderBottom: isMobile ? (tab === t.id ? `2px solid ${ROSE}` : '2px solid transparent') : 'none',
+                borderLeft: tab === t.id ? `3px solid ${ROSE}` : '3px solid transparent',
+                borderBottom: 'none',
                 transition: 'all .15s',
               }}>
               <span style={{ fontSize: 16 }}>{t.icon}</span>
@@ -2399,7 +2445,7 @@ export default function DashboardPage() {
             </button>
           ))}
         </nav>
-        <div style={{ padding: isMobile ? '10px 14px 0' : '16px 20px', borderTop: '1px solid rgba(255,255,255,.1)' }}>
+        <div style={{ padding: isMobile ? '12px 16px 0' : '16px 20px', borderTop: '1px solid rgba(255,255,255,.1)' }}>
           <button onClick={handleLock}
             style={{ width: '100%', padding: '10px', background: 'rgba(255,255,255,.08)', color: 'rgba(255,255,255,.7)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>
             🔒 Lock Dashboard
@@ -2411,10 +2457,32 @@ export default function DashboardPage() {
       <main style={{
         flex: 1,
         marginLeft: isMobile ? 0 : 220,
-        padding: isMobile ? '16px 12px 24px' : '32px 36px',
+        padding: isMobile ? '14px 12px 24px' : '32px 36px',
         overflowY: 'auto',
-        minHeight: isMobile ? 'calc(100vh - 64px)' : '100vh',
+        minHeight: '100vh',
       }}>
+        {isMobile && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <button
+              type="button"
+              onClick={() => setSidebarOpen(true)}
+              style={{
+                padding: '8px 10px',
+                background: BROWN,
+                color: '#fff',
+                border: 'none',
+                borderRadius: 8,
+                fontSize: 14,
+                fontWeight: 700,
+                cursor: 'pointer',
+              }}
+            >
+              ☰ Menu
+            </button>
+            <span style={{ fontSize: 12, color: MUTED }}>Dashboard</span>
+          </div>
+        )}
+
         {/* Header */}
         <div style={{
           display: 'flex',
