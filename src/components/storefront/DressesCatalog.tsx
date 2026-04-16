@@ -9,6 +9,7 @@ import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import { useSearchParams } from 'next/navigation';
 import AppShell from '@/components/layout/AppShell';
+import { useToast } from '@/components/layout/ToastProvider';
 import type { StoreCategory, StoreProduct } from '@/types/storefront';
 
 const sortOptions = [
@@ -23,7 +24,9 @@ const sortOptions = [
 function ProductCard({ product, index }: { product: StoreProduct; index: number }) {
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, isWishlisted } = useWishlistStore();
+  const { toast } = useToast();
   const wishlisted = isWishlisted(product.id);
+  const [adding, setAdding] = useState(false);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const mx = useMotionValue(0);
   const my = useMotionValue(0);
@@ -82,21 +85,37 @@ function ProductCard({ product, index }: { product: StoreProduct; index: number 
           </div>
           <div className="absolute top-3 right-3 flex flex-col gap-2">
             <button
-              onClick={(e) => { e.preventDefault(); toggle(product.id); }}
+              onClick={(e) => {
+                e.preventDefault();
+                const wasWishlisted = isWishlisted(product.id);
+                toggle(product.id);
+                toast({
+                  type: 'success',
+                  title: wasWishlisted ? 'Removed from wishlist' : 'Saved to wishlist',
+                  message: product.name,
+                });
+              }}
               className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 ${wishlisted ? 'bg-rose-gold text-white' : 'bg-white/80 text-brown hover:bg-rose-gold hover:text-white'}`}
             >
               <Heart size={12} className={wishlisted ? 'fill-current' : ''} strokeWidth={1.5} />
             </button>
             <button
-              disabled={product.outOfStock}
-              onClick={(e) => { e.preventDefault(); addItem(product, product.sizes[1] || product.sizes[0], product.colors[0]); }}
+              disabled={product.outOfStock || adding}
+              onClick={(e) => {
+                e.preventDefault();
+                if (adding || product.outOfStock) return;
+                setAdding(true);
+                addItem(product, product.sizes[1] || product.sizes[0], product.colors[0]);
+                toast({ type: 'success', title: 'Added to bag', message: product.name });
+                window.setTimeout(() => setAdding(false), 500);
+              }}
               className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-brown hover:bg-brown hover:text-white transition-all opacity-0 group-hover:opacity-100 disabled:opacity-60 disabled:cursor-not-allowed"
             >
               <ShoppingBag size={12} strokeWidth={1.5} />
             </button>
           </div>
           <div className={`absolute bottom-0 inset-x-0 bg-brown/90 text-cream text-center py-2.5 text-[10px] tracking-[0.15em] uppercase font-inter transition-transform duration-400 ${hovered ? 'translate-y-0' : 'translate-y-full'}`}>
-            Quick Add
+            {adding ? 'Adding...' : 'Quick Add'}
           </div>
         </div>
       </Link>

@@ -8,6 +8,7 @@ import { Heart, ShoppingBag, Star, ChevronDown, Share2, Package, RotateCcw, Truc
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import AppShell from '@/components/layout/AppShell';
+import { useToast } from '@/components/layout/ToastProvider';
 import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
 import type { StoreProduct } from '@/types/storefront';
@@ -106,10 +107,13 @@ export default function ProductPage() {
   const [reviewSubmitting, setReviewSubmitting] = useState(false);
   const [reviewMsg, setReviewMsg] = useState('');
   const [recentlyViewedIds, setRecentlyViewedIds] = useState<string[]>([]);
+  const [addingToCart, setAddingToCart] = useState(false);
+  const [buyingNow, setBuyingNow] = useState(false);
 
   const addItem = useCartStore(s => s.addItem);
   const toggleCart = useCartStore(s => s.toggleCart);
   const { toggle, isWishlisted } = useWishlistStore();
+  const { toast } = useToast();
 
   useEffect(() => {
     let mounted = true;
@@ -303,8 +307,9 @@ export default function ProductPage() {
   };
 
   const handleAddToCart = () => {
-    if (!selectedSizeSafe || !selectedColorSafe.name) return;
+    if (!selectedSizeSafe || !selectedColorSafe.name || addingToCart) return;
 
+    setAddingToCart(true);
     addItem(product, selectedSizeSafe, selectedColorSafe);
     trackProductEvent('add_to_cart', {
       productId: product.id,
@@ -314,12 +319,15 @@ export default function ProductPage() {
       size: selectedSizeSafe,
       color: selectedColorSafe.name,
     });
+    toast({ type: 'success', title: 'Added to bag', message: product.name });
     toggleCart();
+    window.setTimeout(() => setAddingToCart(false), 500);
   };
 
   const handleBuyNow = () => {
-    if (product.outOfStock || !selectedSizeSafe || !selectedColorSafe.name) return;
+    if (product.outOfStock || !selectedSizeSafe || !selectedColorSafe.name || buyingNow) return;
 
+    setBuyingNow(true);
     addItem(product, selectedSizeSafe, selectedColorSafe);
     trackProductEvent('buy_now_click', {
       productId: product.id,
@@ -329,7 +337,18 @@ export default function ProductPage() {
       size: selectedSizeSafe,
       color: selectedColorSafe.name,
     });
+    toast({ type: 'success', title: 'Proceeding to checkout', message: product.name });
     router.push('/checkout');
+  };
+
+  const handleToggleWishlist = () => {
+    const wasWishlisted = isWishlisted(product.id);
+    toggle(product.id);
+    toast({
+      type: 'success',
+      title: wasWishlisted ? 'Removed from wishlist' : 'Saved to wishlist',
+      message: product.name,
+    });
   };
 
   async function handleShare() {
@@ -347,6 +366,7 @@ export default function ProductPage() {
         });
       } else if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(shareUrl);
+        toast({ type: 'success', title: 'Link copied', message: 'Product URL copied to clipboard.' });
       }
 
       trackProductEvent('share_product', {
@@ -492,7 +512,7 @@ export default function ProductPage() {
                 </span>
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={() => toggle(product.id)}
+                    onClick={handleToggleWishlist}
                     className={`p-2 border transition-all duration-300 ${wishlisted ? 'bg-rose-gold border-rose-gold text-white' : 'border-nude text-brown hover:border-rose-gold hover:text-rose-gold'}`}
                   >
                     <Heart size={16} className={wishlisted ? 'fill-current' : ''} strokeWidth={1.5} />
@@ -590,23 +610,23 @@ export default function ProductPage() {
               <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 mb-8">
                 <motion.button
                   whileTap={{ scale: 0.98 }}
-                  disabled={product.outOfStock}
+                  disabled={product.outOfStock || addingToCart}
                   onClick={handleAddToCart}
                   className="btn-luxury btn-primary flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <ShoppingBag size={15} strokeWidth={2} />
-                  {product.outOfStock ? 'Out of Stock' : 'Add to Bag'}
+                  {product.outOfStock ? 'Out of Stock' : addingToCart ? 'Adding...' : 'Add to Bag'}
                 </motion.button>
                 <button
                   type="button"
-                  disabled={product.outOfStock}
+                  disabled={product.outOfStock || buyingNow}
                   onClick={handleBuyNow}
                   className="btn-luxury btn-outline disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  Buy Now
+                  {buyingNow ? 'Redirecting...' : 'Buy Now'}
                 </button>
                 <button
-                  onClick={() => toggle(product.id)}
+                  onClick={handleToggleWishlist}
                   className={`btn-luxury px-5 border ${wishlisted ? 'bg-rose-gold border-rose-gold text-white' : 'border-nude text-brown hover:border-rose-gold hover:text-rose-gold'} transition-all duration-300`}
                 >
                   <Heart size={15} className={wishlisted ? 'fill-current' : ''} strokeWidth={1.5} />
@@ -855,19 +875,19 @@ export default function ProductPage() {
             </div>
             <button
               type="button"
-              disabled={product.outOfStock}
+              disabled={product.outOfStock || addingToCart}
               onClick={handleAddToCart}
               className="btn-luxury btn-primary flex-1 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {product.outOfStock ? 'Out of Stock' : 'Add to Bag'}
+              {product.outOfStock ? 'Out of Stock' : addingToCart ? 'Adding...' : 'Add to Bag'}
             </button>
             <button
               type="button"
-              disabled={product.outOfStock}
+              disabled={product.outOfStock || buyingNow}
               onClick={handleBuyNow}
               className="btn-luxury btn-outline disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Buy Now
+              {buyingNow ? 'Redirecting...' : 'Buy Now'}
             </button>
           </div>
         </div>
@@ -884,19 +904,19 @@ export default function ProductPage() {
             </div>
             <button
               type="button"
-              disabled={product.outOfStock}
+              disabled={product.outOfStock || addingToCart}
               onClick={handleAddToCart}
               className="btn-luxury btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {product.outOfStock ? 'Out of Stock' : 'Add to Bag'}
+              {product.outOfStock ? 'Out of Stock' : addingToCart ? 'Adding...' : 'Add to Bag'}
             </button>
             <button
               type="button"
-              disabled={product.outOfStock}
+              disabled={product.outOfStock || buyingNow}
               onClick={handleBuyNow}
               className="btn-luxury btn-outline disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Buy Now
+              {buyingNow ? 'Redirecting...' : 'Buy Now'}
             </button>
           </div>
         </div>

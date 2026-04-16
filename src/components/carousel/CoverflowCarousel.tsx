@@ -7,6 +7,7 @@ import Link from 'next/link';
 import { ChevronLeft, ChevronRight, Heart, ShoppingBag } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
+import { useToast } from '@/components/layout/ToastProvider';
 import type { StoreProduct } from '@/types/storefront';
 
 interface CoverflowCarouselProps {
@@ -63,12 +64,14 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
   const [isAutoplay, setIsAutoplay] = useState(true);
   const [viewportWidth, setViewportWidth] = useState(1280);
   const [centerTilt, setCenterTilt] = useState({ x: 0, y: 0 });
+  const [addingId, setAddingId] = useState<string | null>(null);
   const reduceMotion = useReducedMotion();
   const containerRef = useRef<HTMLDivElement>(null);
   const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, isWishlisted } = useWishlistStore();
+  const { toast } = useToast();
 
   const total = products.length;
 
@@ -289,7 +292,13 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
                             <button
                               onClick={(e) => {
                                 e.preventDefault();
+                                const wasWishlisted = isWishlisted(product.id);
                                 toggle(product.id);
+                                toast({
+                                  type: 'success',
+                                  title: wasWishlisted ? 'Removed from wishlist' : 'Saved to wishlist',
+                                  message: product.name,
+                                });
                               }}
                               className={`flex-1 h-10 rounded flex items-center justify-center gap-2 transition-all duration-300 text-sm font-semibold ${
                                 isWishlisted(product.id)
@@ -301,15 +310,21 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
                               {isWishlisted(product.id) ? 'Saved' : 'Save'}
                             </button>
                             <button
-                              disabled={product.outOfStock}
+                              disabled={product.outOfStock || addingId === product.id}
                               onClick={(e) => {
                                 e.preventDefault();
+                                if (product.outOfStock || addingId === product.id) return;
+                                setAddingId(product.id);
                                 addItem(product, product.sizes[1] || product.sizes[0], product.colors[0]);
+                                toast({ type: 'success', title: 'Added to bag', message: product.name });
+                                window.setTimeout(() => {
+                                  setAddingId((current) => (current === product.id ? null : current));
+                                }, 500);
                               }}
                               className="flex-1 h-10 rounded bg-cream text-brown flex items-center justify-center gap-2 font-semibold hover:bg-rose-gold hover:text-cream transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                               <ShoppingBag size={16} />
-                              Add
+                              {addingId === product.id ? 'Adding...' : 'Add'}
                             </button>
                           </div>
 
