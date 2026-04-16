@@ -48,6 +48,7 @@ export default function CartDrawer() {
               <button
                 onClick={toggleCart}
                 className="p-2 text-brown hover:text-rose-gold transition-colors duration-300"
+                aria-label="Close shopping bag"
               >
                 <X size={20} strokeWidth={1.5} />
               </button>
@@ -103,6 +104,7 @@ export default function CartDrawer() {
                         <button
                           onClick={() => removeItem(item.product.id, item.selectedSize, item.selectedColor.name)}
                           className="text-brown-muted hover:text-rose-gold transition-colors flex-shrink-0"
+                          aria-label={`Remove ${item.product.name} from bag`}
                         >
                           <Trash2 size={14} strokeWidth={1.5} />
                         </button>
@@ -115,6 +117,7 @@ export default function CartDrawer() {
                           <button
                             onClick={() => updateQuantity(item.product.id, item.selectedSize, item.quantity - 1, item.selectedColor.name)}
                             className="p-1.5 text-brown hover:text-rose-gold transition-colors"
+                            aria-label={`Decrease quantity of ${item.product.name}`}
                           >
                             <Minus size={12} strokeWidth={2} />
                           </button>
@@ -124,6 +127,7 @@ export default function CartDrawer() {
                           <button
                             onClick={() => updateQuantity(item.product.id, item.selectedSize, item.quantity + 1, item.selectedColor.name)}
                             className="p-1.5 text-brown hover:text-rose-gold transition-colors"
+                            aria-label={`Increase quantity of ${item.product.name}`}
                           >
                             <Plus size={12} strokeWidth={2} />
                           </button>

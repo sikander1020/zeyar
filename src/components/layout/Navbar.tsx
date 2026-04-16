@@ -208,7 +208,7 @@ export default function Navbar() {
                 >
                   ZAYBAASH
                 </span>
-                <button onClick={() => setMobileOpen(false)} className="p-2 text-brown">
+                <button onClick={() => setMobileOpen(false)} className="p-2 text-brown" aria-label="Close menu">
                   <X size={20} strokeWidth={1.5} />
                 </button>
               </div>
@@ -266,6 +266,7 @@ export default function Navbar() {
                 <button
                   onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
                   className="p-2 text-brown hover:text-rose-gold transition-colors"
+                  aria-label="Close search"
                 >
                   <X size={24} strokeWidth={1.5} />
                 </button>

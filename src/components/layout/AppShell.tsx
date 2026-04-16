@@ -24,6 +24,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <CartDrawer />
       <AnimatePresence mode="sync">
         <motion.main
+          id="main-content"
           key={pathname}
           initial={{ opacity: 0, y: 4 }}
           animate={{ opacity: 1, y: 0 }}

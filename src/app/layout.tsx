@@ -105,6 +105,9 @@ export default function RootLayout({
         />
       </head>
       <body suppressHydrationWarning>
+        <a href="#main-content" className="skip-link">
+          Skip to content
+        </a>
         <ThemeProvider>
           <ToastProvider>
             {children}
