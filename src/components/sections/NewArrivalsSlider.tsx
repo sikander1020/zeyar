@@ -152,7 +152,7 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
                       <span className="badge-new">{product.isNew ? "New" : "Featured"}</span>
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-brown/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
-                    <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-full group-hover:translate-y-0 transition-transform duration-400">
+                    <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-400">
                       <p className="text-xs text-cream font-inter tracking-[0.15em] uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>
                         {product.category}
                       </p>
@@ -171,9 +171,10 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
                         type="button"
                         onClick={(e) => {
                           e.preventDefault();
+                          e.stopPropagation();
                           setQuickViewProduct(product);
                         }}
-                        className="mt-3 inline-flex rounded-full bg-white/90 px-3 py-1.5 text-[10px] tracking-[0.14em] uppercase text-brown hover:bg-white"
+                        className="mt-3 inline-flex rounded-full bg-white/90 px-3 py-1.5 text-[10px] tracking-[0.14em] uppercase text-brown hover:bg-white md:opacity-0 md:group-hover:opacity-100"
                       >
                         Quick View
                       </button>

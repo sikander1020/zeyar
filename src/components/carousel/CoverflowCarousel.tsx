@@ -334,6 +334,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
                             type="button"
                             onClick={(e) => {
                               e.preventDefault();
+                              e.stopPropagation();
                               setQuickViewProduct(product);
                             }}
                             className="mb-3 w-full rounded border border-cream/35 bg-cream/10 py-2 text-[11px] tracking-[0.14em] uppercase hover:bg-cream/20 transition-colors"

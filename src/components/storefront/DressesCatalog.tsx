@@ -122,9 +122,10 @@ function ProductCard({ product, index, onQuickView }: { product: StoreProduct; i
             type="button"
             onClick={(e) => {
               e.preventDefault();
+              e.stopPropagation();
               onQuickView(product);
             }}
-            className={`absolute left-1/2 top-1/2 z-20 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-xs tracking-[0.1em] uppercase text-brown shadow transition-all duration-300 ${hovered ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            className={`absolute left-1/2 top-1/2 z-20 inline-flex -translate-x-1/2 -translate-y-1/2 items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-xs tracking-[0.1em] uppercase text-brown shadow transition-all duration-300 ${hovered ? 'opacity-100' : 'opacity-100 md:opacity-0'} md:group-hover:opacity-100`}
           >
             <Eye size={13} />
             Quick View
