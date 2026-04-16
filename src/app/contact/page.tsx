@@ -125,7 +125,7 @@ export default function ContactPage() {
                 <div className="text-center relative z-10">
                   <MapPin size={32} className="text-rose-gold mx-auto mb-3" strokeWidth={1.5} />
                   <p className="text-sm text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Fashion District, Karachi
+                    Islamabad, Pakistan
                   </p>
                 </div>
               </div>
