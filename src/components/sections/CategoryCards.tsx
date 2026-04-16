@@ -20,9 +20,10 @@ function CategoryCardItem({ cat, i, inView }: { cat: StoreCategory; i: number; i
   return (
     <motion.div
       ref={cardRef}
-      initial={{ opacity: 0, y: 40 }}
+      initial={{ opacity: 0, y: 42, scale: 0.985 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.6, delay: i * 0.12 }}
+      whileHover={{ y: -10, scale: 1.01 }}
+      transition={{ duration: 0.58, delay: i * 0.12, ease: [0.2, 0.8, 0.2, 1] }}
       style={{ x: smoothX, y: smoothY }}
       onMouseMove={(e) => {
         const rect = cardRef.current?.getBoundingClientRect();
@@ -49,7 +50,7 @@ function CategoryCardItem({ cat, i, inView }: { cat: StoreCategory; i: number; i
             className="object-cover transition-transform duration-700 group-hover:scale-110"
           />
         </motion.div>
-        <div className="absolute inset-0 overlay-dark opacity-60 group-hover:opacity-75 transition-opacity duration-400" />
+        <div className="absolute inset-0 overlay-dark opacity-60 group-hover:opacity-80 transition-opacity duration-400" />
 
         <div className="absolute inset-0 flex flex-col justify-end p-6">
           <p className="text-xs tracking-[0.18em] uppercase text-nude/70 font-inter mb-2 group-hover:text-nude transition-colors" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -58,7 +59,7 @@ function CategoryCardItem({ cat, i, inView }: { cat: StoreCategory; i: number; i
           <h3 className="text-2xl font-playfair text-white mb-3 group-hover:text-nude transition-colors duration-300" style={{ fontFamily: "'Playfair Display', serif" }}>
             {cat.name}
           </h3>
-          <p className="text-xs text-white/60 font-inter mb-4 opacity-0 group-hover:opacity-100 transition-all duration-400 translate-y-2 group-hover:translate-y-0" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <p className="text-xs text-white/60 font-inter mb-4 opacity-0 group-hover:opacity-100 transition-all duration-400 translate-y-3 group-hover:translate-y-0" style={{ fontFamily: "'Inter', sans-serif" }}>
             {cat.description}
           </p>
           <div className="flex items-center gap-2 text-nude text-xs tracking-[0.15em] uppercase font-inter group-hover:gap-3 transition-all duration-300" style={{ fontFamily: "'Inter', sans-serif" }}>

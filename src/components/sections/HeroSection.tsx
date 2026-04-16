@@ -18,6 +18,21 @@ const HeroScene = dynamic(() => import('@/components/3d/HeroScene'), {
 
 export default function HeroSection() {
   const router = useRouter();
+  const stagger = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        staggerChildren: 0.08,
+        delayChildren: 0.08,
+      },
+    },
+  };
+  const item = {
+    hidden: { opacity: 0, y: 16 },
+    visible: { opacity: 1, y: 0 },
+  };
 
   useEffect(() => {
     router.prefetch('/shop');
@@ -40,25 +55,26 @@ export default function HeroSection() {
           <div className="order-2 lg:order-1">
             {/* Tag */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              variants={stagger}
+              initial="hidden"
+              animate="visible"
               className="flex items-center gap-3 mb-8"
             >
-              <span className="w-10 h-px bg-rose-gold" />
-              <span
+              <motion.span variants={item} className="w-10 h-px bg-rose-gold" />
+              <motion.span
+                variants={item}
                 className="text-xs tracking-[0.25em] uppercase text-rose-gold font-semibold font-inter"
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 New Season 2026
-              </span>
+              </motion.span>
             </motion.div>
 
             {/* Main heading */}
             <motion.h1
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.35 }}
+              transition={{ duration: 0.72, delay: 0.28 }}
               className="text-6xl md:text-7xl xl:text-8xl font-playfair leading-[1.05] text-brown mb-6"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
@@ -72,7 +88,7 @@ export default function HeroSection() {
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.5 }}
+              transition={{ duration: 0.65, delay: 0.45 }}
               className="text-base text-brown-muted font-inter leading-relaxed mb-10 max-w-md"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
@@ -84,7 +100,7 @@ export default function HeroSection() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.65 }}
+              transition={{ duration: 0.65, delay: 0.58 }}
               className="flex flex-wrap gap-4"
             >
               <Link

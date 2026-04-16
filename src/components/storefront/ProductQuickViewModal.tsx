@@ -88,6 +88,7 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[120] bg-brown/50 backdrop-blur-sm"
+        transition={{ duration: 0.28, ease: 'easeOut' }}
         onClick={onClose}
       />
 
@@ -95,11 +96,11 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
         role="dialog"
         aria-modal="true"
         aria-label={`Quick view for ${product.name}`}
-        initial={{ opacity: 0, y: 24, scale: 0.98 }}
+        initial={{ opacity: 0, y: 28, scale: 0.96 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 14, scale: 0.98 }}
-        transition={{ duration: 0.22 }}
-        className="fixed left-1/2 top-1/2 z-[130] w-[min(96vw,980px)] -translate-x-1/2 -translate-y-1/2 border border-nude/30 bg-cream shadow-[0_38px_120px_-40px_rgba(58,46,42,0.6)]"
+        exit={{ opacity: 0, y: 18, scale: 0.97 }}
+        transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1] }}
+        className="fixed left-1/2 top-1/2 z-[130] w-[min(96vw,980px)] -translate-x-1/2 -translate-y-1/2 border border-nude/30 bg-cream shadow-[0_42px_130px_-45px_rgba(58,46,42,0.65)]"
       >
         <button
           ref={closeRef}
@@ -205,23 +206,34 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
             </div>
 
             <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <button
+              <motion.button
                 type="button"
                 disabled={product.outOfStock || adding}
                 onClick={handleAdd}
+                whileHover={product.outOfStock ? undefined : { y: -2, scale: 1.01 }}
+                whileTap={product.outOfStock ? undefined : { scale: 0.98 }}
                 className="btn-luxury btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {product.outOfStock ? 'Out of Stock' : adding ? 'Adding...' : 'Add to Bag'}
-              </button>
+              </motion.button>
 
-              <button
+              <motion.button
                 type="button"
                 onClick={handleWishlist}
+                whileHover={{ y: -2, scale: 1.01 }}
+                whileTap={{ scale: 0.98 }}
                 className={`btn-luxury ${wishlisted ? 'btn-primary' : 'btn-outline'}`}
               >
-                <Heart size={14} className={wishlisted ? 'fill-current' : ''} />
+                <motion.span
+                  key={wishlisted ? 'wishlisted' : 'saved'}
+                  initial={{ scale: 0.85, rotate: -8, opacity: 0.8 }}
+                  animate={{ scale: 1, rotate: 0, opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Heart size={14} className={wishlisted ? 'fill-current soft-pulse' : ''} />
+                </motion.span>
                 {wishlisted ? 'Saved' : 'Save'}
-              </button>
+              </motion.button>
             </div>
 
             <Link

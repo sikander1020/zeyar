@@ -47,10 +47,11 @@ function ProductCard({ product, index, onQuickView }: { product: StoreProduct; i
   return (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ opacity: 0, y: 34, scale: 0.985 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      transition={{ duration: 0.45, delay: Math.min(index * 0.06, 0.4) }}
+      whileHover={{ y: -10, scale: 1.01 }}
+      transition={{ duration: 0.45, delay: Math.min(index * 0.06, 0.4), ease: [0.2, 0.8, 0.2, 1] }}
       className="product-card group"
       ref={cardRef}
       style={{ x: smoothX, y: smoothY }}
@@ -86,6 +87,7 @@ function ProductCard({ product, index, onQuickView }: { product: StoreProduct; i
           </div>
           <div className="absolute top-3 right-3 flex flex-col gap-2">
             <button
+              type="button"
               onClick={(e) => {
                 e.preventDefault();
                 const wasWishlisted = isWishlisted(product.id);
@@ -98,9 +100,10 @@ function ProductCard({ product, index, onQuickView }: { product: StoreProduct; i
               }}
               className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 opacity-0 group-hover:opacity-100 ${wishlisted ? 'bg-rose-gold text-white' : 'bg-white/80 text-brown hover:bg-rose-gold hover:text-white'}`}
             >
-              <Heart size={12} className={wishlisted ? 'fill-current' : ''} strokeWidth={1.5} />
+              <Heart size={12} className={wishlisted ? 'fill-current soft-pulse' : ''} strokeWidth={1.5} />
             </button>
             <button
+              type="button"
               disabled={product.outOfStock || adding}
               onClick={(e) => {
                 e.preventDefault();

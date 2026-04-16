@@ -35,28 +35,43 @@ export default function FeaturedCollections({ initialProducts }: { initialProduc
 
   const featuredTagged = products.filter((p) => p.isBestseller || p.isNew);
   const featured = (featuredTagged.length > 0 ? featuredTagged : products).slice(0, 8);
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        staggerChildren: 0.08,
+        delayChildren: 0.08,
+      },
+    },
+  };
+  const itemVariants = {
+    hidden: { opacity: 0, y: 16 },
+    visible: { opacity: 1, y: 0 },
+  };
 
   return (
     <section className="section-padding bg-cream">
       <div className="max-w-7xl mx-auto px-6" ref={ref}>
         {/* Section header */}
         <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.7 }}
+          variants={sectionVariants}
+          initial="hidden"
+          animate={inView ? 'visible' : 'hidden'}
           className="text-center mb-16"
         >
-          <span className="text-xs tracking-[0.3em] uppercase text-rose-gold font-semibold font-inter block mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <motion.span variants={itemVariants} className="text-xs tracking-[0.3em] uppercase text-rose-gold font-semibold font-inter block mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Curated For You
-          </span>
-          <h2 className="text-5xl font-playfair text-brown mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          </motion.span>
+          <motion.h2 variants={itemVariants} className="text-5xl font-playfair text-brown mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
             Featured{' '}
             <span className="italic gradient-rose-text">Pieces</span>
-          </h2>
-          <div className="divider-rose" />
-          <p className="text-brown-muted font-inter max-w-md mx-auto mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>
+          </motion.h2>
+          <motion.div variants={itemVariants} className="divider-rose" />
+          <motion.p variants={itemVariants} className="text-brown-muted font-inter max-w-md mx-auto mt-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Handpicked from our latest collection — pieces that define the ZAYBAASH woman.
-          </p>
+          </motion.p>
         </motion.div>
 
         {loading && (
@@ -78,18 +93,18 @@ export default function FeaturedCollections({ initialProducts }: { initialProduc
 
         {!loading && featured.length > 0 && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={inView ? { opacity: 1 } : {}}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            initial={{ opacity: 0, y: 16 }}
+            animate={inView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.6, delay: 0.18 }}
           >
             <CoverflowCarousel products={featured} />
           </motion.div>
         )}
 
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 16 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6, delay: 0.5 }}
+          transition={{ duration: 0.55, delay: 0.4 }}
           className="text-center mt-14"
         >
           <Link href="/dresses" className="btn-luxury btn-outline">
