@@ -34,6 +34,7 @@ export default function CheckoutPage() {
   const [couponCode, setCouponCode] = useState('');
   const [couponApplying, setCouponApplying] = useState(false);
   const [couponError, setCouponError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState<Partial<Record<'firstName' | 'lastName' | 'email' | 'phone' | 'address' | 'city' | 'state' | 'zip', string>>>({});
   const [appliedCoupon, setAppliedCoupon] = useState<{
     code: string;
     discount: number;
@@ -46,6 +47,33 @@ export default function CheckoutPage() {
   const finalTotal = netTotal * 1.08;
 
   const update = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
+
+  const validateShipping = useCallback(() => {
+    const nextErrors: Partial<Record<'firstName' | 'lastName' | 'email' | 'phone' | 'address' | 'city' | 'state' | 'zip', string>> = {};
+
+    if (!form.firstName.trim()) nextErrors.firstName = 'First name is required.';
+    if (!form.lastName.trim()) nextErrors.lastName = 'Last name is required.';
+    if (!form.email.trim()) nextErrors.email = 'Email is required.';
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) nextErrors.email = 'Enter a valid email address.';
+    if (!form.phone.trim()) nextErrors.phone = 'Phone number is required.';
+    if (!form.address.trim()) nextErrors.address = 'Address is required.';
+    if (!form.city.trim()) nextErrors.city = 'City is required.';
+    if (!form.state.trim()) nextErrors.state = 'State is required.';
+    if (!form.zip.trim()) nextErrors.zip = 'ZIP code is required.';
+
+    setFieldErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  }, [form]);
+
+  const goToPayment = () => {
+    if (!validateShipping()) return;
+    setStep(1);
+  };
+
+  const goToReview = () => {
+    if (!validateShipping()) return;
+    setStep(2);
+  };
 
   const handlePlaceOrder = useCallback(async () => {
     try {
@@ -221,41 +249,49 @@ export default function CheckoutPage() {
                     <div>
                       <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>First Name</label>
                       <input value={form.firstName} onChange={e => update('firstName', e.target.value)} className="input-luxury" placeholder="Layla" />
+                      {fieldErrors.firstName && <p className="mt-1 text-xs text-red-600">{fieldErrors.firstName}</p>}
                     </div>
                     <div>
                       <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Last Name</label>
                       <input value={form.lastName} onChange={e => update('lastName', e.target.value)} className="input-luxury" placeholder="Al-Rashid" />
+                      {fieldErrors.lastName && <p className="mt-1 text-xs text-red-600">{fieldErrors.lastName}</p>}
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4 mb-4">
                     <div>
                       <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Email</label>
                       <input type="email" value={form.email} onChange={e => update('email', e.target.value)} className="input-luxury" placeholder="layla@email.com" />
+                      {fieldErrors.email && <p className="mt-1 text-xs text-red-600">{fieldErrors.email}</p>}
                     </div>
                     <div>
                       <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Phone</label>
                       <input value={form.phone} onChange={e => update('phone', e.target.value)} className="input-luxury" placeholder="+92 300 1234567" />
+                      {fieldErrors.phone && <p className="mt-1 text-xs text-red-600">{fieldErrors.phone}</p>}
                     </div>
                   </div>
                   <div className="mb-4">
                     <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Address</label>
                     <input value={form.address} onChange={e => update('address', e.target.value)} className="input-luxury" placeholder="123 Luxury Lane, Suite 4" />
+                    {fieldErrors.address && <p className="mt-1 text-xs text-red-600">{fieldErrors.address}</p>}
                   </div>
                   <div className="grid grid-cols-3 gap-4 mb-8">
                     <div>
                       <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>City</label>
                       <input value={form.city} onChange={e => update('city', e.target.value)} className="input-luxury" placeholder="Karachi" />
+                      {fieldErrors.city && <p className="mt-1 text-xs text-red-600">{fieldErrors.city}</p>}
                     </div>
                     <div>
                       <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>State</label>
                       <input value={form.state} onChange={e => update('state', e.target.value)} className="input-luxury" placeholder="Sindh" />
+                      {fieldErrors.state && <p className="mt-1 text-xs text-red-600">{fieldErrors.state}</p>}
                     </div>
                     <div>
                       <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>ZIP</label>
                       <input value={form.zip} onChange={e => update('zip', e.target.value)} className="input-luxury" placeholder="75500" />
+                      {fieldErrors.zip && <p className="mt-1 text-xs text-red-600">{fieldErrors.zip}</p>}
                     </div>
                   </div>
-                  <button onClick={() => setStep(1)} className="btn-luxury btn-primary w-full">
+                  <button onClick={goToPayment} className="btn-luxury btn-primary w-full">
                     Continue to Payment
                   </button>
                 </motion.div>
@@ -330,6 +366,17 @@ export default function CheckoutPage() {
                             You will be directed to the payment section soon.
                           </p>
                         )}
+                      </div>
+
+                      <div className="mt-4 rounded-lg border border-nude/20 bg-white/80 p-4">
+                        <p className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          Why customers trust this checkout
+                        </p>
+                        <div className="grid gap-2 text-xs text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                          <div className="flex items-center gap-2"><ShieldCheck size={13} className="text-rose-gold" strokeWidth={1.8} /> Secure order processing</div>
+                          <div className="flex items-center gap-2"><Truck size={13} className="text-rose-gold" strokeWidth={1.8} /> Delivery in 2-4 business days</div>
+                          <div className="flex items-center gap-2"><Lock size={13} className="text-rose-gold" strokeWidth={1.8} /> Easy exchange policy</div>
+                        </div>
                       </div>
                     </div>
                   )}
