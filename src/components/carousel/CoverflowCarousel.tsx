@@ -70,19 +70,35 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, isWishlisted } = useWishlistStore();
 
+  const total = products.length;
+
+  useEffect(() => {
+    if (total === 0) {
+      setActiveIndex(0);
+      return;
+    }
+
+    if (activeIndex >= total || Number.isNaN(activeIndex)) {
+      setActiveIndex(0);
+    }
+  }, [activeIndex, total]);
+
   // Autoplay functionality
   useEffect(() => {
-    if (reduceMotion) return;
-    if (!isAutoplay) return;
+    if (reduceMotion || !isAutoplay || total < 2) return;
 
     autoplayTimerRef.current = setInterval(() => {
-      setActiveIndex((prev) => (prev + 1) % products.length);
+      setActiveIndex((prev) => {
+        const next = (prev + 1) % total;
+        onSlideChange?.(next);
+        return next;
+      });
     }, 3200);
 
     return () => {
       if (autoplayTimerRef.current) clearInterval(autoplayTimerRef.current);
     };
-  }, [isAutoplay, products.length, reduceMotion]);
+  }, [isAutoplay, total, reduceMotion, onSlideChange]);
 
   useEffect(() => {
     const updateViewport = () => {
@@ -95,15 +111,21 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
   }, []);
 
   const handlePrev = () => {
-    setIsAutoplay(false);
-    setActiveIndex((prev) => (prev - 1 + products.length) % products.length);
-    onSlideChange?.(activeIndex - 1 < 0 ? products.length - 1 : activeIndex - 1);
+    if (total < 2) return;
+    setActiveIndex((prev) => {
+      const next = (prev - 1 + total) % total;
+      onSlideChange?.(next);
+      return next;
+    });
   };
 
   const handleNext = () => {
-    setIsAutoplay(false);
-    setActiveIndex((prev) => (prev + 1) % products.length);
-    onSlideChange?.(activeIndex + 1);
+    if (total < 2) return;
+    setActiveIndex((prev) => {
+      const next = (prev + 1) % total;
+      onSlideChange?.(next);
+      return next;
+    });
   };
 
   const handlePointerMove = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -121,16 +143,21 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
     setCenterTilt({ x: 0, y: 0 });
   };
 
-  const getCardPosition = (index: number): { x: number; z: number; angle: number; opacity: number; scale: number } => {
-    const metrics = getCoverflowMetrics(viewportWidth);
+  const getRelativePosition = (index: number): number => {
+    if (total === 0) return 0;
     let position = index - activeIndex;
 
-    // Normalize position to -1, 0, 1 range
-    if (position > products.length / 2) {
-      position -= products.length;
-    } else if (position < -products.length / 2) {
-      position += products.length;
+    if (position > total / 2) {
+      position -= total;
+    } else if (position < -total / 2) {
+      position += total;
     }
+
+    return position;
+  };
+
+  const getCardPosition = (position: number): { x: number; z: number; angle: number; opacity: number; scale: number } => {
+    const metrics = getCoverflowMetrics(viewportWidth);
 
     if (position === 0) {
       // Center card - focused
@@ -163,6 +190,10 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
 
   const metrics = getCoverflowMetrics(viewportWidth);
 
+  if (total === 0) {
+    return null;
+  }
+
   return (
     <div className="relative w-full py-8 md:py-12">
       {/* Perspective container */}
@@ -173,8 +204,6 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
           perspective: `${metrics.perspective}px`,
           height: `${metrics.containerHeight}px`,
         }}
-        onMouseEnter={() => setIsAutoplay(false)}
-        onMouseLeave={() => setIsAutoplay(!reduceMotion)}
         onMouseMove={handlePointerMove}
         onMouseOut={resetPointerTilt}
       >
@@ -183,7 +212,10 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
         {/* Cards */}
         <div className="relative w-full h-full flex items-center justify-center">
           {products.map((product, index) => {
-            const { x, z, angle, opacity, scale } = getCardPosition(index);
+            const position = getRelativePosition(index);
+            if (Math.abs(position) > 2) return null;
+
+            const { x, z, angle, opacity, scale } = getCardPosition(position);
             const isCenter = index === activeIndex;
 
             return (
@@ -208,6 +240,8 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
                 style={{
                   transformStyle: 'preserve-3d',
                   width: `${metrics.cardWidth}px`,
+                  zIndex: isCenter ? 40 : 30 - Math.abs(position),
+                  pointerEvents: isCenter ? 'auto' : 'none',
                 }}
               >
                 {/* Card container with shadow */}
@@ -321,7 +355,6 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
           <motion.button
             key={index}
             onClick={() => {
-              setIsAutoplay(false);
               setActiveIndex(index);
               onSlideChange?.(index);
             }}
@@ -336,7 +369,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
       {/* Slide counter */}
       <div className="text-center mt-6 text-brown-muted font-inter text-sm">
         <span className="font-semibold text-brown">{activeIndex + 1}</span>
-        <span> / {products.length}</span>
+        <span> / {total}</span>
       </div>
     </div>
   );
