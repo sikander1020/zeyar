@@ -17,6 +17,35 @@ const ModelViewer3D = dynamic(() => import('@/components/storefront/ModelViewer3
 });
 
 const BLOCKED_SIZES = new Set(['XS', 'XL', 'EXTRA SMALL', 'EXTRA LARGE']);
+const PRODUCT_CACHE_TTL_MS = 5 * 60 * 1000;
+
+function getCachedProduct(pid: string): StoreProduct | null {
+  if (typeof window === 'undefined') return null;
+
+  try {
+    const raw = window.sessionStorage.getItem(`zaybaash-product-cache:${pid}`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { cachedAt?: number; product?: StoreProduct };
+    if (!parsed || typeof parsed.cachedAt !== 'number' || !parsed.product) return null;
+    if (Date.now() - parsed.cachedAt > PRODUCT_CACHE_TTL_MS) return null;
+    return parsed.product;
+  } catch {
+    return null;
+  }
+}
+
+function setCachedProduct(pid: string, product: StoreProduct): void {
+  if (typeof window === 'undefined') return;
+
+  try {
+    window.sessionStorage.setItem(
+      `zaybaash-product-cache:${pid}`,
+      JSON.stringify({ cachedAt: Date.now(), product }),
+    );
+  } catch {
+    // Ignore sessionStorage failures.
+  }
+}
 
 type ProductEventPayload = {
   productId: string;
@@ -86,7 +115,18 @@ export default function ProductPage() {
     let mounted = true;
 
     const pid = String(id ?? '').trim();
-    setProductLoading(true);
+    const cachedProduct = pid ? getCachedProduct(pid) : null;
+    if (cachedProduct) {
+      setProduct(cachedProduct);
+      const firstAllowedSize = cachedProduct.sizes.find((size) => !BLOCKED_SIZES.has(size.toUpperCase()));
+      setSelectedSize(firstAllowedSize || cachedProduct.sizes[0] || '');
+      setSelectedColor(cachedProduct.colors[0] || { name: '', hex: '' });
+      setActiveImage(0);
+      setProductLoading(false);
+    } else {
+      setProductLoading(true);
+    }
+
     if (!pid) {
       setProduct(null);
       setProductLoading(false);
@@ -95,7 +135,7 @@ export default function ProductPage() {
       };
     }
 
-    fetch(`/api/products/${encodeURIComponent(pid)}`, { cache: 'no-store' })
+    fetch(`/api/products/${encodeURIComponent(pid)}`)
       .then(async (res) => {
         if (!res.ok) return { product: null } as { product: StoreProduct | null };
         return res.json() as Promise<{ product?: StoreProduct }>;
@@ -105,6 +145,7 @@ export default function ProductPage() {
         const p = single.product ?? null;
         setProduct(p);
         if (p) {
+          setCachedProduct(pid, p);
           const firstAllowedSize = p.sizes.find((size) => !BLOCKED_SIZES.has(size.toUpperCase()));
           setSelectedSize(firstAllowedSize || p.sizes[0] || '');
           setSelectedColor(p.colors[0] || { name: '', hex: '' });
@@ -116,7 +157,7 @@ export default function ProductPage() {
         setProduct(null);
       })
       .finally(() => {
-        if (mounted) setProductLoading(false);
+        if (mounted && !cachedProduct) setProductLoading(false);
       });
 
     return () => {
@@ -127,7 +168,7 @@ export default function ProductPage() {
   useEffect(() => {
     let mounted = true;
 
-    fetch('/api/products?sort=featured', { cache: 'no-store' })
+    fetch('/api/products?sort=featured&limit=24')
       .then(async (res) => {
         if (!res.ok) return { products: [] } as { products: StoreProduct[] };
         return res.json() as Promise<{ products?: StoreProduct[] }>;
