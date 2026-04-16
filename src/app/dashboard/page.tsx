@@ -230,7 +230,7 @@ function LoginWall({ onLogin }: { onLogin: () => void }) {
       background: `linear-gradient(135deg, ${BROWN} 0%, #6B5247 100%)`,
     }}>
       <div style={{
-        background: '#fff', borderRadius: 16, padding: '48px 40px', width: 360,
+        background: '#fff', borderRadius: 16, padding: '40px 24px', width: 'min(92vw, 360px)',
         boxShadow: '0 20px 60px rgba(0,0,0,.3)',
         animation: shake ? 'shake 0.5s ease' : undefined,
       }}>
@@ -1057,6 +1057,7 @@ function ProductsTab() {
   const [uploadedImages, setUploadedImages] = useState<string[]>([]);
   const [imageUrlInputs, setImageUrlInputs] = useState<string[]>(['']);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -1220,6 +1221,7 @@ function ProductsTab() {
     const file = e.currentTarget.files?.[0];
     if (!file) return;
 
+    setUploadingVideo(true);
     try {
       const { ['Content-Type']: _contentType, ...uploadHeaders } = authHeaders();
 
@@ -1242,6 +1244,7 @@ function ProductsTab() {
       console.error('Error uploading video file:', err);
       alert(err instanceof Error ? err.message : 'Failed to upload video. Please try again.');
     } finally {
+      setUploadingVideo(false);
       e.currentTarget.value = '';
     }
   }
@@ -1587,13 +1590,17 @@ function ProductsTab() {
               )}
             </div>
             <div style={{ border: '1px solid #EBD9CC', borderRadius: 8, padding: 10, background: CREAM }}>
-              <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 6, fontWeight: 600 }}>Product Video</label>
+              <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 6, fontWeight: 600 }}>Upload Product Video File</label>
               <input
                 type="file"
                 accept="video/*"
                 onChange={(e) => void handleVideoUpload(e)}
+                disabled={uploadingVideo}
                 style={{ display: 'block', width: '100%', fontSize: 12, color: BROWN }}
               />
+              <p style={{ margin: '6px 0 0', fontSize: 11, color: MUTED }}>
+                {uploadingVideo ? 'Uploading video...' : 'Choose a video file (MP4/WebM/MOV). No URL needed.'}
+              </p>
               {formData.videoUrl && (
                 <div style={{ marginTop: 8 }}>
                   <video
@@ -2232,6 +2239,7 @@ export default function DashboardPage() {
   const [lastRef, setLastRef] = useState('');
   const [liveOn, setLiveOn]   = useState(true);
   const [error, setError]     = useState('');
+  const [isMobile, setIsMobile] = useState(false);
 
   const verify = useCallback(async () => {
     const token = localStorage.getItem('zaybaash_admin_token');
@@ -2293,6 +2301,14 @@ export default function DashboardPage() {
   useEffect(() => { verify(); }, [verify]);
   useEffect(() => { if (authed) fetchData(); }, [authed, fetchData]);
 
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Live updates: poll MongoDB on an interval; pause when tab is in background
   useEffect(() => {
     if (!authed || !liveOn) return;
@@ -2333,26 +2349,49 @@ export default function DashboardPage() {
   if (!authed) return <LoginWall onLogin={() => { setAuthed(true); }} />;
 
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', fontFamily: 'Inter, sans-serif', background: CREAM }}>
+    <div style={{ display: isMobile ? 'block' : 'flex', minHeight: '100vh', fontFamily: 'Inter, sans-serif', background: CREAM }}>
       {/* Sidebar */}
       <aside style={{
-        width: 220, background: BROWN, color: '#fff', display: 'flex',
-        flexDirection: 'column', padding: '28px 0', position: 'fixed', left: 0, top: 0,
-        height: '100vh', flexShrink: 0, zIndex: 100, overflowY: 'auto',
+        width: isMobile ? '100%' : 220,
+        background: BROWN,
+        color: '#fff',
+        display: 'flex',
+        flexDirection: 'column',
+        padding: isMobile ? '14px 0' : '28px 0',
+        position: isMobile ? 'sticky' : 'fixed',
+        left: 0,
+        top: 0,
+        height: isMobile ? 'auto' : '100vh',
+        flexShrink: 0,
+        zIndex: 100,
+        overflowY: 'auto',
       }}>
-        <div style={{ padding: '0 20px 28px', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
+        <div style={{ padding: isMobile ? '0 14px 12px' : '0 20px 28px', borderBottom: '1px solid rgba(255,255,255,.1)' }}>
           <p style={{ margin: 0, fontSize: 20, fontWeight: 700, letterSpacing: '0.04em' }}>ZAYBAASH</p>
           <p style={{ margin: '4px 0 0', fontSize: 11, color: '#9A7B72', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Admin Dashboard</p>
         </div>
-        <nav style={{ flex: 1, padding: '16px 0' }}>
+        <nav style={{
+          flex: 1,
+          padding: isMobile ? '10px 0' : '16px 0',
+          display: 'flex',
+          flexDirection: isMobile ? 'row' : 'column',
+          overflowX: isMobile ? 'auto' : 'visible',
+          overflowY: 'hidden',
+          WebkitOverflowScrolling: 'touch',
+        }}>
           {TABS.map((t) => (
             <button key={t.id} onClick={() => setTab(t.id)}
               style={{
-                display: 'flex', alignItems: 'center', gap: 12, width: '100%',
-                padding: '12px 20px', border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500,
+                display: 'flex', alignItems: 'center', gap: 8,
+                width: isMobile ? 'auto' : '100%',
+                minWidth: isMobile ? 120 : undefined,
+                whiteSpace: 'nowrap',
+                padding: isMobile ? '10px 12px' : '12px 20px',
+                border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 500,
                 background: tab === t.id ? 'rgba(183,110,121,.25)' : 'transparent',
                 color: tab === t.id ? '#F0C9BF' : 'rgba(255,255,255,.7)',
-                borderLeft: tab === t.id ? `3px solid ${ROSE}` : '3px solid transparent',
+                borderLeft: isMobile ? 'none' : (tab === t.id ? `3px solid ${ROSE}` : '3px solid transparent'),
+                borderBottom: isMobile ? (tab === t.id ? `2px solid ${ROSE}` : '2px solid transparent') : 'none',
                 transition: 'all .15s',
               }}>
               <span style={{ fontSize: 16 }}>{t.icon}</span>
@@ -2360,7 +2399,7 @@ export default function DashboardPage() {
             </button>
           ))}
         </nav>
-        <div style={{ padding: '16px 20px', borderTop: '1px solid rgba(255,255,255,.1)' }}>
+        <div style={{ padding: isMobile ? '10px 14px 0' : '16px 20px', borderTop: '1px solid rgba(255,255,255,.1)' }}>
           <button onClick={handleLock}
             style={{ width: '100%', padding: '10px', background: 'rgba(255,255,255,.08)', color: 'rgba(255,255,255,.7)', border: '1px solid rgba(255,255,255,.15)', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>
             🔒 Lock Dashboard
@@ -2369,9 +2408,22 @@ export default function DashboardPage() {
       </aside>
 
       {/* Main content */}
-      <main style={{ flex: 1, marginLeft: 220, padding: '32px 36px', overflowY: 'auto', minHeight: '100vh' }}>
+      <main style={{
+        flex: 1,
+        marginLeft: isMobile ? 0 : 220,
+        padding: isMobile ? '16px 12px 24px' : '32px 36px',
+        overflowY: 'auto',
+        minHeight: isMobile ? 'calc(100vh - 64px)' : '100vh',
+      }}>
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: isMobile ? 'flex-start' : 'center',
+          flexDirection: isMobile ? 'column' : 'row',
+          gap: isMobile ? 12 : 0,
+          marginBottom: 24,
+        }}>
           <div>
             <h1 style={{ margin: 0, fontSize: 24, fontWeight: 700, color: BROWN }}>
               {TABS.find((t) => t.id === tab)?.label}
