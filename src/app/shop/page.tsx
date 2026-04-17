@@ -8,6 +8,7 @@ import RecentlyViewedStrip from '@/components/sections/RecentlyViewedStrip';
 import ShopHeroMotion from '@/components/sections/ShopHeroMotion';
 import ShopHashScroll from '@/components/sections/ShopHashScroll';
 import RevealOnScroll from '@/components/animation/RevealOnScroll';
+import SignatureDressSpotlight from '@/components/storefront/SignatureDressSpotlight';
 import { getStorefrontCategories, getStorefrontProducts } from '@/lib/storefrontData';
 import type { StoreCategory, StoreProduct } from '@/types/storefront';
 
@@ -18,12 +19,19 @@ export default async function ShopPage() {
     getStorefrontProducts(),
     getStorefrontCategories(),
   ]);
+  const signatureProducts = products.filter((p) => p.isSignatureDress);
 
   return (
     <AppShell>
       <div className="pt-24 min-h-screen bg-cream">
         <ShopHashScroll />
         <ShopHeroMotion />
+
+        <RevealOnScroll>
+          <div className="max-w-7xl mx-auto px-6 pt-8">
+            <SignatureDressSpotlight products={signatureProducts} />
+          </div>
+        </RevealOnScroll>
 
         <RevealOnScroll>
           <FeaturedCollections initialProducts={products} />

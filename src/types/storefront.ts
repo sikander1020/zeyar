@@ -30,6 +30,7 @@ export interface StoreProduct {
   isNew?: boolean;
   isSale?: boolean;
   isBestseller?: boolean;
+  isSignatureDress?: boolean;
   frontImageUrl?: string;
   backImageUrl?: string;
   sizeChartImageUrl?: string;

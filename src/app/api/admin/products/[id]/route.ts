@@ -113,6 +113,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         isNewArrival: body.isNewArrival,
         isSale: body.isSale,
         isBestseller: body.isBestseller,
+        isSignatureDress: body.isSignatureDress === true,
       },
       { new: true }
     );

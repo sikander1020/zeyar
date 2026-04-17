@@ -119,6 +119,7 @@ export async function POST(req: NextRequest) {
       isNewArrival: body.isNewArrival || false,
       isSale: body.isSale || false,
       isBestseller: body.isBestseller || false,
+      isSignatureDress: body.isSignatureDress === true,
     });
 
     await product.save();

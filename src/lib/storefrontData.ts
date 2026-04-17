@@ -101,6 +101,7 @@ function normalizeProduct(p: {
   isNewArrival?: boolean;
   isSale?: boolean;
   isBestseller?: boolean;
+  isSignatureDress?: boolean;
 }): StoreProduct {
   const resolvedId = typeof p.productId === 'string' && p.productId.trim().length > 0
     ? p.productId.trim()
@@ -143,6 +144,7 @@ function normalizeProduct(p: {
     isNew: p.isNewArrival === true,
     isSale: p.isSale === true,
     isBestseller: p.isBestseller === true,
+    isSignatureDress: p.isSignatureDress === true || (Array.isArray(p.tags) && p.tags.some((tag) => tag.trim().toLowerCase() === 'signature')),
   };
 }
 

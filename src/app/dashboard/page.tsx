@@ -95,6 +95,7 @@ interface ProductRow {
   isNewArrival: boolean;
   isSale: boolean;
   isBestseller: boolean;
+  isSignatureDress?: boolean;
 }
 interface CouponRow {
   _id: string;
@@ -181,6 +182,7 @@ const TABS = [
   { id: 'sales',      label: 'Sales',           icon: '◈' },
   { id: 'orders',     label: 'Orders',          icon: '≡' },
   { id: 'products',   label: 'Products',        icon: '◉' },
+  { id: 'signature',  label: 'Signature Dress', icon: '◆' },
   { id: 'categories', label: 'Categories',      icon: '▤' },
   { id: 'inventory',  label: 'Inventory',       icon: '▤' },
   { id: 'customers',  label: 'Customers',       icon: '⊙' },
@@ -1048,7 +1050,7 @@ function CategoriesTab() {
 }
 
 // ── Products Tab ──────────────────────────────────────────────────────────────
-function ProductsTab() {
+function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [loading, setLoading] = useState(false);
   const [lowStockThreshold, setLowStockThreshold] = useState(5);
@@ -1083,6 +1085,7 @@ function ProductsTab() {
     isNewArrival: false,
     isSale: false,
     isBestseller: false,
+    isSignatureDress: signatureOnly,
   });
 
   function parseCsvOrLines(value: string): string[] {
@@ -1151,6 +1154,7 @@ function ProductsTab() {
       isNewArrival: false,
       isSale: false,
       isBestseller: false,
+      isSignatureDress: signatureOnly,
     });
     setUploadedImages([]);
     setImageUrlInputs(['']);
@@ -1331,6 +1335,7 @@ function ProductsTab() {
         isNewArrival: formData.isNewArrival,
         isSale: formData.isSale,
         isBestseller: formData.isBestseller,
+        isSignatureDress: formData.isSignatureDress,
       };
 
       const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
@@ -1401,6 +1406,7 @@ function ProductsTab() {
       isNewArrival: prod.isNewArrival,
       isSale: prod.isSale,
       isBestseller: prod.isBestseller,
+      isSignatureDress: prod.isSignatureDress,
     };
     await fetch(`/api/admin/products/${prod.productId}`, {
       method: 'PUT',
@@ -1435,6 +1441,7 @@ function ProductsTab() {
       isNewArrival: prod.isNewArrival,
       isSale: prod.isSale,
       isBestseller: prod.isBestseller,
+      isSignatureDress: prod.isSignatureDress === true,
     });
     setUploadedImages(prod.images ?? []);
     setImageUrlInputs((prod.images ?? []).length > 0 ? (prod.images ?? []) : ['']);
@@ -1444,9 +1451,13 @@ function ProductsTab() {
   const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= lowStockThreshold && p.isActive !== false).length;
   const outOfStockCount = products.filter((p) => p.outOfStock).length;
   const inactiveCount = products.filter((p) => p.isActive === false).length;
-  const filteredProducts = showLowStockOnly
-    ? products.filter((p) => p.stock > 0 && p.stock <= lowStockThreshold && p.isActive !== false)
+  const tabProducts = signatureOnly
+    ? products.filter((p) => p.isSignatureDress === true)
     : products;
+
+  const filteredProducts = showLowStockOnly
+    ? tabProducts.filter((p) => p.stock > 0 && p.stock <= lowStockThreshold && p.isActive !== false)
+    : tabProducts;
 
   async function activateAllInactive() {
     if (!confirm(`Activate all ${inactiveCount} hidden products? They will appear in the store.`)) return;
@@ -1492,7 +1503,9 @@ function ProductsTab() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>{products.length} products</p>
+          <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>
+            {filteredProducts.length} {signatureOnly ? 'signature dresses' : 'products'}
+          </p>
           <span style={{ fontSize: 12, color: '#A0613E', background: '#FDF3EC', border: '1px solid #F1D9C7', borderRadius: 999, padding: '4px 10px' }}>
             Low stock: {lowStockCount}
           </span>
@@ -1510,6 +1523,7 @@ function ProductsTab() {
             onClick={() => void replaceCatalogWithMarketData()}
             style={{ padding: '10px 12px', background: '#6B5247', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
             title="Delete current catalog and insert new market catalog"
+            disabled={signatureOnly}
           >
             Replace Catalog
           </button>
@@ -1776,6 +1790,10 @@ function ProductsTab() {
               <input type="checkbox" checked={formData.isBestseller} onChange={(e) => setFormData({ ...formData, isBestseller: e.target.checked })} style={{ accentColor: ROSE }} />
               Bestseller
             </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
+              <input type="checkbox" checked={formData.isSignatureDress} onChange={(e) => setFormData({ ...formData, isSignatureDress: e.target.checked })} style={{ accentColor: ROSE }} />
+              Signature Dress (Handcrafted)
+            </label>
           </div>
           <button type="submit" style={{ padding: '10px 20px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
             {editing ? 'Update' : 'Create'} Product
@@ -1823,6 +1841,7 @@ function ProductsTab() {
                     {p.isNewArrival && <span className="badge-new">New</span>}
                     {p.isSale && <span className="badge-sale">Sale</span>}
                     {p.isBestseller && <span style={{ background: '#6B8E6B', color: '#fff', fontSize: 10, padding: '2px 6px', borderRadius: 4 }}>Best</span>}
+                    {p.isSignatureDress && <span style={{ background: '#3A2E2A', color: '#fff', fontSize: 10, padding: '2px 6px', borderRadius: 4 }}>Signature</span>}
                   </div>
                 </td>
                 <td style={{ padding: '10px 14px' }}>
@@ -2621,6 +2640,7 @@ export default function DashboardPage() {
             {tab === 'sales'      && <SalesTab      data={data} />}
             {tab === 'orders'     && <OrdersTab     data={data} fetchData={() => fetchData()} />}
             {tab === 'products'   && <ProductsTab />}
+            {tab === 'signature'  && <ProductsTab signatureOnly={true} />}
             {tab === 'categories' && <CategoriesTab />}
             {tab === 'inventory'  && <InventoryTab  data={data} />}
             {tab === 'customers'  && <CustomersTab  data={data} />}
