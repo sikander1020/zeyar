@@ -453,8 +453,8 @@ export default function ProductPage() {
     <AppShell>
       <div className="pt-24 bg-cream min-h-screen pb-24 md:pb-28">
         {/* Breadcrumb */}
-        <div className="max-w-7xl mx-auto px-6 py-6">
-          <nav className="flex items-center gap-2 text-xs text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 md:py-6">
+          <nav className="flex flex-wrap items-center gap-2 text-xs text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
             <Link href="/" className="hover:text-brown transition-colors">Home</Link>
             <span>/</span>
             <Link href="/shop" className="hover:text-brown transition-colors">Shop</Link>
@@ -465,16 +465,16 @@ export default function ProductPage() {
           </nav>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 pb-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-16 md:pb-20">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 xl:gap-20">
             {/* Left: Media */}
             <div>
               {showMediaTabs && (
-                <div className="flex mb-4 border border-nude/30">
+                <div className="mb-4 flex flex-wrap border border-nude/30">
                   <button
                     type="button"
                     onClick={() => setActiveTab('images')}
-                    className={`flex-1 py-3 text-xs tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeMediaTab === 'images' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
+                    className={`flex-1 min-w-[120px] py-3 text-[11px] sm:text-xs tracking-[0.12em] sm:tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeMediaTab === 'images' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
                     style={{ fontFamily: "'Inter', sans-serif" }}
                   >
                     Gallery
@@ -483,7 +483,7 @@ export default function ProductPage() {
                     <button
                       type="button"
                       onClick={() => setActiveTab('video')}
-                      className={`flex-1 py-3 text-xs tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeMediaTab === 'video' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
+                      className={`flex-1 min-w-[120px] py-3 text-[11px] sm:text-xs tracking-[0.12em] sm:tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeMediaTab === 'video' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
                       style={{ fontFamily: "'Inter', sans-serif" }}
                     >
                       Video
@@ -493,7 +493,7 @@ export default function ProductPage() {
                     <button
                       type="button"
                       onClick={() => setActiveTab('3d')}
-                      className={`flex-1 py-3 text-xs tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeMediaTab === '3d' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
+                      className={`flex-1 min-w-[120px] py-3 text-[11px] sm:text-xs tracking-[0.12em] sm:tracking-[0.15em] uppercase font-inter transition-all duration-300 ${activeMediaTab === '3d' ? 'bg-brown text-cream' : 'text-brown-muted hover:text-brown'}`}
                       style={{ fontFamily: "'Inter', sans-serif" }}
                     >
                       3D View
@@ -562,7 +562,7 @@ export default function ProductPage() {
 
             {/* Right: Product info */}
             <div className="flex flex-col">
-              <div className="flex items-start justify-between mb-2">
+              <div className="mb-2 flex flex-wrap items-start justify-between gap-3">
                 <span className="text-xs tracking-[0.2em] uppercase text-rose-gold font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
                   {product.category}
                 </span>
@@ -582,12 +582,12 @@ export default function ProductPage() {
                 </div>
               </div>
 
-              <h1 className="text-4xl font-playfair text-brown mb-3 leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
+              <h1 className="text-3xl md:text-4xl font-playfair text-brown mb-3 leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
                 {product.name}
               </h1>
 
               {/* Rating */}
-              <div className="flex items-center gap-3 mb-6">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-6">
                 <div className="flex">
                   {[1,2,3,4,5].map(i => (
                     <Star
@@ -604,7 +604,7 @@ export default function ProductPage() {
               </div>
 
               {/* Price */}
-              <div className="flex items-baseline gap-3 mb-8">
+              <div className="flex flex-wrap items-baseline gap-2 sm:gap-3 mb-8">
                 <span className="text-3xl font-playfair font-semibold text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
                   Rs {product.price.toLocaleString()}
                 </span>
@@ -625,7 +625,7 @@ export default function ProductPage() {
                 <p className="text-xs tracking-[0.15em] uppercase text-brown font-semibold font-inter mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
                   Color — <span className="normal-case font-normal text-brown-muted tracking-normal">{selectedColor.name}</span>
                 </p>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-3">
                   {product.colors.map((color) => (
                     <button
                       key={color.name}
@@ -690,7 +690,7 @@ export default function ProductPage() {
               </div>
 
               {/* Benefits */}
-              <div className="grid grid-cols-3 gap-4 py-6 border-y border-nude/20 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 py-6 border-y border-nude/20 mb-8">
                 {[
                   { icon: Truck, text: 'Free Shipping' },
                   { icon: RotateCcw, text: 'Easy Returns' },

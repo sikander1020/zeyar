@@ -13,6 +13,34 @@ const BROWN  = '#3A2E2A';
 const CREAM  = '#FAF7F4';
 const BEIGE  = '#F5EDE6';
 const MUTED  = '#9A7B72';
+const PRODUCT_COLOR_PRESETS: Array<{ name: string; hex: string }> = [
+  { name: 'Black', hex: '#000000' },
+  { name: 'White', hex: '#FFFFFF' },
+  { name: 'Beige', hex: '#F5F5DC' },
+  { name: 'Cream', hex: '#FFFDD0' },
+  { name: 'Ivory', hex: '#FFFFF0' },
+  { name: 'Nude', hex: '#E6B7A9' },
+  { name: 'Rose Gold', hex: '#B76E79' },
+  { name: 'Brown', hex: '#6B5247' },
+  { name: 'Maroon', hex: '#800000' },
+  { name: 'Burgundy', hex: '#800020' },
+  { name: 'Red', hex: '#FF0000' },
+  { name: 'Pink', hex: '#FFC0CB' },
+  { name: 'Peach', hex: '#FFCBA4' },
+  { name: 'Orange', hex: '#FFA500' },
+  { name: 'Yellow', hex: '#FFFF00' },
+  { name: 'Gold', hex: '#FFD700' },
+  { name: 'Green', hex: '#008000' },
+  { name: 'Olive', hex: '#808000' },
+  { name: 'Mint', hex: '#98FF98' },
+  { name: 'Sky Blue', hex: '#87CEEB' },
+  { name: 'Blue', hex: '#0000FF' },
+  { name: 'Navy', hex: '#000080' },
+  { name: 'Purple', hex: '#800080' },
+  { name: 'Lilac', hex: '#C8A2C8' },
+  { name: 'Gray', hex: '#808080' },
+  { name: 'Silver', hex: '#C0C0C0' },
+];
 
 /** How often to pull fresh data from MongoDB (orders, inventory, stats). */
 const POLL_MS = 15_000;
@@ -1078,7 +1106,7 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
     detailsText: '',
     sizesText: 'S, M, L',
     sizeChartText: 'XS,18,16,20,41\nS,19,17,21,42\nM,20,18,22,43\nL,22,20,24,44\nXL,24,22,26,45',
-    colorsText: 'Default:#E6B7A9',
+    colorsText: '',
     tagsText: '',
     isActive: true,
     outOfStock: false,
@@ -1244,7 +1272,7 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
       detailsText: '',
       sizesText: 'S, M, L',
       sizeChartText: 'XS,18,16,20,41\nS,19,17,21,42\nM,20,18,22,43\nL,22,20,24,44\nXL,24,22,26,45',
-      colorsText: 'Default:#E6B7A9',
+      colorsText: '',
       tagsText: '',
       isActive: true,
       outOfStock: false,
@@ -1557,6 +1585,23 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
     : tabProducts;
 
   const colorPreview = parseColorsPreview(formData.colorsText);
+  const selectedColorHexes = new Set(colorPreview.map((c) => c.hex.toUpperCase()));
+
+  function applySelectedColors(next: Array<{ name: string; hex: string }>) {
+    setFormData((prev) => ({
+      ...prev,
+      colorsText: next.map((c) => `${c.name}:${c.hex}`).join(', '),
+    }));
+  }
+
+  function toggleColorPreset(color: { name: string; hex: string }) {
+    const exists = colorPreview.some((c) => c.hex.toUpperCase() === color.hex.toUpperCase());
+    if (exists) {
+      applySelectedColors(colorPreview.filter((c) => c.hex.toUpperCase() !== color.hex.toUpperCase()));
+      return;
+    }
+    applySelectedColors([...colorPreview, color]);
+  }
 
   async function activateAllInactive() {
     if (!confirm(`Activate all ${inactiveCount} hidden products? They will appear in the store.`)) return;
@@ -1864,8 +1909,69 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
             <textarea value={formData.sizeChartText} onChange={(e) => setFormData({ ...formData, sizeChartText: e.target.value })} placeholder="Size chart rows: size,chest,waist,hips,length"
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 90 }} />
             <div>
-              <input value={formData.colorsText} onChange={(e) => setFormData({ ...formData, colorsText: e.target.value })} placeholder="Colors (e.g. red, navy, beige or Rose:#E6B7A9)"
-                style={{ width: '100%', padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
+                <p style={{ margin: 0, fontSize: 12, color: BROWN, fontWeight: 600 }}>Select Product Colors</p>
+                {colorPreview.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => applySelectedColors([])}
+                    style={{ padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 11, fontWeight: 600 }}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))',
+                  gap: 8,
+                  padding: 10,
+                  border: '1px solid #EBD9CC',
+                  borderRadius: 8,
+                  background: CREAM,
+                }}
+              >
+                {PRODUCT_COLOR_PRESETS.map((color) => {
+                  const isSelected = selectedColorHexes.has(color.hex.toUpperCase());
+                  return (
+                    <button
+                      key={`${color.name}-${color.hex}`}
+                      type="button"
+                      onClick={() => toggleColorPreset(color)}
+                      title={`${color.name} (${color.hex})`}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 6,
+                        padding: '8px 4px',
+                        borderRadius: 8,
+                        border: isSelected ? `2px solid ${ROSE}` : '1px solid #EBD9CC',
+                        background: isSelected ? '#FBEDE6' : '#fff',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      <span
+                        aria-hidden
+                        style={{
+                          width: 26,
+                          height: 26,
+                          borderRadius: '50%',
+                          background: color.hex,
+                          border: '1px solid rgba(0,0,0,0.2)',
+                          boxShadow: isSelected ? '0 0 0 2px rgba(183,110,121,0.18)' : 'none',
+                        }}
+                      />
+                      <span style={{ fontSize: 10, color: BROWN, fontWeight: 600, textAlign: 'center', lineHeight: 1.2 }}>
+                        {color.name}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+
               <div style={{ marginTop: 8, minHeight: 24 }}>
                 {colorPreview.length > 0 ? (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -1896,13 +2002,13 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
                             display: 'inline-block',
                           }}
                         />
-                        {c.name} ({c.hex})
+                        {c.name}
                       </span>
                     ))}
                   </div>
                 ) : (
                   <p style={{ margin: 0, fontSize: 11, color: MUTED }}>
-                    Type color names like red, navy, beige to preview automatically.
+                    Pick one or more colors from the grid.
                   </p>
                 )}
               </div>

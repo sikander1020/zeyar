@@ -343,48 +343,50 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
           </p>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 py-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-10">
           <div className="sticky top-20 z-30 mb-5 bg-cream/95 backdrop-blur border border-nude/20 p-4">
-            <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex gap-2 flex-wrap">
-              {categoryPills.map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setActiveCategory(cat)}
-                  className={`px-5 py-2 text-xs tracking-[0.12em] uppercase font-inter border transition-all duration-300 ${activeCategory === cat ? 'bg-brown text-cream border-brown' : 'bg-transparent text-brown border-nude hover:border-brown'}`}
-                  style={{ fontFamily: "'Inter', sans-serif" }}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex items-center gap-4">
-              <button
-                type="button"
-                onClick={() => setShowAdvancedFilters((v) => !v)}
-                className="inline-flex items-center gap-2 px-3 py-2 border border-nude text-xs tracking-[0.12em] uppercase text-brown hover:border-brown transition-colors"
-              >
-                <SlidersHorizontal size={14} />
-                Filters
-              </button>
-              <div className="relative">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none pl-4 pr-10 py-2.5 bg-transparent border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
-                  style={{ fontFamily: "'Inter', sans-serif" }}
-                >
-                  {sortOptions.map(o => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+              <div className="w-full overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                <div className="flex min-w-max gap-2">
+                  {categoryPills.map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setActiveCategory(cat)}
+                      className={`shrink-0 whitespace-nowrap px-4 py-2 text-xs tracking-[0.12em] uppercase font-inter border transition-all duration-300 ${activeCategory === cat ? 'bg-brown text-cream border-brown' : 'bg-transparent text-brown border-nude hover:border-brown'}`}
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                    >
+                      {cat}
+                    </button>
                   ))}
-                </select>
-                <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brown-muted pointer-events-none" />
+                </div>
               </div>
-              <span className="text-sm text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {filtered.length} pieces
-              </span>
-            </div>
+
+              <div className="flex w-full flex-wrap items-center gap-2 sm:gap-3 lg:w-auto lg:justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowAdvancedFilters((v) => !v)}
+                  className="inline-flex h-[42px] items-center justify-center gap-2 px-3 border border-nude text-xs tracking-[0.12em] uppercase text-brown hover:border-brown transition-colors"
+                >
+                  <SlidersHorizontal size={14} />
+                  Filters
+                </button>
+                <div className="relative min-w-[170px] flex-1 sm:flex-none">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="appearance-none w-full h-[42px] pl-4 pr-10 bg-transparent border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
+                    style={{ fontFamily: "'Inter', sans-serif" }}
+                  >
+                    {sortOptions.map(o => (
+                      <option key={o.value} value={o.value}>{o.label}</option>
+                    ))}
+                  </select>
+                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brown-muted pointer-events-none" />
+                </div>
+                <span className="ml-auto text-xs sm:text-sm text-brown-muted font-inter whitespace-nowrap" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  {filtered.length} pieces
+                </span>
+              </div>
             </div>
           </div>
 
@@ -410,11 +412,11 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
               <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brown-muted pointer-events-none" />
             </div>
 
-            <div className="flex items-center gap-3 justify-start lg:justify-end h-[56px]">
+            <div className="flex items-center gap-2 sm:gap-3 justify-start lg:justify-end h-[56px]">
               <button
                 type="button"
                 onClick={() => setOnlyInStock((v) => !v)}
-                className={`h-[48px] px-4 text-xs tracking-[0.12em] uppercase font-inter border transition-all duration-300 ${onlyInStock ? 'bg-brown text-cream border-brown' : 'border-nude text-brown hover:border-brown'}`}
+                className={`h-[48px] px-3 sm:px-4 text-[11px] sm:text-xs tracking-[0.12em] uppercase font-inter border transition-all duration-300 ${onlyInStock ? 'bg-brown text-cream border-brown' : 'border-nude text-brown hover:border-brown'}`}
                 style={{ fontFamily: "'Inter', sans-serif" }}
               >
                 In Stock Only
@@ -431,7 +433,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                   setPriceMax(bounds.max);
                   setSortBy('featured');
                 }}
-                className="h-[48px] px-2 text-xs text-brown-muted underline underline-offset-2 hover:text-brown transition-colors"
+                className="h-[48px] px-2 text-[11px] sm:text-xs text-brown-muted underline underline-offset-2 hover:text-brown transition-colors"
               >
                 Reset
               </button>
@@ -521,7 +523,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
           )}
 
           <AnimatePresence mode="popLayout">
-            <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
               {filtered.map((product, i) => (
                 <ProductCard key={product.id} product={product} index={i} onQuickView={setQuickViewProduct} />
               ))}
