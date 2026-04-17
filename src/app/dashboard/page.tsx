@@ -2432,7 +2432,7 @@ export default function DashboardPage() {
         height: '100vh',
         flexShrink: 0,
         zIndex: 130,
-        overflowY: 'auto',
+        overflowY: 'hidden',
         transform: isMobile ? (sidebarOpen ? 'translateX(0)' : 'translateX(-100%)') : 'translateX(0)',
         transition: 'transform .25s ease',
         boxShadow: isMobile ? '0 12px 36px rgba(0,0,0,.35)' : 'none',
@@ -2468,6 +2468,7 @@ export default function DashboardPage() {
         </div>
         <nav style={{
           flex: 1,
+          minHeight: 0,
           padding: isMobile ? '12px 0' : '16px 0',
           display: 'flex',
           flexDirection: 'column',
