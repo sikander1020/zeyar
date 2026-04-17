@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import "./globals.css";
 import { SITE_ORIGIN } from "@/lib/siteUrl";
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
@@ -84,6 +85,16 @@ export default function RootLayout({
   return (
     <html lang="en-PK">
       <head>
+        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-ERQGVY9029" />
+        <Script
+          id="google-analytics"
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer = window.dataLayer || [];
+function gtag(){dataLayer.push(arguments);}
+gtag('js', new Date());
+gtag('config', 'G-ERQGVY9029');`,
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `(() => {
