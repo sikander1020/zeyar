@@ -1095,19 +1095,116 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
       .filter(Boolean);
   }
 
+  function normalizeHex(input: string): string | null {
+    const value = input.trim();
+    const shortHex = /^#([0-9a-fA-F]{3})$/;
+    const longHex = /^#([0-9a-fA-F]{6})$/;
+    if (shortHex.test(value)) {
+      const m = value.slice(1);
+      return `#${m[0]}${m[0]}${m[1]}${m[1]}${m[2]}${m[2]}`.toUpperCase();
+    }
+    if (longHex.test(value)) return value.toUpperCase();
+    return null;
+  }
+
+  function rgbToHex(input: string): string | null {
+    const match = input.match(/^rgba?\((\d+)\s*,\s*(\d+)\s*,\s*(\d+)(?:\s*,\s*[\d.]+)?\)$/i);
+    if (!match) return null;
+    const r = Number(match[1]);
+    const g = Number(match[2]);
+    const b = Number(match[3]);
+    if (![r, g, b].every((n) => Number.isFinite(n) && n >= 0 && n <= 255)) return null;
+    return `#${[r, g, b].map((n) => n.toString(16).padStart(2, '0')).join('')}`.toUpperCase();
+  }
+
+  function resolveColorHex(input: string): string | null {
+    const raw = input.trim();
+    if (!raw) return null;
+
+    const normalizedHex = normalizeHex(raw);
+    if (normalizedHex) return normalizedHex;
+
+    const key = raw.toLowerCase().replace(/\s+/g, ' ').trim();
+    const palette: Record<string, string> = {
+      black: '#000000',
+      white: '#FFFFFF',
+      gray: '#808080',
+      grey: '#808080',
+      silver: '#C0C0C0',
+      navy: '#000080',
+      'navy blue': '#000080',
+      blue: '#0000FF',
+      sky: '#87CEEB',
+      'sky blue': '#87CEEB',
+      red: '#FF0000',
+      maroon: '#800000',
+      burgundy: '#800020',
+      green: '#008000',
+      olive: '#808000',
+      mint: '#98FF98',
+      yellow: '#FFFF00',
+      gold: '#FFD700',
+      pink: '#FFC0CB',
+      rose: '#FF007F',
+      'rose gold': '#B76E79',
+      nude: '#E6B7A9',
+      beige: '#F5F5DC',
+      cream: '#FFFDD0',
+      ivory: '#FFFFF0',
+      brown: '#6B5247',
+      chocolate: '#7B3F00',
+      purple: '#800080',
+      lilac: '#C8A2C8',
+      peach: '#FFCBA4',
+      orange: '#FFA500',
+    };
+
+    if (palette[key]) return palette[key];
+
+    if (typeof window !== 'undefined') {
+      const sample = document.createElement('span');
+      sample.style.color = '';
+      sample.style.color = raw;
+      const computed = sample.style.color;
+      const computedHex = normalizeHex(computed) ?? rgbToHex(computed);
+      if (computedHex) return computedHex;
+    }
+
+    return null;
+  }
+
   function parseColors(value: string): Array<{ name: string; hex: string }> {
     const rows = parseCsvOrLines(value);
     const parsed = rows
       .map((row) => {
-        const [namePart, hexPart] = row.split(':');
-        const name = (namePart ?? '').trim();
-        const hex = (hexPart ?? '').trim();
-        if (!name || !hex) return null;
+        const separator = row.indexOf(':');
+        const name = (separator >= 0 ? row.slice(0, separator) : row).trim();
+        const colorToken = (separator >= 0 ? row.slice(separator + 1) : row).trim();
+        if (!name) return null;
+
+        const hex = resolveColorHex(colorToken) ?? resolveColorHex(name);
+        if (!hex) return null;
         return { name, hex };
       })
       .filter((c): c is { name: string; hex: string } => !!c);
 
     return parsed.length > 0 ? parsed : [{ name: 'Default', hex: '#E6B7A9' }];
+  }
+
+  function parseColorsPreview(value: string): Array<{ name: string; hex: string }> {
+    const rows = parseCsvOrLines(value);
+    return rows
+      .map((row) => {
+        const separator = row.indexOf(':');
+        const name = (separator >= 0 ? row.slice(0, separator) : row).trim();
+        const colorToken = (separator >= 0 ? row.slice(separator + 1) : row).trim();
+        if (!name) return null;
+
+        const hex = resolveColorHex(colorToken) ?? resolveColorHex(name);
+        if (!hex) return null;
+        return { name, hex };
+      })
+      .filter((c): c is { name: string; hex: string } => !!c);
   }
 
   function parseSizeChartRows(value: string): Array<{ size: string; chest: number; waist: number; hips: number; length: number }> {
@@ -1459,6 +1556,8 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
     ? tabProducts.filter((p) => p.stock > 0 && p.stock <= lowStockThreshold && p.isActive !== false)
     : tabProducts;
 
+  const colorPreview = parseColorsPreview(formData.colorsText);
+
   async function activateAllInactive() {
     if (!confirm(`Activate all ${inactiveCount} hidden products? They will appear in the store.`)) return;
     try {
@@ -1764,8 +1863,50 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
             <textarea value={formData.sizeChartText} onChange={(e) => setFormData({ ...formData, sizeChartText: e.target.value })} placeholder="Size chart rows: size,chest,waist,hips,length"
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 90 }} />
-            <input value={formData.colorsText} onChange={(e) => setFormData({ ...formData, colorsText: e.target.value })} placeholder="Colors (e.g. Rose:#E6B7A9, Black:#1A1A1A)"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+            <div>
+              <input value={formData.colorsText} onChange={(e) => setFormData({ ...formData, colorsText: e.target.value })} placeholder="Colors (e.g. red, navy, beige or Rose:#E6B7A9)"
+                style={{ width: '100%', padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+              <div style={{ marginTop: 8, minHeight: 24 }}>
+                {colorPreview.length > 0 ? (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                    {colorPreview.map((c) => (
+                      <span
+                        key={`${c.name}-${c.hex}`}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: 6,
+                          padding: '4px 8px',
+                          borderRadius: 999,
+                          border: '1px solid #EBD9CC',
+                          background: '#fff',
+                          fontSize: 11,
+                          color: BROWN,
+                        }}
+                        title={`${c.name}: ${c.hex}`}
+                      >
+                        <span
+                          aria-hidden
+                          style={{
+                            width: 12,
+                            height: 12,
+                            borderRadius: '50%',
+                            background: c.hex,
+                            border: '1px solid rgba(0,0,0,0.15)',
+                            display: 'inline-block',
+                          }}
+                        />
+                        {c.name} ({c.hex})
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ margin: 0, fontSize: 11, color: MUTED }}>
+                    Type color names like red, navy, beige to preview automatically.
+                  </p>
+                )}
+              </div>
+            </div>
             <input value={formData.tagsText} onChange={(e) => setFormData({ ...formData, tagsText: e.target.value })} placeholder="Tags (comma separated)"
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
           </div>
