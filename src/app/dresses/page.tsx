@@ -15,5 +15,7 @@ export default async function DressesPage({ searchParams }: { searchParams?: { c
     getStorefrontCategories(),
   ]);
 
-  return <DressesCatalog initialProducts={products} initialCategories={initialCategories} />;
+  const regularProducts = products.filter((product) => !product.isSignatureDress);
+
+  return <DressesCatalog initialProducts={regularProducts} initialCategories={initialCategories} />;
 }

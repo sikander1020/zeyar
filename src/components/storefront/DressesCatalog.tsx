@@ -11,7 +11,6 @@ import { useSearchParams } from 'next/navigation';
 import AppShell from '@/components/layout/AppShell';
 import { useToast } from '@/components/layout/ToastProvider';
 import ProductQuickViewModal from '@/components/storefront/ProductQuickViewModal';
-import SignatureDressSpotlight from '@/components/storefront/SignatureDressSpotlight';
 import type { StoreCategory, StoreProduct } from '@/types/storefront';
 
 const sortOptions = [
@@ -327,8 +326,6 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
     return result;
   }, [products, activeCategory, sortBy, query, onlyInStock, selectedSize, selectedColor, priceMin, priceMax]);
 
-  const signatureProducts = useMemo(() => products.filter((p) => p.isSignatureDress), [products]);
-
   return (
     <AppShell>
       <div className="pt-24 min-h-screen bg-cream">
@@ -342,14 +339,9 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
           <p className="mt-4 text-sm text-brown-muted font-inter max-w-md mx-auto" style={{ fontFamily: "'Inter', sans-serif" }}>
             Explore every piece — from elegant one-pieces to curated sets — crafted for the modern woman.
           </p>
-          <p className="mt-2 text-xs text-brown-muted font-inter max-w-2xl mx-auto" style={{ fontFamily: "'Inter', sans-serif" }}>
-            Look for Signature Dress items: our totally handcrafted statement articles.
-          </p>
         </div>
 
         <div className="max-w-7xl mx-auto px-6 py-10">
-          <SignatureDressSpotlight products={signatureProducts} />
-
           <div className="sticky top-20 z-30 mb-5 bg-cream/95 backdrop-blur border border-nude/20 p-4">
             <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="flex gap-2 flex-wrap">
