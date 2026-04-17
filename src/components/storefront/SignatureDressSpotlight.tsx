@@ -2,16 +2,18 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
+import { useRef } from 'react';
 import type { StoreProduct } from '@/types/storefront';
 
 export default function SignatureDressSpotlight({ products }: { products: StoreProduct[] }) {
   if (!products || products.length === 0) return null;
 
-  const featured = products.slice(0, 3);
+  const ref = useRef(null);
+  const inView = useInView(ref, { once: true, margin: '-80px' });
 
   return (
-    <section className="relative mb-12 overflow-hidden border border-nude/30 bg-[#f7eee8] p-5 md:p-8">
+    <section id="signature-dress" ref={ref} className="relative mb-12 overflow-hidden border border-nude/30 bg-[#f7eee8] p-5 md:p-8 scroll-mt-28">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 opacity-60"
@@ -26,23 +28,33 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
-        className="relative"
+        className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
       >
-        <p className="text-[11px] tracking-[0.22em] uppercase text-rose-gold mb-2">Signature Dress</p>
-        <h2 className="text-3xl md:text-4xl font-playfair text-brown leading-tight">The House Signature Edit</h2>
-        <p className="mt-3 max-w-2xl text-sm md:text-base text-brown-muted font-inter leading-relaxed">
-          Each signature dress is totally handcrafted by our atelier with slow, careful finishing. These are hero pieces made in limited runs for women who want one unforgettable look.
-        </p>
+        <div>
+          <p className="text-[11px] tracking-[0.22em] uppercase text-rose-gold mb-2">Signature Dress</p>
+          <h2 className="text-3xl md:text-4xl font-playfair text-brown leading-tight">The House Signature Edit</h2>
+          <p className="mt-3 max-w-2xl text-sm md:text-base text-brown-muted font-inter leading-relaxed">
+            Each signature dress is totally handcrafted by our atelier with slow, careful finishing. These are hero pieces made in limited runs for women who want one unforgettable look.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-3">
+          <Link href="#signature-grid" className="btn-luxury btn-primary">
+            View Signature Dresses
+          </Link>
+          <Link href="/shop" className="btn-luxury btn-outline">
+            Shop All
+          </Link>
+        </div>
       </motion.div>
 
-      <div className="relative mt-7 grid grid-cols-1 gap-4 md:grid-cols-3">
-        {featured.map((product, index) => (
+      <div id="signature-grid" className="relative mt-7 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {products.map((product, index) => (
           <motion.article
             key={product.id}
             initial={{ opacity: 0, y: 22, scale: 0.98 }}
-            whileInView={{ opacity: 1, y: 0, scale: 1 }}
+            whileInView={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
             viewport={{ once: true, amount: 0.25 }}
-            transition={{ duration: 0.55, delay: index * 0.09, ease: [0.2, 0.8, 0.2, 1] }}
+            transition={{ duration: 0.55, delay: index * 0.06, ease: [0.2, 0.8, 0.2, 1] }}
             className="group overflow-hidden border border-nude/40 bg-white"
           >
             <Link href={`/product/${product.id}`} className="block">
@@ -61,10 +73,22 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
                 <p className="text-[10px] tracking-[0.14em] uppercase text-brown-muted">Handcrafted Piece</p>
                 <h3 className="mt-1 text-lg font-playfair text-brown leading-snug">{product.name}</h3>
                 <p className="mt-2 text-sm font-semibold text-brown">Rs {product.price.toLocaleString()}</p>
+                <p className="mt-2 text-xs text-brown-muted leading-relaxed">
+                  {product.description || 'Totally handcrafted signature dress from our atelier.'}
+                </p>
               </div>
             </Link>
           </motion.article>
         ))}
+      </div>
+
+      <div className="relative mt-8 flex flex-col items-center gap-3 text-center">
+        <p className="text-xs tracking-[0.16em] uppercase text-brown-muted">
+          A signature collection for statement occasions and elevated everyday elegance.
+        </p>
+        <Link href="/shop#signature-grid" className="text-xs tracking-[0.12em] uppercase text-brown underline underline-offset-4 hover:text-rose-gold">
+          Jump to signature grid
+        </Link>
       </div>
     </section>
   );

@@ -14,7 +14,7 @@ const navLinks = [
   { href: '/', label: 'Home' },
   { href: '/shop', label: 'Shop' },
   { href: '/dresses', label: 'Dresses' },
-  { href: '/dresses?category=One Piece', label: 'One Piece' },
+  { href: '/signature-dress', label: 'Signature Dress' },
   { href: '/about', label: 'About' },
   { href: '/contact', label: 'Contact' },
 ];
@@ -42,6 +42,7 @@ export default function Navbar() {
     // Warm up critical routes from the first paint so navigation feels instant.
     router.prefetch('/shop');
     router.prefetch('/dresses');
+    router.prefetch('/signature-dress');
   }, [router]);
 
   useEffect(() => {
@@ -112,10 +113,12 @@ export default function Navbar() {
                   onMouseEnter={() => {
                     if (link.href.startsWith('/shop')) router.prefetch('/shop');
                     if (link.href.startsWith('/dresses')) router.prefetch('/dresses');
+                    if (link.href.startsWith('/signature-dress')) router.prefetch('/signature-dress');
                   }}
                   onFocus={() => {
                     if (link.href.startsWith('/shop')) router.prefetch('/shop');
                     if (link.href.startsWith('/dresses')) router.prefetch('/dresses');
+                    if (link.href.startsWith('/signature-dress')) router.prefetch('/signature-dress');
                   }}
                   className="text-[11px] tracking-[0.18em] uppercase font-inter font-medium text-brown hover:text-rose-gold transition-colors duration-300 relative group"
                   style={{ fontFamily: "'Inter', sans-serif" }}

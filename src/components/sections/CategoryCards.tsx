@@ -39,7 +39,7 @@ function CategoryCardItem({ cat, i, inView }: { cat: StoreCategory; i: number; i
       }}
     >
       <Link
-        href={`/dresses?category=${encodeURIComponent(cat.name)}`}
+        href={cat.name === 'One Piece' ? '/signature-dress' : `/dresses?category=${encodeURIComponent(cat.name)}`}
         className="group relative block overflow-hidden aspect-[3/4] bg-nude/20"
       >
         <motion.div className="absolute inset-0" style={{ y: imageY }}>
