@@ -100,19 +100,20 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 18, scale: 0.97 }}
         transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1] }}
-        className="fixed left-1/2 top-1/2 z-[130] w-[min(96vw,980px)] -translate-x-1/2 -translate-y-1/2 border border-nude/30 bg-cream shadow-[0_42px_130px_-45px_rgba(58,46,42,0.65)]"
+        className="fixed left-1/2 top-1/2 z-[130] w-[min(96vw,980px)] max-h-[min(100vh-40px,900px)] -translate-x-1/2 -translate-y-1/2 border border-nude/30 bg-cream shadow-[0_42px_130px_-45px_rgba(58,46,42,0.65)] overflow-y-auto flex flex-col"
+        onClick={(e) => e.stopPropagation()}
       >
         <button
           ref={closeRef}
           type="button"
           onClick={onClose}
-          className="absolute right-3 top-3 z-10 rounded-full border border-nude/40 bg-white/90 p-2 text-brown hover:text-rose-gold"
+          className="sticky top-0 right-3 w-10 h-10 z-20 rounded-full border border-nude/40 bg-white/90 p-2 text-brown hover:text-rose-gold transition-colors flex items-center justify-center flex-shrink-0 ml-auto mt-3"
           aria-label="Close quick view"
         >
           <X size={16} />
         </button>
 
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_1.1fr]">
+        <div className="grid grid-cols-1 md:grid-cols-[1fr_1.1fr] flex-1 overflow-hidden">
           <div className="border-b border-nude/20 md:border-b-0 md:border-r md:border-nude/20 p-4">
             <div className="relative aspect-[3/4] overflow-hidden bg-beige">
               <Image
@@ -156,7 +157,7 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
             )}
           </div>
 
-          <div className="p-6 md:p-7">
+          <div className="p-4 md:p-7 overflow-y-auto">
             <p className="text-[10px] tracking-[0.18em] uppercase text-rose-gold mb-2">{product.category}</p>
             <h3 className="text-2xl font-playfair text-brown leading-tight">{product.name}</h3>
 
@@ -243,6 +244,15 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
             >
               View Full Details
             </Link>
+
+            {/* Mobile close button */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="md:hidden w-full mt-6 py-2 border border-nude/30 rounded text-brown text-sm hover:bg-cream transition-colors"
+            >
+              Close
+            </button>
           </div>
         </div>
       </motion.div>

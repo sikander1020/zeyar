@@ -2472,7 +2472,7 @@ export default function DashboardPage() {
           display: 'flex',
           flexDirection: 'column',
           overflowX: 'hidden',
-          overflowY: 'hidden',
+          overflowY: 'auto',
           WebkitOverflowScrolling: 'touch',
         }}>
           {TABS.map((t) => (
