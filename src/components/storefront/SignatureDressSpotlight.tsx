@@ -28,7 +28,7 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
-        className="relative flex flex-col gap-4 md:flex-row md:items-end md:justify-between"
+        className="relative mx-auto flex max-w-4xl flex-col gap-4 text-center"
       >
         <div>
           <p className="text-[11px] tracking-[0.22em] uppercase text-rose-gold mb-2">Signature Dress</p>
@@ -36,14 +36,6 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
           <p className="mt-3 max-w-2xl text-sm md:text-base text-brown-muted font-inter leading-relaxed">
             Each signature dress is totally handcrafted by our atelier with slow, careful finishing. These are hero pieces made in limited runs for women who want one unforgettable look.
           </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Link href="#signature-grid" className="btn-luxury btn-primary">
-            View Signature Dresses
-          </Link>
-          <Link href="/shop" className="btn-luxury btn-outline">
-            Shop All
-          </Link>
         </div>
       </motion.div>
 

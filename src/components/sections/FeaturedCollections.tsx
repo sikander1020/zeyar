@@ -33,8 +33,9 @@ export default function FeaturedCollections({ initialProducts }: { initialProduc
     };
   }, [initialProducts]);
 
-  const featuredTagged = products.filter((p) => p.isBestseller || p.isNew);
-  const featured = (featuredTagged.length > 0 ? featuredTagged : products).slice(0, 8);
+  const nonSignature = products.filter((p) => !p.isSignatureDress);
+  const featuredTagged = nonSignature.filter((p) => p.isBestseller || p.isNew);
+  const featured = (featuredTagged.length > 0 ? featuredTagged : nonSignature).slice(0, 8);
   const sectionVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
