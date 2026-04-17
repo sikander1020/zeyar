@@ -13,20 +13,6 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const prefersReducedMotion = useReducedMotion();
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 30, scale: 0.96 },
-    visible: (index: number) => ({
-      opacity: 1,
-      y: 0,
-      scale: 1,
-      transition: {
-        duration: 0.6,
-        delay: index * 0.08,
-        ease: [0.2, 0.8, 0.2, 1],
-      },
-    }),
-  };
-
   return (
     <section id="signature-dress" ref={ref} className="relative mb-12 overflow-hidden border border-nude/30 bg-[#f7eee8] p-5 md:p-8 scroll-mt-28">
       <div
@@ -97,13 +83,11 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
         {products.map((product, index) => (
           <motion.article
             key={product.id}
-            custom={index}
-            initial="hidden"
-            whileInView={inView ? 'visible' : 'hidden'}
-            variants={cardVariants}
+            initial={{ opacity: 0, y: 30, scale: 0.96 }}
+            whileInView={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
             viewport={{ once: true, amount: 0.25 }}
             whileHover={prefersReducedMotion ? undefined : { y: -6, scale: 1.01 }}
-            transition={{ type: 'spring', stiffness: 220, damping: 22 }}
+            transition={{ duration: 0.6, delay: index * 0.08 }}
             className="group overflow-hidden border border-nude/40 bg-white w-full max-w-[360px] shadow-[0_10px_34px_rgba(58,46,42,0.08)]"
           >
             <Link href={`/product/${product.id}`} className="block">
