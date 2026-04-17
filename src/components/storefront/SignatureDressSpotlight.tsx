@@ -47,7 +47,7 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
         </div>
       </motion.div>
 
-      <div id="signature-grid" className="relative mt-7 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div id="signature-grid" className="relative mt-7 grid grid-cols-1 gap-4 justify-items-center sm:grid-cols-2 xl:grid-cols-3">
         {products.map((product, index) => (
           <motion.article
             key={product.id}
@@ -55,7 +55,7 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
             whileInView={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
             viewport={{ once: true, amount: 0.25 }}
             transition={{ duration: 0.55, delay: index * 0.06, ease: [0.2, 0.8, 0.2, 1] }}
-            className="group overflow-hidden border border-nude/40 bg-white"
+            className="group overflow-hidden border border-nude/40 bg-white w-full max-w-[360px]"
           >
             <Link href={`/product/${product.id}`} className="block">
               <div className="relative aspect-[3/4] overflow-hidden">
