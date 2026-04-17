@@ -85,9 +85,13 @@ export default function RootLayout({
   return (
     <html lang="en-PK">
       <head>
-        <Script async src="https://www.googletagmanager.com/gtag/js?id=G-ERQGVY9029" />
+        <Script
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-ERQGVY9029"
+        />
         <Script
           id="google-analytics"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `window.dataLayer = window.dataLayer || [];
 function gtag(){dataLayer.push(arguments);}
