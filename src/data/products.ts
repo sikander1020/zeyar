@@ -318,32 +318,3 @@ export const categories = [
   },
 ];
 
-export const testimonials = [
-  {
-    id: 1,
-    name: 'Layla Al-Rashid',
-    title: 'Fashion Editor',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&q=80',
-    rating: 5,
-    text: "I was so excited to be one of the first to order from ZAYBAASH's launch! The craftsmanship is extraordinary — you can feel the love and attention in every stitch. My Velvet Reverie Gown received so many compliments.",
-    product: 'Velvet Reverie Gown',
-  },
-  {
-    id: 2,
-    name: 'Amira Hassan',
-    title: 'Interior Designer',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=100&q=80',
-    rating: 5,
-    text: "I purchased from their brand new debut collection looking for modest fashion that didn't compromise on elegance. The Crystal Embroidered piece is an absolute masterpiece. Worth every penny!",
-    product: 'Crystal Embroidered One Piece',
-  },
-  {
-    id: 3,
-    name: 'Nour Khalid',
-    title: 'Entrepreneur',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80',
-    rating: 5,
-    text: "The quality of this new launch speaks for itself! The packaging alone feels like an incredible unboxing experience — this is exactly what beauty with style should feel like.",
-    product: 'Boardroom Blazer Set',
-  },
-];

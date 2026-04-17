@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
-import { Heart, ShoppingBag, Star, ChevronDown, Share2, Package, RotateCcw, Truck } from 'lucide-react';
+import { Heart, ShoppingBag, Star, ChevronDown, ChevronLeft, ChevronRight, Share2, Package, RotateCcw, Truck, X } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import AppShell from '@/components/layout/AppShell';
@@ -85,6 +85,7 @@ export default function ProductPage() {
   const [selectedSize, setSelectedSize] = useState('');
   const [selectedColor, setSelectedColor] = useState({ name: '', hex: '' });
   const [activeImage, setActiveImage] = useState(0);
+  const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'3d' | 'images' | 'video'>('images');
   const [expandedSection, setExpandedSection] = useState<string | null>(null);
   const [reviews, setReviews] = useState<Array<{
@@ -155,6 +156,7 @@ export default function ProductPage() {
           setSelectedSize(firstAllowedSize || p.sizes[0] || '');
           setSelectedColor(p.colors[0] || { name: '', hex: '' });
           setActiveImage(0);
+          setImageViewerOpen(false);
           setActiveTab('images');
         }
       })
@@ -220,6 +222,26 @@ export default function ProductPage() {
       mounted = false;
     };
   }, [product?.id]);
+
+  useEffect(() => {
+    if (!imageViewerOpen) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setImageViewerOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [imageViewerOpen]);
 
   useEffect(() => {
     if (!product?.id) return;
@@ -493,22 +515,35 @@ export default function ProductPage() {
               ) : activeMediaTab === '3d' && hasModel3d ? (
                 <ModelViewer3D modelUrl={product.model3dUrl || ''} posterUrl={product.frontImageUrl || product.images[0]} />
               ) : (
-                <div className="aspect-square relative overflow-hidden bg-beige mb-3">
+                <button
+                  type="button"
+                  onClick={() => setImageViewerOpen(true)}
+                  className="aspect-square relative overflow-hidden bg-beige mb-3 w-full cursor-zoom-in"
+                  aria-label="Open product image viewer"
+                >
                   <Image
                     src={product.images[activeImage]}
                     alt={product.name}
                     fill
                     className="object-cover"
                   />
-                </div>
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-brown/40 to-transparent p-4 text-left text-[10px] tracking-[0.2em] uppercase text-cream/90">
+                    Tap to view full screen
+                  </div>
+                </button>
               )}
 
               <div className="grid grid-cols-4 gap-2">
                 {product.images.map((img, i) => (
                   <button
                     key={i}
-                    onClick={() => setActiveImage(i)}
+                    type="button"
+                    onClick={() => {
+                      setActiveImage(i);
+                      setImageViewerOpen(true);
+                    }}
                     className={`aspect-square relative overflow-hidden border-2 transition-all duration-300 ${activeImage === i ? 'border-rose-gold' : 'border-transparent'}`}
+                    aria-label={`Open image ${i + 1}`}
                   >
                     <Image src={img} alt={`View ${i+1}`} fill className="object-cover" />
                   </button>
@@ -955,6 +990,79 @@ export default function ProductPage() {
             </button>
           </div>
         </div>
+
+        {imageViewerOpen && activeMediaTab === 'images' && (
+          <div className="fixed inset-0 z-[140] bg-brown/95 backdrop-blur-sm">
+            <div className="absolute inset-0" onClick={() => setImageViewerOpen(false)} />
+            <div className="relative z-[1] flex h-full flex-col">
+              <div className="flex items-center justify-between border-b border-white/10 px-4 py-3 text-cream">
+                <button
+                  type="button"
+                  onClick={() => setImageViewerOpen(false)}
+                  className="inline-flex items-center gap-2 text-xs tracking-[0.14em] uppercase"
+                >
+                  <ChevronLeft size={16} />
+                  Back
+                </button>
+                <p className="text-[10px] tracking-[0.2em] uppercase text-white/70">{activeImage + 1} / {product.images.length}</p>
+                <button
+                  type="button"
+                  onClick={() => setImageViewerOpen(false)}
+                  className="inline-flex items-center justify-center rounded-full border border-white/20 p-2 text-cream"
+                  aria-label="Close image viewer"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <div className="flex flex-1 items-center justify-center p-4 md:p-8">
+                <div className="relative h-full w-full max-w-5xl max-h-[80vh]">
+                  <Image
+                    src={product.images[activeImage]}
+                    alt={product.name}
+                    fill
+                    className="object-contain"
+                    priority
+                  />
+                </div>
+              </div>
+
+              <div className="border-t border-white/10 px-4 py-3">
+                <div className="mx-auto flex max-w-5xl items-center justify-between gap-3 text-cream">
+                  <button
+                    type="button"
+                    onClick={() => setActiveImage((current) => (current <= 0 ? product.images.length - 1 : current - 1))}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/15 px-3 py-2 text-xs tracking-[0.14em] uppercase"
+                  >
+                    <ChevronLeft size={15} />
+                    Prev
+                  </button>
+                  <div className="flex gap-2 overflow-x-auto py-1">
+                    {product.images.map((img, i) => (
+                      <button
+                        key={`viewer-${i}`}
+                        type="button"
+                        onClick={() => setActiveImage(i)}
+                        className={`relative h-14 w-14 overflow-hidden border-2 ${activeImage === i ? 'border-rose-gold' : 'border-white/15'}`}
+                        aria-label={`Select image ${i + 1}`}
+                      >
+                        <Image src={img} alt={`${product.name} ${i + 1}`} fill className="object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setActiveImage((current) => (current >= product.images.length - 1 ? 0 : current + 1))}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/15 px-3 py-2 text-xs tracking-[0.14em] uppercase"
+                  >
+                    Next
+                    <ChevronRight size={15} />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AppShell>
   );
