@@ -2,13 +2,20 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { SITE_ORIGIN } from '@/lib/siteUrl';
 
-/** Production-only: apex → www, *.vercel.app → canonical origin. */
+/** Production-only: legacy domains/apex/vercel preview → canonical origin. */
 export function middleware(request: NextRequest) {
   if (process.env.VERCEL_ENV !== 'production') {
     return NextResponse.next();
   }
 
   const host = request.headers.get('host') ?? '';
+
+  if (host === 'zeyar.me' || host === 'www.zeyar.me') {
+    const url = request.nextUrl.clone();
+    url.hostname = 'www.zaybaash.com';
+    url.protocol = 'https:';
+    return NextResponse.redirect(url, 308);
+  }
 
   if (host === 'zaybaash.com') {
     const url = request.nextUrl.clone();
