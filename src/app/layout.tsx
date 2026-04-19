@@ -22,9 +22,9 @@ export const metadata: Metadata = {
   },
   description: "Discover ZAYBAASH's exclusive collection of beauty with style in Pakistan. Elegant one-piece statement pieces, matched two-piece sets, and premium designer wear for the modern Pakistani woman. Shop luxury fashion online.",
   keywords: "ZAYBAASH, beauty with style Pakistan, women's clothing Pakistan, elegant dresses, one piece dresses, two piece suits, premium fashion Karachi, Lahore, Islamabad, Pakistani designer wear, luxury fashion online",
-  verification: {
-    google: 'add-your-google-verification-code-here',
-  },
+  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+    : undefined,
   openGraph: {
     title: "ZAYBAASH — Beauty with Style Pakistan | Premium Fashion",
     description: "Discover ZAYBAASH's exclusive collection of beauty with style in Pakistan. Shop elegant dresses, one-piece & two-piece designer wear.",
@@ -57,9 +57,6 @@ export const metadata: Metadata = {
       'max-image-preview': 'large',
       'max-snippet': -1,
     },
-  },
-  alternates: {
-    canonical: '/',
   }
 };
 
