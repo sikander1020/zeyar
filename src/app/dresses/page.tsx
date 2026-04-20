@@ -2,6 +2,14 @@ import DressesCatalog from '@/components/storefront/DressesCatalog';
 import { getStorefrontCategories, getStorefrontProducts } from '@/lib/storefrontData';
 import type { StoreCategory, StoreProduct } from '@/types/storefront';
 import { redirect } from 'next/navigation';
+import { SITE_ORIGIN } from '@/lib/siteUrl';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: `${SITE_ORIGIN}/dresses`,
+  },
+};
 
 export const dynamic = 'force-dynamic';
 

@@ -1,9 +1,14 @@
 import AppShell from '@/components/layout/AppShell';
 
+import { SITE_ORIGIN } from '@/lib/siteUrl';
+
 export const metadata = {
   title: 'Privacy Policy',
   description:
     'Read how ZAYBAASH collects, uses, stores, and protects your personal information when you shop with us.',
+  alternates: {
+    canonical: `${SITE_ORIGIN}/privacy-policy`,
+  },
 };
 
 export default function PrivacyPolicyPage() {

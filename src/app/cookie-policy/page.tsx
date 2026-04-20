@@ -1,9 +1,13 @@
 import AppShell from '@/components/layout/AppShell';
+import { SITE_ORIGIN } from '@/lib/siteUrl';
 
 export const metadata = {
   title: 'Cookie Policy',
   description:
     'Learn how ZAYBAASH uses cookies and similar technologies for performance, analytics, and user experience.',
+  alternates: {
+    canonical: `${SITE_ORIGIN}/cookie-policy`,
+  },
 };
 
 export default function CookiePolicyPage() {

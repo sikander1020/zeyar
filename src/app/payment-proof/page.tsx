@@ -1,5 +1,10 @@
 import { Suspense } from 'react';
 import PaymentProofClient from './payment-proof-client';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: true },
+};
 
 function Loading() {
   return (

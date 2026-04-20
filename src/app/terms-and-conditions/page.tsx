@@ -1,9 +1,13 @@
 import AppShell from '@/components/layout/AppShell';
+import { SITE_ORIGIN } from '@/lib/siteUrl';
 
 export const metadata = {
   title: 'Terms & Conditions',
   description:
     'Review ZAYBAASH terms and conditions for purchases, orders, pricing, shipping, returns, and website usage.',
+  alternates: {
+    canonical: `${SITE_ORIGIN}/terms-and-conditions`,
+  },
 };
 
 export default function TermsAndConditionsPage() {

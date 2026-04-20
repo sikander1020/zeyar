@@ -2,13 +2,17 @@ import { Metadata } from 'next';
 import { SITE_ORIGIN } from '@/lib/siteUrl';
 
 export function generateMetadata({ params }: { params: { id: string } }): Metadata {
+  const productUrl = `${SITE_ORIGIN}/product/${params.id}`;
   return {
     title: 'Product Details',
     description: 'Shop premium ZAYBAASH pieces with live catalog pricing and availability.',
+    alternates: {
+      canonical: productUrl,
+    },
     openGraph: {
       title: 'Product Details | ZAYBAASH Pakistan',
       description: 'Shop premium ZAYBAASH pieces with live catalog pricing and availability.',
-      url: `${SITE_ORIGIN}/product/${params.id}`,
+      url: productUrl,
       images: [
         {
           url: '/apple-icon.png',

@@ -27,9 +27,14 @@ const faqs = [
   },
 ];
 
+import { SITE_ORIGIN } from '@/lib/siteUrl';
+
 export const metadata = {
   title: 'FAQ',
   description: 'Frequently asked questions about orders, delivery, payments, returns, and support at ZAYBAASH.',
+  alternates: {
+    canonical: `${SITE_ORIGIN}/faq`,
+  },
 };
 
 export default function FaqPage() {

@@ -1,6 +1,14 @@
 import AppShell from '@/components/layout/AppShell';
 import SignatureDressSpotlight from '@/components/storefront/SignatureDressSpotlight';
 import { getStorefrontProducts } from '@/lib/storefrontData';
+import { SITE_ORIGIN } from '@/lib/siteUrl';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  alternates: {
+    canonical: `${SITE_ORIGIN}/signature-dress`,
+  },
+};
 
 export const dynamic = 'force-dynamic';
 
