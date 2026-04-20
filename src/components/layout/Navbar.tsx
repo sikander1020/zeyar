@@ -74,6 +74,15 @@ export default function Navbar() {
     };
   }, [searchOpen, debouncedQuery]);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [mobileOpen]);
+
   return (
     <>
       <motion.nav
@@ -86,17 +95,17 @@ export default function Navbar() {
             : 'bg-transparent py-5'
         }`}
       >
-        <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3 sm:gap-4">
           {/* Logo */}
-          <Link href="/" className="group flex flex-col items-center">
+          <Link href="/" className="group flex flex-col items-start sm:items-center min-w-0">
             <span
-              className="text-3xl font-playfair font-bold tracking-[0.2em] gradient-rose-text transition-all duration-300"
+              className="text-xl sm:text-3xl font-playfair font-bold tracking-[0.14em] sm:tracking-[0.2em] gradient-rose-text transition-all duration-300 leading-none"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
               ZAYBAASH
             </span>
             <span
-              className="text-[9px] tracking-[0.35em] uppercase text-brown-muted font-inter font-light"
+              className="hidden sm:block text-[9px] tracking-[0.35em] uppercase text-brown-muted font-inter font-light"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
               Beauty with Style
@@ -131,10 +140,10 @@ export default function Navbar() {
           </ul>
 
           {/* Icons */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1 sm:gap-4">
             <button
               onClick={toggleTheme}
-              className="p-2 text-brown hover:text-rose-gold transition-colors duration-300"
+              className="p-2 sm:p-2.5 text-brown hover:text-rose-gold transition-colors duration-300"
               aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
               title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             >
@@ -142,14 +151,14 @@ export default function Navbar() {
             </button>
             <button
               onClick={() => { setSearchOpen(true); setTimeout(() => document.getElementById('searchInput')?.focus(), 100); }}
-              className="p-2 text-brown hover:text-rose-gold transition-colors duration-300"
+              className="p-2 sm:p-2.5 text-brown hover:text-rose-gold transition-colors duration-300"
               aria-label="Search"
             >
               <Search size={18} strokeWidth={1.5} />
             </button>
             <Link
               href="/wishlist"
-              className="relative p-2 text-brown hover:text-rose-gold transition-colors duration-300"
+              className="relative p-2 sm:p-2.5 text-brown hover:text-rose-gold transition-colors duration-300"
               aria-label="Wishlist"
             >
               <Heart size={18} strokeWidth={1.5} />
@@ -161,7 +170,7 @@ export default function Navbar() {
             </Link>
             <button
               onClick={toggleCart}
-              className="relative p-2 text-brown hover:text-rose-gold transition-colors duration-300"
+              className="relative p-2 sm:p-2.5 text-brown hover:text-rose-gold transition-colors duration-300"
               aria-label="Cart"
             >
               <ShoppingBag size={18} strokeWidth={1.5} />
@@ -176,7 +185,7 @@ export default function Navbar() {
               )}
             </button>
             <button
-              className="lg:hidden p-2 text-brown hover:text-rose-gold transition-colors duration-300"
+              className="lg:hidden p-2.5 rounded-full border border-nude/40 bg-cream/90 text-brown hover:text-rose-gold transition-colors duration-300"
               onClick={() => setMobileOpen(true)}
               aria-label="Menu"
             >
@@ -194,7 +203,7 @@ export default function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-brown/40 backdrop-blur-sm z-[60]"
+              className="fixed inset-0 bg-brown/45 backdrop-blur-sm z-[110]"
               onClick={() => setMobileOpen(false)}
             />
             <motion.div
@@ -202,7 +211,7 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-[min(22rem,90vw)] bg-cream z-[70] flex flex-col p-6 sm:p-8"
+              className="fixed top-0 right-0 bottom-0 w-[88vw] max-w-[22rem] bg-cream z-[120] flex flex-col p-5 sm:p-8 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] overflow-y-auto"
             >
               <div className="flex justify-between items-center mb-12">
                 <span
