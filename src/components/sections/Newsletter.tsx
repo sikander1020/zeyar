@@ -32,7 +32,7 @@ export default function Newsletter() {
           <span className="text-xs tracking-[0.3em] uppercase text-rose-gold font-semibold font-inter block mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Inner Circle
           </span>
-          <h2 className="text-5xl font-playfair text-brown mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-playfair text-brown mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
             Join the{' '}
             <span className="italic gradient-rose-text">ZAYBAASH Circle</span>
           </h2>

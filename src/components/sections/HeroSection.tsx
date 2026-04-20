@@ -50,7 +50,7 @@ export default function HeroSection() {
       />
 
       <div className="relative max-w-7xl mx-auto px-6 min-h-screen flex items-center">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full pt-24 pb-12">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center w-full pt-12 sm:pt-16 lg:pt-24 pb-8 sm:pb-12">
           {/* Left: Text content */}
           <div className="order-2 lg:order-1">
             {/* Tag */}
@@ -75,7 +75,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 28 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.72, delay: 0.28 }}
-              className="text-6xl md:text-7xl xl:text-8xl font-playfair leading-[1.05] text-brown mb-6"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-playfair leading-[1.08] sm:leading-[1.05] text-brown mb-4 sm:mb-6"
               style={{ fontFamily: "'Playfair Display', serif" }}
             >
               Elegance{' '}
@@ -89,7 +89,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.65, delay: 0.45 }}
-              className="text-base text-brown-muted font-inter leading-relaxed mb-10 max-w-md"
+              className="text-sm sm:text-base text-brown-muted font-inter leading-relaxed mb-6 sm:mb-10 max-w-md"
               style={{ fontFamily: "'Inter', sans-serif" }}
             >
               Discover the new ZAYBAASH collection — where every piece tells a story of feminine grace, 
@@ -124,7 +124,7 @@ export default function HeroSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, delay: 0.8 }}
-              className="flex gap-10 mt-14 pt-10 border-t border-nude/30"
+              className="flex gap-4 sm:gap-8 lg:gap-10 mt-8 sm:mt-14 pt-6 sm:pt-10 border-t border-nude/30"
             >
               {[
                 { value: 'Curated', label: 'Exclusive Designs' },
@@ -133,13 +133,13 @@ export default function HeroSection() {
               ].map(({ value, label }) => (
                 <div key={label}>
                   <p
-                    className="text-2xl font-playfair font-semibold text-brown"
+                    className="text-lg sm:text-2xl font-playfair font-semibold text-brown"
                     style={{ fontFamily: "'Playfair Display', serif" }}
                   >
                     {value}
                   </p>
                   <p
-                    className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter mt-0.5"
+                    className="text-[10px] sm:text-xs tracking-[0.12em] uppercase text-brown-muted font-inter mt-0.5"
                     style={{ fontFamily: "'Inter', sans-serif" }}
                   >
                     {label}

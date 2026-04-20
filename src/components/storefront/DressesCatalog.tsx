@@ -335,7 +335,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
           <span className="text-xs tracking-[0.3em] uppercase text-rose-gold font-semibold font-inter block mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
             ZAYBAASH Collection
           </span>
-          <h1 className="text-5xl font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
             Our <span className="italic gradient-rose-text">Dresses</span>
           </h1>
           <p className="mt-4 text-sm text-brown-muted font-inter max-w-md mx-auto" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -390,7 +390,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4 items-stretch">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-3 mb-3 sm:mb-4 items-stretch">
             <input
               value={queryInput}
               onChange={(e) => setQueryInput(e.target.value)}
@@ -449,7 +449,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                 transition={{ duration: 0.25 }}
                 className="overflow-hidden border border-nude/20 p-4 mb-6"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 items-end">
                   <div className="relative">
                     <label className="block text-[10px] tracking-[0.12em] uppercase text-brown-muted mb-2">Color</label>
                     <select
@@ -523,7 +523,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
           )}
 
           <AnimatePresence mode="popLayout">
-            <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
               {filtered.map((product, i) => (
                 <ProductCard key={product.id} product={product} index={i} onQuickView={setQuickViewProduct} />
               ))}

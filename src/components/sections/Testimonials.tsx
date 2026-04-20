@@ -106,7 +106,7 @@ export default function Testimonials() {
           <span className="text-xs tracking-[0.3em] uppercase text-nude/60 font-semibold font-inter block mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Client Love
           </span>
-          <h2 className="text-5xl font-playfair text-nude" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-playfair text-nude" style={{ fontFamily: "'Playfair Display', serif" }}>
             Words that <span className="italic" style={{ color: '#E6B7A9' }}>inspire</span>
           </h2>
           <p className="mt-8 text-base md:text-lg text-cream/70 max-w-2xl mx-auto leading-relaxed font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -137,7 +137,7 @@ export default function Testimonials() {
           <span className="text-xs tracking-[0.3em] uppercase text-nude/60 font-semibold font-inter block mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Client Love
           </span>
-          <h2 className="text-5xl font-playfair text-nude" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-3xl sm:text-4xl md:text-5xl font-playfair text-nude" style={{ fontFamily: "'Playfair Display', serif" }}>
             Words that{' '}
             <span className="italic" style={{ color: '#E6B7A9' }}>inspire</span>
           </h2>
