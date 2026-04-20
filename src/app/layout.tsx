@@ -66,6 +66,9 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: SITE_ORIGIN,
+  },
+  other: {
+    'facebook-domain-verification': 'i1l8y9vlrmov8985cem7vqx9yty908',
   }
 };
 
