@@ -43,9 +43,9 @@ export default function ReturnsPage() {
               hassle-free exchange and return policy tailored for our clients globally and across Pakistan.
             </p>
 
-            <h2 className="text-2xl font-playfair text-brown mb-4">14-Day Exchange & Return Policy</h2>
+            <h2 className="text-2xl font-playfair text-brown mb-4">7-Day Exchange & Return Policy</h2>
             <p className="mb-4">
-              Items purchased from ZAYBAASH are eligible for a return or exchange within <strong>14 days of delivery</strong>, 
+              Items purchased from ZAYBAASH are eligible for a return or exchange within <strong>7 days of delivery</strong>, 
               provided they meet our strict quality criteria:
             </p>
             <ul className="list-disc pl-6 mb-8 space-y-2">
