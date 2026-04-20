@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Heart, ShoppingBag, X } from 'lucide-react';
+import { Heart, X } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
 import { useToast } from '@/components/layout/ToastProvider';
@@ -16,9 +16,15 @@ type ProductQuickViewModalProps = {
 };
 
 export default function ProductQuickViewModal({ product, onClose }: ProductQuickViewModalProps) {
+  if (!product) return null;
+
+  return <ProductQuickViewModalBody key={product.id} product={product} onClose={onClose} />;
+}
+
+function ProductQuickViewModalBody({ product, onClose }: { product: StoreProduct; onClose: () => void }) {
   const [activeImage, setActiveImage] = useState(0);
-  const [selectedSize, setSelectedSize] = useState('');
-  const [selectedColor, setSelectedColor] = useState<{ name: string; hex: string }>({ name: '', hex: '' });
+  const [selectedSize, setSelectedSize] = useState(product.sizes[0] || '');
+  const [selectedColor, setSelectedColor] = useState<{ name: string; hex: string }>(product.colors[0] || { name: '', hex: '' });
   const [adding, setAdding] = useState(false);
   const closeRef = useRef<HTMLButtonElement | null>(null);
 
@@ -28,17 +34,6 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!product) return;
-
-    setActiveImage(0);
-    setSelectedSize(product.sizes[0] || '');
-    setSelectedColor(product.colors[0] || { name: '', hex: '' });
-    setAdding(false);
-  }, [product]);
-
-  useEffect(() => {
-    if (!product) return;
-
     const previousOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
 
@@ -55,9 +50,7 @@ export default function ProductQuickViewModal({ product, onClose }: ProductQuick
       document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', handleKeydown);
     };
-  }, [product, onClose]);
-
-  if (!product) return null;
+  }, [onClose]);
 
   const wishlisted = isWishlisted(product.id);
 

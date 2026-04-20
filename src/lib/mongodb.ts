@@ -8,7 +8,6 @@ if (!MONGODB_URI) {
 
 // Use a cached connection in development to avoid too many connections
 declare global {
-  // eslint-disable-next-line no-var
   var _mongooseCache: { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null; lastError?: Error };
 }
 

@@ -27,17 +27,14 @@ function applyTheme(theme: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('light');
+  const [theme, setThemeState] = useState<Theme>(() => resolveInitialTheme());
 
   useEffect(() => {
-    const nextTheme = resolveInitialTheme();
-    setThemeState(nextTheme);
-    applyTheme(nextTheme);
-  }, []);
+    applyTheme(theme);
+  }, [theme]);
 
   const setTheme = useCallback((nextTheme: Theme) => {
     setThemeState(nextTheme);
-    applyTheme(nextTheme);
   }, []);
 
   const toggleTheme = useCallback(() => {

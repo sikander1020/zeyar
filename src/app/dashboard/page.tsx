@@ -1,5 +1,7 @@
 'use client';
 
+/* eslint-disable @next/next/no-img-element */
+
 import { useEffect, useState, useCallback } from 'react';
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -1373,7 +1375,8 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
 
     setUploadingVideo(true);
     try {
-      const { ['Content-Type']: _contentType, ...uploadHeaders } = authHeaders();
+      const { ['Content-Type']: contentType, ...uploadHeaders } = authHeaders();
+      void contentType;
 
       const formData = new FormData();
       formData.append('file', file);
@@ -1615,7 +1618,7 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
         alert(`✓ ${data.message}`);
         void loadProducts();
       }
-    } catch (err) {
+    } catch {
       alert('Failed to activate products');
     }
   }

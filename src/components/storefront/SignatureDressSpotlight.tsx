@@ -7,11 +7,11 @@ import { useRef } from 'react';
 import type { StoreProduct } from '@/types/storefront';
 
 export default function SignatureDressSpotlight({ products }: { products: StoreProduct[] }) {
-  if (!products || products.length === 0) return null;
-
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const prefersReducedMotion = useReducedMotion();
+
+  if (!products || products.length === 0) return null;
 
   return (
     <section id="signature-dress" ref={ref} className="relative mb-12 overflow-hidden border border-nude/30 bg-[#f7eee8] p-5 md:p-8 scroll-mt-28">

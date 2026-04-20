@@ -226,7 +226,7 @@ const getRawCategories = unstable_cache(
     } else {
       result = Array.from(countMap.entries())
         .sort((a, b) => b[1] - a[1])
-        .map(([key, count], i) => normalizeCategory({
+        .map(([key, count]) => normalizeCategory({
           categoryId: `cat_${String(key).replace(/[^a-z0-9]+/g, '-')}`,
           name: categoryDisplayName(key),
           slug: String(key).toLowerCase().replace(/[^a-z0-9]+/g, '-'),

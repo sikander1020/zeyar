@@ -1,21 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 type CookieChoice = 'accepted' | 'essential';
 
 const STORAGE_KEY = 'zaybaash-cookie-consent-v1';
 
 export default function CookieConsentBanner() {
-  const [visible, setVisible] = useState(false);
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (!saved) {
-      setVisible(true);
-    }
-  }, []);
+  const [visible, setVisible] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return !window.localStorage.getItem(STORAGE_KEY);
+  });
 
   const saveChoice = (choice: CookieChoice) => {
     window.localStorage.setItem(STORAGE_KEY, choice);

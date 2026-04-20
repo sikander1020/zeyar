@@ -55,7 +55,6 @@ export default function Navbar() {
   useEffect(() => {
     if (!searchOpen) return;
     if (debouncedQuery.length < 2) {
-      setProducts([]);
       return;
     }
 
@@ -73,6 +72,8 @@ export default function Navbar() {
       mounted = false;
     };
   }, [searchOpen, debouncedQuery]);
+
+  const visibleProducts = searchOpen && debouncedQuery.length >= 2 ? products : [];
 
   useEffect(() => {
     if (!mobileOpen) return;
@@ -300,7 +301,7 @@ export default function Navbar() {
                 <div className="flex-1 overflow-y-auto">
                   <p className="text-xs uppercase tracking-[0.1em] text-brown-muted mb-6">Results</p>
                   <div className="space-y-6">
-                    {products
+                    {visibleProducts
                       .map((p, i) => (
                         <motion.div
                           key={p.id}
@@ -321,7 +322,7 @@ export default function Navbar() {
                         </motion.div>
                       ))}
                     
-                    {products.length === 0 && (
+                    {visibleProducts.length === 0 && (
                       <p className="text-brown-muted font-inter">No pieces found matching &quot;{searchQuery}&quot;.</p>
                     )}
                   </div>

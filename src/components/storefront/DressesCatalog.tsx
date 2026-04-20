@@ -22,6 +22,15 @@ const sortOptions = [
   { value: 'rating', label: 'Top Rated' },
 ];
 
+const normalizeCategory = (value: string) => value.trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ');
+
+const toDisplayCategory = (value: string) =>
+  normalizeCategory(value)
+    .split(' ')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+
 function ProductCard({ product, index, onQuickView }: { product: StoreProduct; index: number; onQuickView: (product: StoreProduct) => void }) {
   const addItem = useCartStore((s) => s.addItem);
   const { toggle, isWishlisted } = useWishlistStore();
@@ -186,15 +195,6 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
   useEffect(() => {
     setSortBy(initialSort || 'featured');
   }, [initialSort]);
-
-  const normalizeCategory = (value: string) => value.trim().toLowerCase().replace(/[^a-z0-9]+/g, ' ');
-
-  const toDisplayCategory = (value: string) =>
-    normalizeCategory(value)
-      .split(' ')
-      .filter(Boolean)
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(' ');
 
   useEffect(() => {
     if (activeCategory === 'All') return;

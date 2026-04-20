@@ -70,11 +70,6 @@ export default function CheckoutPage() {
     setStep(1);
   };
 
-  const goToReview = () => {
-    if (!validateShipping()) return;
-    setStep(2);
-  };
-
   const handlePlaceOrder = useCallback(async () => {
     try {
       setSubmitError('');
@@ -440,6 +435,7 @@ export default function CheckoutPage() {
                   {items.map(item => (
                     <div key={`${item.product.id}-${item.selectedSize}`} className="flex gap-3 text-sm">
                       <div className="w-14 h-18 relative bg-cream-dark flex-shrink-0" style={{ height: '72px' }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={item.product.images[0]} alt={item.product.name} className="w-full h-full object-cover" />
                       </div>
                       <div className="flex-1">

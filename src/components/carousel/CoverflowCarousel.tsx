@@ -62,7 +62,7 @@ function getCoverflowMetrics(viewportWidth: number) {
 
 export default function CoverflowCarousel({ products, onSlideChange }: CoverflowCarouselProps) {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isAutoplay, setIsAutoplay] = useState(true);
+  const isAutoplay = true;
   const [viewportWidth, setViewportWidth] = useState(1280);
   const [centerTilt, setCenterTilt] = useState({ x: 0, y: 0 });
   const [addingId, setAddingId] = useState<string | null>(null);
@@ -76,17 +76,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
   const { toast } = useToast();
 
   const total = products.length;
-
-  useEffect(() => {
-    if (total === 0) {
-      setActiveIndex(0);
-      return;
-    }
-
-    if (activeIndex >= total || Number.isNaN(activeIndex)) {
-      setActiveIndex(0);
-    }
-  }, [activeIndex, total]);
+  const activeSlideIndex = total > 0 ? ((activeIndex % total) + total) % total : 0;
 
   // Autoplay functionality
   useEffect(() => {
@@ -150,7 +140,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
 
   const getRelativePosition = (index: number): number => {
     if (total === 0) return 0;
-    let position = index - activeIndex;
+    let position = index - activeSlideIndex;
 
     if (position > total / 2) {
       position -= total;
@@ -221,7 +211,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
             if (Math.abs(position) > 2) return null;
 
             const { x, z, angle, opacity, scale } = getCardPosition(position);
-            const isCenter = index === activeIndex;
+            const isCenter = index === activeSlideIndex;
 
             return (
               <motion.div

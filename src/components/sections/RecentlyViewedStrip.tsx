@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import type { StoreProduct } from '@/types/storefront';
@@ -8,16 +8,14 @@ import type { StoreProduct } from '@/types/storefront';
 const STORAGE_KEY = 'zaybaash-recently-viewed-v1';
 
 export default function RecentlyViewedStrip({ products }: { products: StoreProduct[] }) {
-  const [ids, setIds] = useState<string[]>([]);
-
-  useEffect(() => {
+  const [ids] = useState<string[]>(() => {
+    if (typeof window === 'undefined') return [];
     try {
-      const parsed = JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '[]') as string[];
-      setIds(parsed);
+      return JSON.parse(window.localStorage.getItem(STORAGE_KEY) ?? '[]') as string[];
     } catch {
-      setIds([]);
+      return [];
     }
-  }, []);
+  });
 
   const items = useMemo(() => {
     if (ids.length === 0) return [] as StoreProduct[];

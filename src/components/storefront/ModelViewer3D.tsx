@@ -8,15 +8,14 @@ type ModelViewer3DProps = {
 };
 
 export default function ModelViewer3D({ modelUrl, posterUrl }: ModelViewer3DProps) {
-  const [viewerReady, setViewerReady] = useState(false);
+  const [viewerReady, setViewerReady] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return Boolean(window.customElements?.get('model-viewer'));
+  });
   const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (window.customElements?.get('model-viewer')) {
-      setViewerReady(true);
-      return;
-    }
+    if (typeof window === 'undefined' || viewerReady) return;
 
     const existing = document.querySelector('script[data-model-viewer="true"]');
 
@@ -33,7 +32,6 @@ export default function ModelViewer3D({ modelUrl, posterUrl }: ModelViewer3DProp
     if (existing instanceof HTMLScriptElement) {
       existing.addEventListener('load', handleReady);
       existing.addEventListener('error', handleError);
-      handleReady();
 
       return () => {
         existing.removeEventListener('load', handleReady);
@@ -53,7 +51,7 @@ export default function ModelViewer3D({ modelUrl, posterUrl }: ModelViewer3DProp
       script.removeEventListener('load', handleReady);
       script.removeEventListener('error', handleError);
     };
-  }, []);
+  }, [viewerReady]);
 
   if (loadError) {
     return (

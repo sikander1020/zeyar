@@ -279,17 +279,28 @@ function GlowCircle() {
 function Sparkles() {
   const ref = useRef<THREE.Points>(null!);
   const geo = useMemo(() => {
+    const pseudoRandom = (seed: number) => {
+      const x = Math.sin(seed * 12.9898 + 78.233) * 43758.5453;
+      return x - Math.floor(x);
+    };
+
     const count = 55;
     const g = new THREE.BufferGeometry();
     const pos = new Float32Array(count * 3);
     const col = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      const a = Math.random() * Math.PI * 2;
-      const r = 3.0 + Math.random() * 1.6;
+      const r1 = pseudoRandom(i * 5 + 1);
+      const r2 = pseudoRandom(i * 5 + 2);
+      const r3 = pseudoRandom(i * 5 + 3);
+      const r4 = pseudoRandom(i * 5 + 4);
+      const r5 = pseudoRandom(i * 5 + 5);
+
+      const a = r1 * Math.PI * 2;
+      const r = 3.0 + r2 * 1.6;
       pos[i*3]   = Math.cos(a) * r;
-      pos[i*3+1] = -2.5 + Math.random() * 6.5;
-      pos[i*3+2] = -0.5 + Math.random() * 0.8;
-      const c = new THREE.Color(Math.random() > 0.5 ? PINK : BEIGE);
+      pos[i*3+1] = -2.5 + r3 * 6.5;
+      pos[i*3+2] = -0.5 + r4 * 0.8;
+      const c = new THREE.Color(r5 > 0.5 ? PINK : BEIGE);
       col[i*3] = c.r; col[i*3+1] = c.g; col[i*3+2] = c.b;
     }
     g.setAttribute('position', new THREE.BufferAttribute(pos,3));

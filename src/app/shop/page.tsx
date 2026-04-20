@@ -10,7 +10,6 @@ import ShopHashScroll from '@/components/sections/ShopHashScroll';
 import RevealOnScroll from '@/components/animation/RevealOnScroll';
 import SignatureDressSpotlight from '@/components/storefront/SignatureDressSpotlight';
 import { getStorefrontCategories, getStorefrontProducts } from '@/lib/storefrontData';
-import type { StoreCategory, StoreProduct } from '@/types/storefront';
 import { SITE_ORIGIN } from '@/lib/siteUrl';
 import type { Metadata } from 'next';
 
