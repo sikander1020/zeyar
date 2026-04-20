@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -34,12 +34,35 @@ function IconFacebook({ size = 16 }: { size?: number }) {
 export default function ContactPage() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [sent, setSent] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   const update = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSent(true);
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) {
+        throw new Error('Failed to send message');
+      }
+
+      setSent(true);
+    } catch (err) {
+      setError('Something went wrong. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -177,12 +200,18 @@ export default function ContactPage() {
                       placeholder="Tell us about your inquiry..."
                     />
                   </div>
+                  {error && (
+                    <div className="text-red-500 text-sm font-inter">
+                      {error}
+                    </div>
+                  )}
                   <motion.button
                     type="submit"
-                    whileTap={{ scale: 0.98 }}
-                    className="btn-luxury btn-primary w-full"
+                    disabled={loading}
+                    whileTap={!loading ? { scale: 0.98 } : undefined}
+                    className="btn-luxury btn-primary w-full disabled:opacity-70 disabled:cursor-not-allowed"
                   >
-                    Send Message
+                    {loading ? 'Sending...' : 'Send Message'}
                   </motion.button>
                 </form>
               )}
