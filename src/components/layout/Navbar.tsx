@@ -203,15 +203,16 @@ export default function Navbar() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-brown/45 backdrop-blur-sm z-[110]"
+              transition={{ duration: 0.16, ease: 'easeOut' }}
+              className="fixed inset-0 bg-brown/42 z-[110]"
               onClick={() => setMobileOpen(false)}
             />
             <motion.div
               initial={{ x: '100%' }}
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-[88vw] max-w-[22rem] bg-cream z-[120] flex flex-col p-5 sm:p-8 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] overflow-y-auto"
+              transition={{ duration: 0.24, ease: [0.22, 1, 0.36, 1] }}
+              className="fixed top-0 right-0 bottom-0 w-[88vw] max-w-[22rem] bg-cream z-[120] flex flex-col p-5 sm:p-8 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] overflow-y-auto transform-gpu will-change-transform"
             >
               <div className="flex justify-between items-center mb-12">
                 <span
