@@ -57,6 +57,9 @@
 
 html {
   scroll-behavior: smooth;
+  width: 100%;
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
@@ -65,6 +68,16 @@ body {
   font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  width: 100%;
+  overflow-x: clip;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+main {
+  width: 100%;
+  overflow-x: clip;
 }
 
 body,
@@ -114,6 +127,10 @@ textarea:focus-visible {
 
 .skip-link:focus {
   transform: translateY(0);
+}
+
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
 }
 
 /* Glassmorphism utility */

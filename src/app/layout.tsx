@@ -5,6 +5,12 @@ import { SITE_ORIGIN } from "@/lib/siteUrl";
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
 import { ToastProvider } from '@/components/layout/ToastProvider';
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover' as const,
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_ORIGIN),
   icons: {
@@ -59,7 +65,7 @@ export const metadata: Metadata = {
     },
   },
   alternates: {
-    canonical: '/',
+    canonical: SITE_ORIGIN,
   }
 };
 

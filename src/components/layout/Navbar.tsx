@@ -80,7 +80,7 @@ export default function Navbar() {
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
+        className={`safe-area-top fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
           scrolled
             ? 'glass shadow-lg shadow-nude/10 py-3'
             : 'bg-transparent py-5'
@@ -142,7 +142,7 @@ export default function Navbar() {
             </button>
             <button
               onClick={() => { setSearchOpen(true); setTimeout(() => document.getElementById('searchInput')?.focus(), 100); }}
-              className="hidden md:flex p-2 text-brown hover:text-rose-gold transition-colors duration-300"
+              className="p-2 text-brown hover:text-rose-gold transition-colors duration-300"
               aria-label="Search"
             >
               <Search size={18} strokeWidth={1.5} />
@@ -202,7 +202,7 @@ export default function Navbar() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-              className="fixed top-0 right-0 bottom-0 w-80 bg-cream z-[70] flex flex-col p-8"
+              className="fixed top-0 right-0 bottom-0 w-[min(22rem,90vw)] bg-cream z-[70] flex flex-col p-6 sm:p-8"
             >
               <div className="flex justify-between items-center mb-12">
                 <span
@@ -282,7 +282,7 @@ export default function Navbar() {
                   placeholder="What are you looking for?"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full text-4xl md:text-5xl lg:text-6xl font-playfair text-brown bg-transparent border-b-2 border-nude/40 pb-4 focus:outline-none focus:border-rose-gold transition-colors placeholder:text-nude"
+                  className="w-full text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-playfair text-brown bg-transparent border-b-2 border-nude/40 pb-4 focus:outline-none focus:border-rose-gold transition-colors placeholder:text-nude"
                 />
               </div>
 

@@ -46,21 +46,21 @@ export default function ContactPage() {
     <AppShell>
       <div className="pt-24 min-h-screen bg-cream">
         {/* Header */}
-        <div className="bg-beige py-16 text-center mb-0">
+        <div className="bg-beige py-12 sm:py-16 text-center mb-0 px-4">
           <span className="text-xs tracking-[0.3em] uppercase text-rose-gold font-inter block mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
             Get in Touch
           </span>
-          <h1 className="text-5xl font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h1 className="text-4xl sm:text-5xl font-playfair text-brown leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
             Contact <span className="italic gradient-rose-text">Us</span>
           </h1>
           <div className="divider-rose" />
-          <p className="text-brown-muted font-inter mt-4 max-w-sm mx-auto" style={{ fontFamily: "'Inter', sans-serif" }}>
+          <p className="text-brown-muted font-inter mt-4 max-w-sm mx-auto px-2" style={{ fontFamily: "'Inter', sans-serif" }}>
             We&apos;d love to hear from you. Our team responds within 24 hours.
           </p>
         </div>
 
-        <div className="max-w-7xl mx-auto px-6 py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-5 gap-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 sm:gap-16">
             {/* Info */}
             <div className="lg:col-span-2 space-y-10">
               <div>
@@ -79,7 +79,7 @@ export default function ContactPage() {
                       </div>
                       <div>
                         <p className="text-xs tracking-[0.15em] uppercase text-brown-muted font-inter mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>{label}</p>
-                        <p className="text-sm text-brown font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>{value}</p>
+                        <p className="text-sm text-brown font-inter break-words" style={{ fontFamily: "'Inter', sans-serif" }}>{value}</p>
                       </div>
                     </div>
                   ))}
@@ -152,7 +152,7 @@ export default function ContactPage() {
                   <h2 className="text-2xl font-playfair text-brown mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>
                     Send a Message
                   </h2>
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                       <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Name</label>
                       <input value={form.name} onChange={e => update('name', e.target.value)} required className="input-luxury" placeholder="Your name" />
