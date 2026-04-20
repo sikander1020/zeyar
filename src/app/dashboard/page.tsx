@@ -3,6 +3,8 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { useEffect, useState, useCallback } from 'react';
+import CampaignsTab from '@/components/admin/CampaignsTab';
+
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -219,6 +221,7 @@ const TABS = [
   { id: 'coupons',    label: 'Coupons',         icon: '🏷' },
   { id: 'reviews',    label: 'Reviews',         icon: '★' },
   { id: 'finance',    label: 'Finance',         icon: '₨' },
+  { id: 'campaigns',  label: 'Campaign Videos', icon: '▶' },
   { id: 'locations',  label: 'Locations',       icon: '⊙' },
   { id: 'bankProofs', label: 'Bank Proofs',     icon: '✓' },
 ];
@@ -2895,6 +2898,7 @@ export default function DashboardPage() {
             {tab === 'inventory'  && <InventoryTab  data={data} />}
             {tab === 'customers'  && <CustomersTab  data={data} />}
             {tab === 'coupons'    && <CouponsTab />}
+            {tab === 'campaigns'  && <CampaignsTab />}
             {tab === 'reviews'    && <ReviewsTab />}
             {tab === 'finance'    && <FinanceTab    data={data} />}
             {tab === 'locations'  && <LocationsTab  data={data} />}

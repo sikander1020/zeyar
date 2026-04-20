@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { ArrowRight, Play } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Play, X } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 
@@ -34,9 +34,21 @@ export default function HeroSection() {
     visible: { opacity: 1, y: 0 },
   };
 
+  const [films, setFilms] = useState<any[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [activeFilmIndex, setActiveFilmIndex] = useState(0);
+
   useEffect(() => {
     router.prefetch('/shop');
     router.prefetch('/dresses');
+
+    // Fetch uploaded films
+    fetch('/api/campaign-films')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) setFilms(data);
+      })
+      .catch(console.error);
   }, [router]);
 
   return (
@@ -113,10 +125,15 @@ export default function HeroSection() {
                 Explore Collection
                 <ArrowRight size={15} strokeWidth={2} />
               </Link>
-              <button className="btn-luxury btn-outline inline-flex items-center gap-3">
-                <Play size={14} strokeWidth={2} className="fill-current" />
-                Watch Film
-              </button>
+              {films.length > 0 && (
+                <button 
+                  onClick={() => setIsModalOpen(true)}
+                  className="btn-luxury btn-outline inline-flex items-center gap-3"
+                >
+                  <Play size={14} strokeWidth={2} className="fill-current" />
+                  Watch Film
+                </button>
+              )}
             </motion.div>
 
             {/* Stats */}
@@ -216,6 +233,68 @@ export default function HeroSection() {
           Scroll
         </span>
       </motion.div>
+
+      {/* Video Modal Overlay */}
+      <AnimatePresence>
+        {isModalOpen && films.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 backdrop-blur-sm p-4 sm:p-8" 
+            onClick={() => setIsModalOpen(false)}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-5xl bg-brown rounded-2xl overflow-hidden shadow-2xl flex flex-col" 
+              onClick={e => e.stopPropagation()}
+            >
+              <button 
+                className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/70 backdrop-blur-md transition-all"
+                onClick={() => setIsModalOpen(false)}
+              >
+                <X size={20} />
+              </button>
+
+              {/* Responsive Video Player */}
+              <div className="relative w-full aspect-video bg-black flex items-center justify-center">
+                <video 
+                  key={films[activeFilmIndex]?.videoUrl}
+                  src={films[activeFilmIndex]?.videoUrl} 
+                  controls 
+                  autoPlay 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+
+              {/* Title & Thumbnail Strip (if multiple) */}
+              <div className="bg-brown p-4 border-t border-nude/20">
+                <h3 className="text-white text-lg font-playfair mb-3">{films[activeFilmIndex]?.title}</h3>
+                
+                {films.length > 1 && (
+                  <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-nude/30">
+                    {films.map((film, i) => (
+                      <button 
+                        key={film._id}
+                        onClick={() => setActiveFilmIndex(i)}
+                        className={`flex-shrink-0 px-4 py-2 rounded-lg text-sm font-inter transition-all ${
+                          activeFilmIndex === i 
+                            ? 'bg-rose-gold text-white shadow-md' 
+                            : 'bg-white/10 text-white/70 hover:bg-white/20'
+                        }`}
+                      >
+                        {film.title}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 }
