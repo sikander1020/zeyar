@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
 
   const hostHeader = request.headers.get('host') ?? '';
   const host = hostHeader.split(':')[0].toLowerCase();
-  const isLegacyDomain = host === 'zeyar.me' || host === 'www.zeyar.me' || host === 'zaybaash.com';
+  const isLegacyDomain = host === 'zeyar.me' || host === 'www.zeyar.me';
   const isVercelPreview = host.endsWith('.vercel.app');
   const needsHttpsOnCanonical = host === 'www.zaybaash.com' && request.nextUrl.protocol !== 'https:';
 
