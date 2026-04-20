@@ -8,30 +8,20 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const host = request.headers.get('host') ?? '';
+  const hostHeader = request.headers.get('host') ?? '';
+  const host = hostHeader.split(':')[0].toLowerCase();
+  const isLegacyDomain = host === 'zeyar.me' || host === 'www.zeyar.me' || host === 'zaybaash.com';
+  const isVercelPreview = host.endsWith('.vercel.app');
+  const needsHttpsOnCanonical = host === 'www.zaybaash.com' && request.nextUrl.protocol !== 'https:';
 
-  if (host === 'zeyar.me' || host === 'www.zeyar.me') {
-    const url = request.nextUrl.clone();
-    url.hostname = 'www.zaybaash.com';
-    url.protocol = 'https:';
-    return NextResponse.redirect(url, 308);
-  }
-
-  if (host === 'zaybaash.com') {
-    const url = request.nextUrl.clone();
-    url.hostname = 'www.zaybaash.com';
-    url.protocol = 'https:';
-    return NextResponse.redirect(url, 308);
-  }
-
-  if (!host.endsWith('.vercel.app')) {
+  if (!isLegacyDomain && !isVercelPreview && !needsHttpsOnCanonical) {
     return NextResponse.next();
   }
 
   try {
     const base = new URL(SITE_ORIGIN);
     const target = new URL(request.nextUrl.pathname + request.nextUrl.search, base);
-    return NextResponse.redirect(target, 308);
+    return NextResponse.redirect(target, 301);
   } catch {
     return NextResponse.next();
   }

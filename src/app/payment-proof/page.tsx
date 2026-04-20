@@ -1,9 +1,13 @@
 import { Suspense } from 'react';
 import PaymentProofClient from './payment-proof-client';
 import type { Metadata } from 'next';
+import { SITE_ORIGIN } from '@/lib/siteUrl';
 
 export const metadata: Metadata = {
   robots: { index: false, follow: true },
+  alternates: {
+    canonical: `${SITE_ORIGIN}/payment-proof`,
+  },
 };
 
 function Loading() {

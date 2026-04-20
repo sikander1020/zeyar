@@ -1,0 +1,37 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "zeyar.me"
+        }
+      ],
+      "destination": "https://www.zaybaash.com/:path*",
+      "statusCode": 301
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.zeyar.me"
+        }
+      ],
+      "destination": "https://www.zaybaash.com/:path*",
+      "statusCode": 301
+    },
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "zaybaash.com"
+        }
+      ],
+      "destination": "https://www.zaybaash.com/:path*",
+      "statusCode": 301
+    }
+  ]
+}
