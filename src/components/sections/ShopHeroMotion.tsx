@@ -48,7 +48,7 @@ export default function ShopHeroMotion() {
           initial={{ opacity: 0, y: 22 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, ease: 'easeOut', delay: 0.06 }}
-          className="text-3xl sm:text-4xl md:text-5xl font-playfair text-brown"
+          className="text-5xl font-playfair text-brown"
           style={{ fontFamily: "'Playfair Display', serif" }}
         >
           Shop <span className="italic gradient-rose-text">All</span>

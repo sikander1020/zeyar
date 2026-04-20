@@ -103,12 +103,12 @@ export default function CategoryCards({ initialCategories }: { initialCategories
           initial={{ opacity: 0, y: 30 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.7 }}
-          className="text-center mb-8 sm:mb-12 lg:mb-16"
+          className="text-center mb-16"
         >
           <span className="text-xs tracking-[0.3em] uppercase text-rose-gold font-semibold font-inter block mb-4" style={{ fontFamily: "'Inter', sans-serif" }}>
             Explore
           </span>
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h2 className="text-5xl font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
             Shop by{' '}
             <span className="italic gradient-rose-text">Category</span>
           </h2>
@@ -131,7 +131,7 @@ export default function CategoryCards({ initialCategories }: { initialCategories
         )}
 
         {!loading && categories.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {categories.map((cat, i) => (
               <CategoryCardItem key={cat.id} cat={cat} i={i} inView={inView} />
             ))}

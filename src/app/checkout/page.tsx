@@ -218,7 +218,7 @@ export default function CheckoutPage() {
             <span className="text-xs tracking-[0.3em] uppercase text-rose-gold font-inter block mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
               Secure Checkout
             </span>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h1 className="text-5xl font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
               Complete <span className="italic gradient-rose-text">Your Order</span>
             </h1>
           </div>

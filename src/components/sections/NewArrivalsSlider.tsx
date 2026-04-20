@@ -74,7 +74,7 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
             <span className="text-xs tracking-[0.3em] uppercase text-rose-gold font-semibold font-inter block mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
               Just Arrived
             </span>
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-5xl font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
               New <span className="italic gradient-rose-text">Arrivals</span>
             </h2>
           </motion.div>

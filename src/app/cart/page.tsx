@@ -19,7 +19,7 @@ export default function CartPage() {
             <span className="text-xs tracking-[0.3em] uppercase text-rose-gold font-inter block mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
               Your Selection
             </span>
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h1 className="text-5xl font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
               Shopping <span className="italic gradient-rose-text">Bag</span>
             </h1>
           </div>

@@ -182,15 +182,13 @@ textarea:focus-visible {
 }
 ::-webkit-scrollbar-thumb:hover { background: var(--nude-dark); }
 
-/* Luxury button base - mobile optimized */
+/* Luxury button base */
 .btn-luxury {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  min-height: 44px;
-  min-width: 44px;
-  padding: 0.75rem 1.5rem;
+  padding: 0.875rem 2.5rem;
   font-family: 'Inter', sans-serif;
   font-size: 0.8125rem;
   font-weight: 500;
@@ -203,12 +201,6 @@ textarea:focus-visible {
   overflow: hidden;
   transform: translateY(0) scale(1);
   will-change: transform, box-shadow, background-color, color;
-}
-
-@media (min-width: 640px) {
-  .btn-luxury {
-    padding: 0.875rem 2.5rem;
-  }
 }
 
 .btn-primary {
@@ -269,27 +261,9 @@ textarea:focus-visible {
   animation: soft-pulse 1.2s ease-in-out infinite;
 }
 
-/* Section spacing - responsive */
+/* Section spacing */
 .section-padding {
-  padding: 2.5rem 0;
-}
-
-@media (min-width: 640px) {
-  .section-padding {
-    padding: 3.5rem 0;
-  }
-}
-
-@media (min-width: 768px) {
-  .section-padding {
-    padding: 5rem 0;
-  }
-}
-
-@media (min-width: 1024px) {
-  .section-padding {
-    padding: 6rem 0;
-  }
+  padding: 6rem 0;
 }
 
 /* Divider */
