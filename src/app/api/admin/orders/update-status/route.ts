@@ -21,14 +21,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
     }
 
-    const order = await Order.findOneAndUpdate(
+    const order: any = await Order.findOneAndUpdate(
       { orderId },
       { status },
       { new: true }
-    );
+    ).lean();
 
     if (!order) {
       return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+    }
+
+    if (status === 'shipped' && order.customer?.email) {
+      import('@/lib/sendEmail').then(({ sendEmail }) => {
+        import('@/lib/emailTemplates').then(({ getOrderShippedEmail }) => {
+          const html = getOrderShippedEmail(orderId, order.customer.firstName);
+          sendEmail(order.customer.email.toLowerCase(), `Order Shipped: Zaybaash #${orderId}`, html);
+        });
+      }).catch(console.error);
     }
 
     return NextResponse.json({ order });

@@ -600,25 +600,35 @@ function OrdersTab({ data, fetchData }: { data: DashData; fetchData?: () => void
                   {o.date}{o.time ? ` ${o.time}` : ''}
                 </td>
                 <td style={{ padding: '10px 14px' }}>
-                  {o.paymentMethod === 'COD' && o.paymentStatus !== 'paid' && o.status === 'pending' ? (
-                    <button
-                      onClick={() => markCodReceived(o.orderId)}
-                      style={{ padding: '6px 10px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}
-                      title="Mark payment received and confirm order"
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {o.paymentMethod === 'COD' && o.paymentStatus !== 'paid' && o.status === 'pending' ? (
+                      <button
+                        onClick={() => markCodReceived(o.orderId)}
+                        style={{ padding: '6px 10px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}
+                        title="Mark payment received and confirm order"
+                      >
+                        Mark received
+                      </button>
+                    ) : (
+                      <select
+                        value={o.status}
+                        onChange={(e) => updateOrderStatus(o.orderId, e.target.value)}
+                        style={{ padding: '6px 10px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: '#fff', outline: 'none' }}
+                      >
+                        {['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'].map((s) => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    )}
+                    <a 
+                      href={`/admin/invoice/${o.orderId}`} 
+                      target="_blank" 
+                      rel="noreferrer"
+                      style={{ fontSize: '11px', color: ROSE, textDecoration: 'none', fontWeight: 600, display: 'inline-block' }}
                     >
-                      Mark received
-                    </button>
-                  ) : (
-                    <select
-                      value={o.status}
-                      onChange={(e) => updateOrderStatus(o.orderId, e.target.value)}
-                      style={{ padding: '6px 10px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: '#fff', outline: 'none' }}
-                    >
-                      {['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'].map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                  )}
+                      🖨️ Print Invoice
+                    </a>
+                  </div>
                 </td>
               </tr>
             ))}

@@ -4,9 +4,10 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ShoppingBag, Heart, Search, Menu, X, ArrowRight, Moon, Sun } from 'lucide-react';
+import { ShoppingBag, Heart, Search, Menu, X, ArrowRight, Moon, Sun, User } from 'lucide-react';
 import { useCartStore } from '@/store/useCartStore';
 import { useWishlistStore } from '@/store/useWishlistStore';
+import { useAuthStore } from '@/store/useAuthStore';
 import type { StoreProduct } from '@/types/storefront';
 import { useTheme } from '@/components/layout/ThemeProvider';
 
@@ -27,10 +28,17 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedQuery, setDebouncedQuery] = useState('');
   const [products, setProducts] = useState<StoreProduct[]>([]);
-  const { theme, toggleTheme } = useTheme();
+  const toggleTheme = useTheme().toggleTheme;
+  const theme = useTheme().theme;
   const itemCount = useCartStore((s) => s.itemCount());
   const wishlistCount = useWishlistStore((s) => s.items.length);
   const toggleCart = useCartStore((s) => s.toggleCart);
+  
+  const { user, fetchSession } = useAuthStore();
+
+  useEffect(() => {
+    fetchSession();
+  }, [fetchSession]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 40);
@@ -157,6 +165,13 @@ export default function Navbar() {
             >
               <Search size={18} strokeWidth={1.5} />
             </button>
+            <Link
+              href={user ? '/account' : '/login'}
+              className="p-2 sm:p-2.5 text-brown hover:text-rose-gold transition-colors duration-300"
+              aria-label="Account"
+            >
+              <User size={18} strokeWidth={1.5} />
+            </Link>
             <Link
               href="/wishlist"
               className="relative p-2 sm:p-2.5 text-brown hover:text-rose-gold transition-colors duration-300"

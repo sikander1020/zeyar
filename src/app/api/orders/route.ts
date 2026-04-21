@@ -207,10 +207,21 @@ export async function POST(req: NextRequest) {
       await session.endSession();
     }
 
+    // Try sending email async (fire and forget for all payment methods)
+    const orderDoc = await Order.findOne({ orderId }).lean() as any;
+    if (orderDoc && customer?.email) {
+      import('@/lib/sendEmail').then(({ sendEmail }) => {
+        import('@/lib/emailTemplates').then(({ getOrderConfirmationEmail }) => {
+          const html = getOrderConfirmationEmail(orderId, customer.firstName, orderDoc.items, orderDoc.total);
+          sendEmail(customer.email.toLowerCase(), `Zaybaash Order Confirmation #${orderId}`, html);
+        });
+      }).catch(console.error);
+    }
+
     // If bank transfer, send token back for the proof upload page.
     if (paymentMethod === 'bank') {
-      const order = await Order.findOne({ orderId }).select('bankTransfer.uploadToken').lean();
-      return NextResponse.json({ success: true, orderId, uploadToken: order?.bankTransfer?.uploadToken ?? '' }, { status: 201 });
+      const uploadToken = orderDoc?.bankTransfer?.uploadToken ?? '';
+      return NextResponse.json({ success: true, orderId, uploadToken }, { status: 201 });
     }
 
     return NextResponse.json({ success: true, orderId }, { status: 201 });
