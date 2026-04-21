@@ -2183,35 +2183,62 @@ function SalesMgrTab() {
   async function applyDiscount(productId: string, pct: number, currentPrice: number, originalPrice?: number) {
     const base = originalPrice && originalPrice > 0 ? originalPrice : currentPrice;
     const newPrice = pct === 0 ? base : Math.round(base * (1 - pct / 100));
-    setSaving(true);
+    const newOriginalPrice = pct === 0 ? 0 : base;
+    // Optimistic update — instant UI feedback
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.productId === productId
+          ? { ...p, price: newPrice, originalPrice: newOriginalPrice, isSale: pct > 0 }
+          : p
+      )
+    );
+    // Sync to DB in background
     try {
       await fetch(`/api/admin/products/${productId}`, {
         method: 'PUT',
         headers: authHeaders(),
-        body: JSON.stringify({ price: newPrice, originalPrice: pct === 0 ? 0 : base, isSale: pct > 0 }),
+        body: JSON.stringify({ price: newPrice, originalPrice: newOriginalPrice, isSale: pct > 0 }),
       });
-      await loadProducts();
     } catch (err) {
       console.error('Failed to apply discount:', err);
-    } finally {
-      setSaving(false);
+      void loadProducts(); // revert
     }
   }
 
   async function applyBulkDiscount(pct: number) {
     if (!confirm(`Apply ${pct === 0 ? 'NO' : pct + '%'} discount to ALL ${filtered.length} visible products?`)) return;
     setSaving(true);
+    // Build price map
+    const updates: Record<string, { price: number; originalPrice: number }> = {};
     for (const p of filtered) {
       const base = p.originalPrice && p.originalPrice > 0 ? p.originalPrice : p.price;
-      const newPrice = pct === 0 ? base : Math.round(base * (1 - pct / 100));
-      await fetch(`/api/admin/products/${p.productId}`, {
-        method: 'PUT',
-        headers: authHeaders(),
-        body: JSON.stringify({ price: newPrice, originalPrice: pct === 0 ? 0 : base, isSale: pct > 0 }),
-      });
+      updates[p.productId] = { price: pct === 0 ? base : Math.round(base * (1 - pct / 100)), originalPrice: pct === 0 ? 0 : base };
     }
-    setSaving(false);
-    await loadProducts();
+    // Optimistic: update all visible products in UI instantly
+    setProducts((prev) =>
+      prev.map((p) =>
+        updates[p.productId]
+          ? { ...p, price: updates[p.productId].price, originalPrice: updates[p.productId].originalPrice, isSale: pct > 0 }
+          : p
+      )
+    );
+    // Fire ALL API calls in parallel
+    try {
+      await Promise.all(
+        Object.entries(updates).map(([productId, vals]) =>
+          fetch(`/api/admin/products/${productId}`, {
+            method: 'PUT',
+            headers: authHeaders(),
+            body: JSON.stringify({ price: vals.price, originalPrice: vals.originalPrice, isSale: pct > 0 }),
+          })
+        )
+      );
+    } catch (err) {
+      console.error('Bulk discount error:', err);
+      void loadProducts();
+    } finally {
+      setSaving(false);
+    }
   }
 
   const QUICK_DISCOUNTS = [10, 20, 30, 40, 50, 70];
