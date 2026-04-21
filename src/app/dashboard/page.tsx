@@ -177,22 +177,26 @@ type TFmt = (value: any) => [string, string] | string;
 function KpiCard({ label, value, sub, accent = false }: { label: string; value: string; sub?: string; accent?: boolean }) {
   return (
     <div style={{
-      background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4,
-      padding: '20px 24px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+      background: accent ? `linear-gradient(135deg, ${BROWN} 0%, #1a1412 100%)` : '#fff',
+      border: accent ? 'none' : '1px solid rgba(235, 217, 204, 0.4)',
+      borderRadius: 24,
+      padding: '24px 28px', 
+      boxShadow: accent ? '0 12px 30px rgba(58,46,42,0.15)' : '0 8px 24px rgba(183,110,121,0.06)',
       position: 'relative', overflow: 'hidden'
     }}>
-      {accent && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: ROSE }} />}
-      <p style={{ margin: 0, fontSize: 12, color: '#6B7280', fontWeight: 600 }}>{label}</p>
-      <p style={{ margin: '8px 0 0', fontSize: 32, fontWeight: 700, color: '#111827' }}>{value}</p>
-      {sub && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#9CA3AF' }}>{sub}</p>}
+      {accent && <div style={{ position: 'absolute', top: '-30px', right: '-20px', width: '120px', height: '120px', background: 'radial-gradient(circle, rgba(183,110,121,0.25) 0%, rgba(0,0,0,0) 70%)', borderRadius: '50%' }} />}
+      <p style={{ margin: 0, fontSize: 13, color: accent ? '#EBD9CC' : MUTED, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</p>
+      <p style={{ margin: '12px 0 0', fontSize: 36, fontWeight: 800, color: accent ? '#fff' : BROWN }}>{value}</p>
+      {sub && <p style={{ margin: '8px 0 0', fontSize: 13, color: accent ? '#B76E79' : ROSE, fontWeight: 600 }}>{sub}</p>}
     </div>
   );
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ margin: '0 0 20px', borderBottom: '1px solid #F3F4F6', paddingBottom: 12 }}>
-      <h2 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+    <div style={{ margin: '0 0 28px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+      <div style={{ width: '4px', height: '22px', background: `linear-gradient(to bottom, ${ROSE}, #E6B7A9)`, borderRadius: '4px' }} />
+      <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: BROWN, fontFamily: "'Playfair Display', serif" }}>
         {children}
       </h2>
     </div>
@@ -322,51 +326,26 @@ function OverviewTab({ data }: { data: DashData }) {
   
   if (!s) return <p style={{ color: MUTED }}>No data yet. Place your first order to see stats.</p>;
   
-  // Show warning if there was a database error but we still loaded the dashboard
   if (hasError) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-        <div style={{ padding: 20, background: '#FFF5F5', border: '1px solid #FED7D7', borderRadius: 12 }}>
-          <p style={{ margin: '0 0 8px', color: '#C0504D', fontSize: 14, fontWeight: 600 }}>⚠️ Database Connection Issue</p>
-          <p style={{ margin: 0, color: '#C0504D', fontSize: 13 }}>
-            Could not connect to MongoDB. Dashboard is showing empty data.
-          </p>
-          <p style={{ margin: '8px 0 0', color: '#C0504D', fontSize: 12 }}>
-            Error: {hasError}
-          </p>
-          <p style={{ margin: '12px 0 0', fontSize: 13, color: BROWN }}>
-            <strong>To fix this:</strong>
-          </p>
-          <ul style={{ margin: '8px 0 0', fontSize: 13, color: BROWN, lineHeight: 1.8 }}>
-            <li>Check your internet connection</li>
-            <li>Verify MongoDB Atlas IP whitelist includes your IP</li>
-            <li>Check MongoDB credentials in .env.local</li>
-            <li>Restart the dev server after fixing</li>
-          </ul>
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: 16 }}>
-          <KpiCard label="Total Revenue" value={fmt(s.totalRevenue)} accent />
-          <KpiCard label="Total Orders" value={fmtN(s.totalOrders)} />
-          <KpiCard label="Gross Profit" value={fmt(s.grossProfit)} accent />
-          <KpiCard label="Profit Margin" value={`${s.profitMargin}%`} />
-          <KpiCard label="Avg Order Value" value={fmt(s.avgOrderValue)} />
-          <KpiCard label="Total Discounts" value={fmt(s.totalDiscount)} />
-        </div>
+      <div style={{ padding: 24, background: '#FFF5F5', border: '1px solid #FED7D7', borderRadius: 16 }}>
+        <p style={{ margin: '0 0 8px', color: '#C0504D', fontSize: 16, fontWeight: 700 }}>⚠️ Database Connection Issue</p>
+        <p style={{ margin: 0, color: '#C0504D', fontSize: 14 }}>Could not connect to MongoDB. Error: {hasError}</p>
       </div>
     );
   }
 
   const statusCards = [
-    { label: 'Pending',   value: s.pendingOrders },
-    { label: 'Confirmed', value: s.confirmedOrders },
-    { label: 'Shipped',   value: s.shippedOrders },
-    { label: 'Delivered', value: s.deliveredOrders },
-    { label: 'Cancelled', value: s.cancelledOrders },
+    { label: 'Pending',   value: s.pendingOrders, color: '#F0C9BF' },
+    { label: 'Confirmed', value: s.confirmedOrders, color: '#D4957F' },
+    { label: 'Shipped',   value: s.shippedOrders, color: '#B76E79' },
+    { label: 'Delivered', value: s.deliveredOrders, color: '#6B8E6B' },
+    { label: 'Cancelled', value: s.cancelledOrders, color: '#C0504D' },
   ];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(200px,1fr))', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 20 }}>
         <KpiCard label="Total Revenue"   value={fmt(s.totalRevenue)}   accent />
         <KpiCard label="Total Orders"    value={fmtN(s.totalOrders)} />
         <KpiCard label="Gross Profit"    value={fmt(s.grossProfit)}    accent />
@@ -377,52 +356,52 @@ function OverviewTab({ data }: { data: DashData }) {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 16 }}>
         {statusCards.map((c) => (
-          <div key={c.label} style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4, padding: '16px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
-            <p style={{ margin: 0, fontSize: 11, color: '#6B7280', fontWeight: 600, textTransform: 'uppercase' }}>{c.label}</p>
-            <p style={{ margin: '4px 0 0', fontSize: 24, fontWeight: 700, color: '#111827' }}>{c.value}</p>
+          <div key={c.label} style={{ background: '#fff', border: `1px solid rgba(235, 217, 204, 0.4)`, borderBottom: `4px solid ${c.color}`, borderRadius: 16, padding: '20px', boxShadow: '0 4px 15px rgba(58,46,42,0.04)', textAlign: 'center' }}>
+            <p style={{ margin: 0, fontSize: 32, fontWeight: 800, color: BROWN }}>{c.value}</p>
+            <p style={{ margin: '8px 0 0', fontSize: 12, color: MUTED, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{c.label}</p>
           </div>
         ))}
       </div>
 
-      <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4, padding: 24, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+      <div style={{ background: '#fff', border: '1px solid rgba(235, 217, 204, 0.4)', borderRadius: 24, padding: 32, boxShadow: '0 8px 30px rgba(183,110,121,0.06)' }}>
         <SectionTitle>Daily Revenue Trend</SectionTitle>
-        <ResponsiveContainer width="100%" height={260}>
+        <ResponsiveContainer width="100%" height={300}>
           <AreaChart data={data.dailyRevenue}>
             <defs>
               <linearGradient id="revGrad" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%"  stopColor={ROSE} stopOpacity={0.25} />
-                <stop offset="95%" stopColor={ROSE} stopOpacity={0} />
+                <stop offset="5%"  stopColor={ROSE} stopOpacity={0.4} />
+                <stop offset="95%" stopColor={ROSE} stopOpacity={0.0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
-            <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#6B7280' }} tickFormatter={(v) => String(v).slice(5)} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} tickFormatter={(v) => `${(Number(v)/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={{ borderRadius: 4, border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
-            <Area type="monotone" dataKey="revenue" stroke={ROSE} strokeWidth={2.5} fill="url(#revGrad)" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#F5EDE6" vertical={false} />
+            <XAxis dataKey="date" tick={{ fontSize: 12, fill: MUTED }} tickFormatter={(v) => String(v).slice(5)} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 12, fill: MUTED }} tickFormatter={(v) => `${(Number(v)/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
+            <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 25px rgba(58,46,42,0.1)' }} formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
+            <Area type="monotone" dataKey="revenue" stroke={ROSE} strokeWidth={3} fill="url(#revGrad)" activeDot={{ r: 6, fill: BROWN, stroke: '#fff', strokeWidth: 2 }} />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-        <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4, padding: 24, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        <div style={{ background: '#fff', border: '1px solid rgba(235, 217, 204, 0.4)', borderRadius: 24, padding: 32, boxShadow: '0 8px 30px rgba(183,110,121,0.06)' }}>
           <SectionTitle>Order Status Distribution</SectionTitle>
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={260}>
             <PieChart>
-              <Pie data={data.orderStatus} dataKey="count" nameKey="status" cx="50%" cy="50%" innerRadius={60} outerRadius={80} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false} stroke="none">
+              <Pie data={data.orderStatus} dataKey="count" nameKey="status" cx="50%" cy="50%" innerRadius={70} outerRadius={100} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false} stroke="none">
                 {data.orderStatus.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip contentStyle={{ borderRadius: 4, border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
+              <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 25px rgba(58,46,42,0.1)' }} />
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4, padding: 24, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+        <div style={{ background: '#fff', border: '1px solid rgba(235, 217, 204, 0.4)', borderRadius: 24, padding: 32, boxShadow: '0 8px 30px rgba(183,110,121,0.06)' }}>
           <SectionTitle>Revenue by Payment Method</SectionTitle>
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={260}>
             <PieChart>
-              <Pie data={data.paymentSplit} dataKey="revenue" nameKey="method" cx="50%" cy="50%" innerRadius={60} outerRadius={80} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false} stroke="none">
+              <Pie data={data.paymentSplit} dataKey="revenue" nameKey="method" cx="50%" cy="50%" innerRadius={70} outerRadius={100} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false} stroke="none">
                 {data.paymentSplit.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip contentStyle={{ borderRadius: 4, border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
+              <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 25px rgba(58,46,42,0.1)' }} formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -434,56 +413,62 @@ function OverviewTab({ data }: { data: DashData }) {
 // ── Sales Tab ─────────────────────────────────────────────────────────────────
 function SalesTab({ data }: { data: DashData }) {
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-      <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4, padding: 24, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+      <div style={{ background: '#fff', border: '1px solid rgba(235, 217, 204, 0.4)', borderRadius: 24, padding: 32, boxShadow: '0 8px 30px rgba(183,110,121,0.06)' }}>
         <SectionTitle>Top Products by Units Sold</SectionTitle>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={data.topProducts.slice(0, 10)} layout="vertical" margin={{ left: 120 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" horizontal={false} />
-            <XAxis type="number" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
-            <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} width={120} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={{ borderRadius: 4, border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} formatter={((v) => [fmtN(v as number), 'Units Sold']) as TFmt} />
-            <Bar dataKey="unitsSold" fill={ROSE} radius={[0, 4, 4, 0]} />
+        <ResponsiveContainer width="100%" height={360}>
+          <BarChart data={data.topProducts.slice(0, 10)} layout="vertical" margin={{ left: 140 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#F5EDE6" horizontal={false} />
+            <XAxis type="number" tick={{ fontSize: 12, fill: MUTED }} axisLine={false} tickLine={false} />
+            <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: BROWN, fontWeight: 500 }} width={140} axisLine={false} tickLine={false} />
+            <Tooltip cursor={{ fill: 'rgba(235, 217, 204, 0.3)' }} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 25px rgba(58,46,42,0.1)' }} formatter={((v) => [fmtN(v as number), 'Units Sold']) as TFmt} />
+            <Bar dataKey="unitsSold" radius={[0, 8, 8, 0]} barSize={24}>
+              {data.topProducts.slice(0, 10).map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-        <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4, padding: 24, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
+        <div style={{ background: '#fff', border: '1px solid rgba(235, 217, 204, 0.4)', borderRadius: 24, padding: 32, boxShadow: '0 8px 30px rgba(183,110,121,0.06)' }}>
           <SectionTitle>Revenue by Category</SectionTitle>
-          <ResponsiveContainer width="100%" height={240}>
+          <ResponsiveContainer width="100%" height={280}>
             <PieChart>
-              <Pie data={data.categoryRevenue} dataKey="revenue" nameKey="category" cx="50%" cy="50%" innerRadius={65} outerRadius={90}
+              <Pie data={data.categoryRevenue} dataKey="revenue" nameKey="category" cx="50%" cy="50%" innerRadius={70} outerRadius={100}
                 label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine stroke="none">
                 {data.categoryRevenue.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip contentStyle={{ borderRadius: 4, border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
+              <Tooltip contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 25px rgba(58,46,42,0.1)' }} formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4, padding: 24, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+        <div style={{ background: '#fff', border: '1px solid rgba(235, 217, 204, 0.4)', borderRadius: 24, padding: 32, boxShadow: '0 8px 30px rgba(183,110,121,0.06)' }}>
           <SectionTitle>Revenue by Product</SectionTitle>
-          <ResponsiveContainer width="100%" height={240}>
+          <ResponsiveContainer width="100%" height={280}>
             <BarChart data={data.topProducts.slice(0, 10)} layout="vertical" margin={{ left: 110 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 10, fill: '#6B7280' }} tickFormatter={(v) => `${(Number(v)/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#4B5563' }} width={110} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{ borderRadius: 4, border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
-              <Bar dataKey="revenue" fill={COLORS[1]} radius={[0, 4, 4, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#F5EDE6" horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 12, fill: MUTED }} tickFormatter={(v) => `${(Number(v)/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 12, fill: BROWN, fontWeight: 500 }} width={110} axisLine={false} tickLine={false} />
+              <Tooltip cursor={{ fill: 'rgba(235, 217, 204, 0.3)' }} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 25px rgba(58,46,42,0.1)' }} formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
+              <Bar dataKey="revenue" radius={[0, 6, 6, 0]} barSize={16}>
+                {data.topProducts.slice(0, 10).map((_, i) => <Cell key={i} fill={COLORS[(i + 3) % COLORS.length]} />)}
+              </Bar>
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4, padding: 24, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+      <div style={{ background: '#fff', border: '1px solid rgba(235, 217, 204, 0.4)', borderRadius: 24, padding: 32, boxShadow: '0 8px 30px rgba(183,110,121,0.06)' }}>
         <SectionTitle>Monthly Order Volume</SectionTitle>
-        <ResponsiveContainer width="100%" height={220}>
+        <ResponsiveContainer width="100%" height={280}>
           <BarChart data={data.monthlyRevenue}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
-            <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
-            <Tooltip contentStyle={{ borderRadius: 4, border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
-            <Bar dataKey="orders" name="Orders" fill={ROSE} radius={[4, 4, 0, 0]} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#F5EDE6" vertical={false} />
+            <XAxis dataKey="month" tick={{ fontSize: 12, fill: MUTED }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 12, fill: MUTED }} axisLine={false} tickLine={false} />
+            <Tooltip cursor={{ fill: 'rgba(235, 217, 204, 0.3)' }} contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 25px rgba(58,46,42,0.1)' }} />
+            <Bar dataKey="orders" name="Orders" radius={[8, 8, 0, 0]} barSize={40}>
+              {data.monthlyRevenue.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+            </Bar>
           </BarChart>
         </ResponsiveContainer>
       </div>
