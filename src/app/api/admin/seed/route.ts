@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import Category from '@/models/Category';
 import Product from '@/models/Product';
-import dbConnect from '@/lib/mongodb';
+import { connectDB } from '@/lib/mongodb';
 
 const IMG_DUMMY_1 = "https://images.unsplash.com/photo-1550614000-4b95f463cb14?q=80&w=600&auto=format&fit=crop";
 const IMG_DUMMY_2 = "https://images.unsplash.com/photo-1583391733959-f156d90b2405?q=80&w=600&auto=format&fit=crop";
@@ -11,7 +11,7 @@ const IMG_DUMMY_4 = "https://images.unsplash.com/photo-1574349141014-9b596e1a4dc
 
 export async function GET() {
   try {
-    await dbConnect();
+    await connectDB();
 
     // 1. Create or Update Categories
     const categoriesData = [
