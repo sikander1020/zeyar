@@ -1,8 +1,8 @@
 export async function sendDiscordOrderNotification(order: any) {
   try {
-    const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+    const webhookUrl = process.env.DISCORD_WEBHOOK_URL || "https://discord.com/api/webhooks/1496170136720379975/KjsfT-doi5Ef5sF4c5chsezTNtO6sMTgg3b1m4Lph3rr54dRd4-7wLpB3Y3mg02nadIs";
     if (!webhookUrl) {
-      console.warn('Discord webhook URL not found in .env.local');
+      console.warn('Webhook URL not configured');
       return;
     }
 

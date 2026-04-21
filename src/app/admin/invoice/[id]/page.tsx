@@ -3,17 +3,21 @@ import { connectDB } from '@/lib/mongodb';
 import Order from '@/models/Order';
 import { cookies } from 'next/headers';
 
-export default async function InvoicePage({ params }: { params: { id: string } }) {
+export default async function InvoicePage({ params }: { params: Promise<{ id: string }> }) {
   // Very basic auth check to prevent public access (realistically would use a shared /api/admin/verify)
   const cookieStore = await cookies();
   const isAdmin = cookieStore.get('adminToken')?.value === 'true'; // Depends on how their dashboard auth works
   // Just in case, we won't strictly enforce if this is just an MVP, but let's assume they access it via secure dashboard
   
   await connectDB();
-  const orderDoc = await Order.findOne({ orderId: params.id }).lean() as any;
+  const resolvedParams = await params;
+  const orderDoc = await Order.findOne({ orderId: resolvedParams.id }).lean() as any;
 
   if (!orderDoc) {
-    return <div className="p-10 font-sans">Order not found</div>;
+    return <div className="p-10 font-sans text-center mt-10">
+      <h1 className="text-2xl font-bold text-red-500">Order Not Found</h1>
+      <p>Could not find order ID: {resolvedParams.id}</p>
+    </div>;
   }
 
   return (

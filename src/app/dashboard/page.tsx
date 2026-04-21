@@ -1668,6 +1668,25 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           <button
+            onClick={async () => {
+              try {
+                const res = await fetch('/api/admin/seed');
+                if (res.ok) {
+                  alert('Successfully injected Pakistani Brand Dummy Products!');
+                  void loadProducts();
+                } else {
+                  alert('Failed to inject products.');
+                }
+              } catch (e) {
+                alert('Error injecting products.');
+              }
+            }}
+            style={{ padding: '10px 12px', background: '#eab308', color: '#1a1412', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+            title="Add Khaadi, Limelight, Sapphire dummy dresses"
+          >
+            ⚡ Inject Dummy Brands
+          </button>
+          <button
             onClick={() => void replaceCatalogWithMarketData()}
             style={{ padding: '10px 12px', background: '#6B5247', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
             title="Delete current catalog and insert new market catalog"
