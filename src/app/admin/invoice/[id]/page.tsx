@@ -51,9 +51,9 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
           <div>
             <p className="text-gray-500 uppercase tracking-widest text-[10px] font-bold mb-2">Return Address</p>
             <p className="font-bold">Zaybaash Warehouse</p>
-            <p>123 Luxury Avenue, Gulberg III</p>
-            <p>Lahore, Punjab 54000</p>
-            <p>Pakistan</p>
+            <p>House 389c (Back Gate), Street 85</p>
+            <p>Sector I-8/4</p>
+            <p>Islamabad, Pakistan</p>
           </div>
         </div>
 

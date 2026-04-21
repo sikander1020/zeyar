@@ -226,7 +226,7 @@ const TABS = [
   { id: 'categories', label: 'Categories',      icon: '▤' },
   { id: 'inventory',  label: 'Inventory',       icon: '▤' },
   { id: 'customers',  label: 'Customers',       icon: '⊙' },
-  { id: 'coupons',    label: 'Coupons',         icon: '🏷' },
+  { id: 'sales-mgr',  label: 'Sales',           icon: '🔥' },
   { id: 'reviews',    label: 'Reviews',         icon: '★' },
   { id: 'finance',    label: 'Finance',         icon: '₨' },
   { id: 'campaigns',  label: 'Campaign Videos', icon: '▶' },
@@ -2135,13 +2135,14 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
   );
 }
 
-// ── Coupons Tab ───────────────────────────────────────────────────────────────
-function CouponsTab() {
-  const [coupons, setCoupons] = useState<CouponRow[]>([]);
+// ── Sales Manager Tab ─────────────────────────────────────────────────────────
+function SalesMgrTab() {
+  const [products, setProducts] = useState<ProductRow[]>([]);
   const [loading, setLoading] = useState(false);
-  const [showForm, setShowForm] = useState(false);
-  const [editing, setEditing] = useState<CouponRow | null>(null);
-  const [formData, setFormData] = useState({ code: '', description: '', discountType: 'percentage' as 'percentage' | 'fixed', discountValue: 0, minOrderValue: 0, maxDiscountValue: 0, usageLimit: 0, startDate: '', endDate: '', isActive: true });
+  const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('All');
+  const [discountInputs, setDiscountInputs] = useState<Record<string, string>>({});
 
   const authHeaders = useCallback(() => {
     const token = localStorage.getItem('zaybaash_admin_token') ?? '';
@@ -2149,131 +2150,178 @@ function CouponsTab() {
     return { 'x-admin-token': token, 'x-admin-ts': ts, 'Content-Type': 'application/json' };
   }, []);
 
-  const loadCoupons = useCallback(async () => {
+  const loadProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/coupons', { headers: authHeaders(), cache: 'no-store' });
-      const data = await res.json() as { coupons?: CouponRow[] };
-      setCoupons(data.coupons ?? []);
+      const res = await fetch('/api/admin/products', { headers: authHeaders(), cache: 'no-store' });
+      const data = await res.json() as { products?: ProductRow[] };
+      setProducts(data.products ?? []);
     } catch (err) {
-      console.error('Failed to load coupons:', err);
+      console.error('Failed to load products:', err);
     } finally {
       setLoading(false);
     }
   }, [authHeaders]);
 
-  useEffect(() => { void loadCoupons(); }, [loadCoupons]);
+  useEffect(() => { void loadProducts(); }, [loadProducts]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const categories = ['All', ...Array.from(new Set(products.map((p) => p.category))).sort()];
+
+  const filtered = products.filter((p) => {
+    const matchSearch = p.name.toLowerCase().includes(search.toLowerCase());
+    const matchCat = categoryFilter === 'All' || p.category === categoryFilter;
+    return matchSearch && matchCat;
+  });
+
+  function getDiscount(p: ProductRow): number {
+    if (p.originalPrice && p.originalPrice > p.price) {
+      return Math.round((1 - p.price / p.originalPrice) * 100);
+    }
+    return 0;
+  }
+
+  async function applyDiscount(productId: string, pct: number, currentPrice: number, originalPrice?: number) {
+    const base = originalPrice && originalPrice > 0 ? originalPrice : currentPrice;
+    const newPrice = pct === 0 ? base : Math.round(base * (1 - pct / 100));
+    setSaving(true);
     try {
-      const url = editing ? `/api/admin/coupons/${editing._id}` : '/api/admin/coupons';
-      const method = editing ? 'PUT' : 'POST';
-      await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(formData) });
-      setShowForm(false);
-      setEditing(null);
-      setFormData({ code: '', description: '', discountType: 'percentage', discountValue: 0, minOrderValue: 0, maxDiscountValue: 0, usageLimit: 0, startDate: '', endDate: '', isActive: true });
-      void loadCoupons();
+      await fetch(`/api/admin/products/${productId}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ price: newPrice, originalPrice: pct === 0 ? 0 : base, isSale: pct > 0 }),
+      });
+      await loadProducts();
     } catch (err) {
-      console.error('Failed to save coupon:', err);
+      console.error('Failed to apply discount:', err);
+    } finally {
+      setSaving(false);
     }
   }
 
-  async function handleDelete(id: string) {
-    if (!confirm('Delete this coupon?')) return;
-    await fetch(`/api/admin/coupons/${id}`, { method: 'DELETE', headers: authHeaders() });
-    void loadCoupons();
+  async function applyBulkDiscount(pct: number) {
+    if (!confirm(`Apply ${pct === 0 ? 'NO' : pct + '%'} discount to ALL ${filtered.length} visible products?`)) return;
+    setSaving(true);
+    for (const p of filtered) {
+      const base = p.originalPrice && p.originalPrice > 0 ? p.originalPrice : p.price;
+      const newPrice = pct === 0 ? base : Math.round(base * (1 - pct / 100));
+      await fetch(`/api/admin/products/${p.productId}`, {
+        method: 'PUT',
+        headers: authHeaders(),
+        body: JSON.stringify({ price: newPrice, originalPrice: pct === 0 ? 0 : base, isSale: pct > 0 }),
+      });
+    }
+    setSaving(false);
+    await loadProducts();
   }
 
-  function startEdit(coupon: CouponRow) {
-    setEditing(coupon);
-    setFormData({ code: coupon.code, description: coupon.description, discountType: coupon.discountType, discountValue: coupon.discountValue, minOrderValue: coupon.minOrderValue, maxDiscountValue: coupon.maxDiscountValue, usageLimit: coupon.usageLimit, startDate: coupon.startDate.slice(0, 10), endDate: coupon.endDate.slice(0, 10), isActive: coupon.isActive });
-    setShowForm(true);
-  }
+  const QUICK_DISCOUNTS = [10, 20, 30, 40, 50, 70];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>{coupons.length} coupons</p>
-        <button onClick={() => { setShowForm(!showForm); setEditing(null); setFormData({ code: '', description: '', discountType: 'percentage', discountValue: 0, minOrderValue: 0, maxDiscountValue: 0, usageLimit: 0, startDate: '', endDate: '', isActive: true }); }}
-          style={{ padding: '10px 16px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-          {showForm ? 'Cancel' : '+ Add Coupon'}
-        </button>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <SectionTitle>🔥 Sale Manager</SectionTitle>
 
-      {loading && (
-        <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>Loading coupons...</p>
-      )}
-
-      {showForm && (
-        <form onSubmit={handleSubmit} style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-            <input value={formData.code} onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })} placeholder="Coupon Code" required
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <select value={formData.discountType} onChange={(e) => setFormData({ ...formData, discountType: e.target.value as 'percentage' | 'fixed' })}
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: '#fff', outline: 'none' }}>
-              <option value="percentage">Percentage (%)</option>
-              <option value="fixed">Fixed Amount (PKR)</option>
-            </select>
-            <input type="number" value={formData.discountValue} onChange={(e) => setFormData({ ...formData, discountValue: Number(e.target.value) })} placeholder="Discount Value" required
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input type="number" value={formData.minOrderValue} onChange={(e) => setFormData({ ...formData, minOrderValue: Number(e.target.value) })} placeholder="Min Order Value"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input type="number" value={formData.maxDiscountValue} onChange={(e) => setFormData({ ...formData, maxDiscountValue: Number(e.target.value) })} placeholder="Max Discount"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input type="number" value={formData.usageLimit} onChange={(e) => setFormData({ ...formData, usageLimit: Number(e.target.value) })} placeholder="Usage Limit (0=unlimited)"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input type="date" value={formData.startDate} onChange={(e) => setFormData({ ...formData, startDate: e.target.value })} required
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input type="date" value={formData.endDate} onChange={(e) => setFormData({ ...formData, endDate: e.target.value })} required
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Description"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
-          </div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN, marginBottom: 16 }}>
-            <input type="checkbox" checked={formData.isActive} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })} style={{ accentColor: ROSE }} />
-            Active
-          </label>
-          <button type="submit" style={{ padding: '10px 20px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-            {editing ? 'Update' : 'Create'} Coupon
+      {/* Bulk Actions */}
+      <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 16, padding: 24 }}>
+        <p style={{ margin: '0 0 6px', fontWeight: 700, color: BROWN, fontSize: 15 }}>Bulk Discount</p>
+        <p style={{ margin: '0 0 16px', fontSize: 12, color: MUTED }}>Apply a % discount to all currently visible products at once.</p>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          {QUICK_DISCOUNTS.map((pct) => (
+            <button key={pct} onClick={() => void applyBulkDiscount(pct)} disabled={saving}
+              style={{ padding: '10px 22px', background: `linear-gradient(135deg, ${ROSE}, #D4957F)`, color: '#fff', border: 'none', borderRadius: 999, fontSize: 14, fontWeight: 700, cursor: 'pointer', boxShadow: '0 4px 12px rgba(183,110,121,0.3)' }}>
+              {pct}% OFF
+            </button>
+          ))}
+          <button onClick={() => void applyBulkDiscount(0)} disabled={saving}
+            style={{ padding: '10px 22px', background: '#6B5247', color: '#fff', border: 'none', borderRadius: 999, fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
+            ✕ Remove All Sales
           </button>
-        </form>
-      )}
-
-      <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, overflow: 'hidden', overflowX: 'auto' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
-          <thead>
-            <tr style={{ background: ROSE, color: '#fff' }}>
-              {['Code', 'Discount', 'Min Order', 'Used/Limit', 'Valid Until', 'Active', 'Actions'].map((h) => (
-                <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {!loading && coupons.length === 0 && (
-              <tr>
-                <td colSpan={7} style={{ padding: 24, textAlign: 'center', color: MUTED }}>No coupons found.</td>
-              </tr>
-            )}
-            {coupons.map((c, i) => (
-              <tr key={c._id} style={{ background: i % 2 === 0 ? '#fff' : BEIGE }}>
-                <td style={{ padding: '10px 14px', fontFamily: 'monospace', fontWeight: 600 }}>{c.code}</td>
-                <td style={{ padding: '10px 14px' }}>{c.discountType === 'percentage' ? `${c.discountValue}%` : fmt(c.discountValue)}</td>
-                <td style={{ padding: '10px 14px' }}>{c.minOrderValue > 0 ? fmt(c.minOrderValue) : '—'}</td>
-                <td style={{ padding: '10px 14px' }}>{c.usedCount}/{c.usageLimit || '∞'}</td>
-                <td style={{ padding: '10px 14px', fontSize: 12, color: MUTED }}>{new Date(c.endDate).toLocaleDateString()}</td>
-                <td style={{ padding: '10px 14px' }}>{c.isActive ? '✓' : '✗'}</td>
-                <td style={{ padding: '10px 14px' }}>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => startEdit(c)} style={{ padding: '6px 10px', background: '#6B5247', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Edit</button>
-                    <button onClick={() => handleDelete(c._id)} style={{ padding: '6px 10px', background: '#C0504D', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Delete</button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        </div>
       </div>
+
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
+        <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search product..."
+          style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 10, fontSize: 13, color: BROWN, background: '#fff', outline: 'none', minWidth: 220 }} />
+        <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)}
+          style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 10, fontSize: 13, color: BROWN, background: '#fff', outline: 'none' }}>
+          {categories.map((c) => <option key={c}>{c}</option>)}
+        </select>
+        <span style={{ fontSize: 12, color: MUTED }}>{filtered.length} products</span>
+        {saving && <span style={{ fontSize: 12, color: ROSE, fontWeight: 700 }}>Saving...</span>}
+      </div>
+
+      {/* Product Cards Grid */}
+      {loading ? (
+        <p style={{ color: MUTED, fontSize: 13 }}>Loading products...</p>
+      ) : filtered.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: 48, color: MUTED }}>
+          <p style={{ fontSize: 32, margin: '0 0 8px' }}>🏷️</p>
+          <p style={{ fontSize: 14, fontWeight: 600 }}>No products found.</p>
+          <p style={{ fontSize: 12 }}>Add products from the Products tab first, then come here to put them on sale!</p>
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 16 }}>
+          {filtered.map((p) => {
+            const currentDiscount = getDiscount(p);
+            const inputVal = discountInputs[p.productId] ?? '';
+            return (
+              <div key={p.productId} style={{ background: '#fff', border: `2px solid ${currentDiscount > 0 ? ROSE : '#EBD9CC'}`, borderRadius: 16, padding: 18, boxShadow: currentDiscount > 0 ? '0 4px 16px rgba(183,110,121,0.15)' : '0 2px 8px rgba(0,0,0,0.04)', position: 'relative' }}>
+                {currentDiscount > 0 && (
+                  <span style={{ position: 'absolute', top: -12, right: 14, background: `linear-gradient(135deg, ${ROSE}, #D4957F)`, color: '#fff', borderRadius: 999, padding: '4px 12px', fontSize: 12, fontWeight: 800 }}>
+                    🔥 {currentDiscount}% OFF
+                  </span>
+                )}
+                <p style={{ margin: '0 0 2px', fontWeight: 700, fontSize: 14, color: BROWN, paddingRight: currentDiscount > 0 ? 80 : 0 }}>{p.name}</p>
+                <p style={{ margin: '0 0 12px', fontSize: 12, color: MUTED }}>{p.category}</p>
+
+                <div style={{ display: 'flex', gap: 10, alignItems: 'baseline', marginBottom: 14 }}>
+                  <span style={{ fontSize: 22, fontWeight: 800, color: currentDiscount > 0 ? ROSE : BROWN }}>
+                    Rs {p.price.toLocaleString()}
+                  </span>
+                  {currentDiscount > 0 && p.originalPrice && (
+                    <span style={{ fontSize: 13, color: MUTED, textDecoration: 'line-through' }}>
+                      Rs {p.originalPrice.toLocaleString()}
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+                  {QUICK_DISCOUNTS.map((pct) => (
+                    <button key={pct} onClick={() => void applyDiscount(p.productId, pct, p.price, p.originalPrice)} disabled={saving}
+                      style={{ padding: '5px 11px', background: currentDiscount === pct ? ROSE : BEIGE, color: currentDiscount === pct ? '#fff' : BROWN, border: `1px solid ${currentDiscount === pct ? ROSE : '#EBD9CC'}`, borderRadius: 999, fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
+                      {pct}%
+                    </button>
+                  ))}
+                  {currentDiscount > 0 && (
+                    <button onClick={() => void applyDiscount(p.productId, 0, p.price, p.originalPrice)} disabled={saving}
+                      style={{ padding: '5px 11px', background: '#FDECEC', color: '#8A3A38', border: '1px solid #F3CACA', borderRadius: 999, fontSize: 11, fontWeight: 700, cursor: 'pointer' }}>
+                      ✕ Remove
+                    </button>
+                  )}
+                </div>
+
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <input type="number" min={1} max={99} value={inputVal}
+                    onChange={(e) => setDiscountInputs((prev) => ({ ...prev, [p.productId]: e.target.value }))}
+                    placeholder="Custom % e.g. 35"
+                    style={{ flex: 1, padding: '8px 10px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: CREAM, outline: 'none' }} />
+                  <button disabled={saving || !inputVal}
+                    onClick={() => {
+                      const pct = parseInt(inputVal, 10);
+                      if (pct > 0 && pct < 100) {
+                        void applyDiscount(p.productId, pct, p.price, p.originalPrice);
+                        setDiscountInputs((prev) => ({ ...prev, [p.productId]: '' }));
+                      }
+                    }}
+                    style={{ padding: '8px 14px', background: BROWN, color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
+                    Apply
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
@@ -2914,7 +2962,7 @@ export default function DashboardPage() {
             {tab === 'categories' && <CategoriesTab />}
             {tab === 'inventory'  && <InventoryTab  data={data} />}
             {tab === 'customers'  && <CustomersTab  data={data} />}
-            {tab === 'coupons'    && <CouponsTab />}
+            {tab === 'sales-mgr'  && <SalesMgrTab />}
             {tab === 'campaigns'  && <CampaignsTab />}
             {tab === 'reviews'    && <ReviewsTab />}
             {tab === 'finance'    && <FinanceTab    data={data} />}
