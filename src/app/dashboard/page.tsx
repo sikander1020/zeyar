@@ -177,21 +177,25 @@ type TFmt = (value: any) => [string, string] | string;
 function KpiCard({ label, value, sub, accent = false }: { label: string; value: string; sub?: string; accent?: boolean }) {
   return (
     <div style={{
-      background: '#fff', border: `1px solid #EBD9CC`, borderRadius: 12,
-      padding: '20px 24px', boxShadow: '0 1px 4px rgba(58,46,42,.06)',
+      background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4,
+      padding: '20px 24px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
+      position: 'relative', overflow: 'hidden'
     }}>
-      <p style={{ margin: 0, fontSize: 11, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</p>
-      <p style={{ margin: '6px 0 0', fontSize: 28, fontWeight: 700, color: accent ? ROSE : BROWN }}>{value}</p>
-      {sub && <p style={{ margin: '4px 0 0', fontSize: 12, color: MUTED }}>{sub}</p>}
+      {accent && <div style={{ position: 'absolute', top: 0, left: 0, width: '4px', height: '100%', background: ROSE }} />}
+      <p style={{ margin: 0, fontSize: 12, color: '#6B7280', fontWeight: 600 }}>{label}</p>
+      <p style={{ margin: '8px 0 0', fontSize: 32, fontWeight: 700, color: '#111827' }}>{value}</p>
+      {sub && <p style={{ margin: '4px 0 0', fontSize: 12, color: '#9CA3AF' }}>{sub}</p>}
     </div>
   );
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 style={{ margin: '0 0 20px', fontSize: 18, fontWeight: 600, color: BROWN, borderLeft: `3px solid ${ROSE}`, paddingLeft: 12 }}>
-      {children}
-    </h2>
+    <div style={{ margin: '0 0 20px', borderBottom: '1px solid #F3F4F6', paddingBottom: 12 }}>
+      <h2 style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        {children}
+      </h2>
+    </div>
   );
 }
 
@@ -371,17 +375,17 @@ function OverviewTab({ data }: { data: DashData }) {
         <KpiCard label="Total Discounts" value={fmt(s.totalDiscount)} />
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 12 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: 16 }}>
         {statusCards.map((c) => (
-          <div key={c.label} style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 10, padding: '14px 16px', textAlign: 'center' }}>
-            <p style={{ margin: 0, fontSize: 22, fontWeight: 700, color: BROWN }}>{c.value}</p>
-            <p style={{ margin: '4px 0 0', fontSize: 11, color: MUTED, textTransform: 'uppercase' }}>{c.label}</p>
+          <div key={c.label} style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4, padding: '16px', boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+            <p style={{ margin: 0, fontSize: 11, color: '#6B7280', fontWeight: 600, textTransform: 'uppercase' }}>{c.label}</p>
+            <p style={{ margin: '4px 0 0', fontSize: 24, fontWeight: 700, color: '#111827' }}>{c.value}</p>
           </div>
         ))}
       </div>
 
-      <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24 }}>
-        <SectionTitle>Daily Revenue — Last 90 Days</SectionTitle>
+      <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4, padding: 24, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+        <SectionTitle>Daily Revenue Trend</SectionTitle>
         <ResponsiveContainer width="100%" height={260}>
           <AreaChart data={data.dailyRevenue}>
             <defs>
@@ -390,35 +394,35 @@ function OverviewTab({ data }: { data: DashData }) {
                 <stop offset="95%" stopColor={ROSE} stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#F5EDE6" />
-            <XAxis dataKey="date" tick={{ fontSize: 11 }} tickFormatter={(v) => String(v).slice(5)} />
-            <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => `${(Number(v)/1000).toFixed(0)}k`} />
-            <Tooltip formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+            <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#6B7280' }} tickFormatter={(v) => String(v).slice(5)} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} tickFormatter={(v) => `${(Number(v)/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
+            <Tooltip contentStyle={{ borderRadius: 4, border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
             <Area type="monotone" dataKey="revenue" stroke={ROSE} strokeWidth={2.5} fill="url(#revGrad)" />
           </AreaChart>
         </ResponsiveContainer>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-        <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24 }}>
-          <SectionTitle>Order Status</SectionTitle>
+        <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4, padding: 24, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <SectionTitle>Order Status Distribution</SectionTitle>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={data.orderStatus} dataKey="count" nameKey="status" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false}>
+              <Pie data={data.orderStatus} dataKey="count" nameKey="status" cx="50%" cy="50%" innerRadius={60} outerRadius={80} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false} stroke="none">
                 {data.orderStatus.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip />
+              <Tooltip contentStyle={{ borderRadius: 4, border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24 }}>
-          <SectionTitle>Payment Methods</SectionTitle>
+        <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4, padding: 24, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <SectionTitle>Revenue by Payment Method</SectionTitle>
           <ResponsiveContainer width="100%" height={220}>
             <PieChart>
-              <Pie data={data.paymentSplit} dataKey="revenue" nameKey="method" cx="50%" cy="50%" outerRadius={80} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false}>
+              <Pie data={data.paymentSplit} dataKey="revenue" nameKey="method" cx="50%" cy="50%" innerRadius={60} outerRadius={80} label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine={false} stroke="none">
                 {data.paymentSplit.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
+              <Tooltip contentStyle={{ borderRadius: 4, border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
             </PieChart>
           </ResponsiveContainer>
         </div>
@@ -431,55 +435,54 @@ function OverviewTab({ data }: { data: DashData }) {
 function SalesTab({ data }: { data: DashData }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
-      <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24 }}>
+      <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4, padding: 24, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
         <SectionTitle>Top Products by Units Sold</SectionTitle>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data.topProducts.slice(0, 10)} layout="vertical" margin={{ left: 120 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#F5EDE6" horizontal={false} />
-            <XAxis type="number" tick={{ fontSize: 11 }} />
-            <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={120} />
-            <Tooltip formatter={((v) => [fmtN(v as number), 'Units Sold']) as TFmt} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" horizontal={false} />
+            <XAxis type="number" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
+            <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fill: '#4B5563' }} width={120} axisLine={false} tickLine={false} />
+            <Tooltip contentStyle={{ borderRadius: 4, border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} formatter={((v) => [fmtN(v as number), 'Units Sold']) as TFmt} />
             <Bar dataKey="unitsSold" fill={ROSE} radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
-        <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24 }}>
+        <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4, padding: 24, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
           <SectionTitle>Revenue by Category</SectionTitle>
           <ResponsiveContainer width="100%" height={240}>
             <PieChart>
-              <Pie data={data.categoryRevenue} dataKey="revenue" nameKey="category" cx="50%" cy="50%" outerRadius={90}
-                label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine>
+              <Pie data={data.categoryRevenue} dataKey="revenue" nameKey="category" cx="50%" cy="50%" innerRadius={65} outerRadius={90}
+                label={({ name, percent }) => `${name} ${((percent ?? 0) * 100).toFixed(0)}%`} labelLine stroke="none">
                 {data.categoryRevenue.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
               </Pie>
-              <Tooltip formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
-              <Legend />
+              <Tooltip contentStyle={{ borderRadius: 4, border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
             </PieChart>
           </ResponsiveContainer>
         </div>
-        <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24 }}>
-          <SectionTitle>Revenue by Product (Top 10)</SectionTitle>
+        <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4, padding: 24, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
+          <SectionTitle>Revenue by Product</SectionTitle>
           <ResponsiveContainer width="100%" height={240}>
             <BarChart data={data.topProducts.slice(0, 10)} layout="vertical" margin={{ left: 110 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F5EDE6" horizontal={false} />
-              <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={(v) => `${(Number(v)/1000).toFixed(0)}k`} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={110} />
-              <Tooltip formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
-              <Bar dataKey="revenue" fill="#D4957F" radius={[0, 4, 4, 0]} />
+              <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" horizontal={false} />
+              <XAxis type="number" tick={{ fontSize: 10, fill: '#6B7280' }} tickFormatter={(v) => `${(Number(v)/1000).toFixed(0)}k`} axisLine={false} tickLine={false} />
+              <YAxis type="category" dataKey="name" tick={{ fontSize: 10, fill: '#4B5563' }} width={110} axisLine={false} tickLine={false} />
+              <Tooltip contentStyle={{ borderRadius: 4, border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} formatter={((v) => [fmt(v as number), 'Revenue']) as TFmt} />
+              <Bar dataKey="revenue" fill={COLORS[1]} radius={[0, 4, 4, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
       </div>
 
-      <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24 }}>
+      <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 4, padding: 24, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
         <SectionTitle>Monthly Order Volume</SectionTitle>
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={data.monthlyRevenue}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#F5EDE6" />
-            <XAxis dataKey="month" tick={{ fontSize: 11 }} />
-            <YAxis tick={{ fontSize: 11 }} />
-            <Tooltip />
+            <CartesianGrid strokeDasharray="3 3" stroke="#F3F4F6" vertical={false} />
+            <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
+            <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
+            <Tooltip contentStyle={{ borderRadius: 4, border: 'none', boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }} />
             <Bar dataKey="orders" name="Orders" fill={ROSE} radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
