@@ -344,8 +344,8 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-10">
-          <div className="sticky top-20 z-30 mb-5">
-            <div className="rounded-2xl border border-nude/30 bg-white/80 backdrop-blur-sm shadow-[0_20px_45px_-30px_rgba(58,46,42,0.38)] p-3 sm:p-4 md:p-5">
+          <div className="relative xl:sticky xl:top-20 z-30 mb-5">
+            <div className="rounded-2xl border border-nude/30 bg-white/95 xl:bg-white/80 xl:backdrop-blur-sm shadow-[0_20px_45px_-30px_rgba(58,46,42,0.38)] p-3 sm:p-4 md:p-5">
               <div className="space-y-3.5">
                 <div className="w-full overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   <div className="flex min-w-max gap-2">
@@ -362,8 +362,8 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                 </div>
                 </div>
 
-                <div className="grid w-full grid-cols-1 gap-2.5 sm:grid-cols-[minmax(0,1fr)_auto_auto]">
-                  <div className="relative min-w-0 sm:min-w-[220px]">
+                <div className="flex flex-col sm:flex-row gap-2.5 w-full">
+                  <div className="relative flex-none sm:min-w-[220px]">
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
@@ -377,68 +377,70 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                     <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brown-muted pointer-events-none" />
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setShowAdvancedFilters((v) => !v)}
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 border border-nude text-[11px] tracking-[0.12em] uppercase text-brown hover:border-brown hover:bg-cream transition-colors"
-                  >
-                    <SlidersHorizontal size={14} />
-                    Filters
-                  </button>
+                  <div className="flex flex-1 gap-2.5">
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvancedFilters((v) => !v)}
+                      className="inline-flex h-10 flex-1 sm:flex-none items-center justify-center gap-2 rounded-xl px-4 border border-nude text-[11px] tracking-[0.12em] uppercase text-brown hover:border-brown hover:bg-cream transition-colors"
+                    >
+                      <SlidersHorizontal size={14} />
+                      Filters
+                    </button>
 
-                  <div className="inline-flex h-10 items-center justify-center rounded-xl border border-brown/10 bg-brown/[0.04] px-3 text-xs text-brown-muted font-inter whitespace-nowrap">
-                    {filtered.length} pieces
+                    <div className="inline-flex h-10 flex-1 sm:flex-none items-center justify-center rounded-xl border border-brown/10 bg-brown/[0.04] px-3 text-xs text-brown-muted font-inter whitespace-nowrap">
+                      {filtered.length} pieces
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:grid-cols-[1.2fr_0.9fr_auto_auto] xl:items-center">
-                <input
-                  value={queryInput}
-                  onChange={(e) => setQueryInput(e.target.value)}
-                  placeholder="Search dresses"
-                  className="input-luxury h-11 rounded-xl bg-white"
-                />
+                <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-[1.2fr_0.9fr_auto_auto] gap-2.5 xl:items-center">
+                  <input
+                    value={queryInput}
+                    onChange={(e) => setQueryInput(e.target.value)}
+                    placeholder="Search dresses"
+                    className="input-luxury h-10 rounded-xl bg-white col-span-2 md:col-span-1"
+                  />
 
-                <div className="relative">
-                  <select
-                    value={selectedSize}
-                    onChange={(e) => setSelectedSize(e.target.value)}
-                    className="appearance-none w-full h-11 rounded-xl pl-4 pr-10 bg-white border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
+                  <div className="relative col-span-2 md:col-span-1">
+                    <select
+                      value={selectedSize}
+                      onChange={(e) => setSelectedSize(e.target.value)}
+                      className="appearance-none w-full h-10 rounded-xl pl-4 pr-10 bg-white border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
+                      style={{ fontFamily: "'Inter', sans-serif" }}
+                    >
+                      {sizeOptions.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brown-muted pointer-events-none" />
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setOnlyInStock((v) => !v)}
+                    className={`h-10 rounded-xl px-2 sm:px-4 text-[10px] sm:text-[11px] tracking-[0.05em] sm:tracking-[0.12em] uppercase font-inter border transition-all duration-300 ${onlyInStock ? 'bg-brown text-cream border-brown shadow-[0_10px_24px_-18px_rgba(58,46,42,0.75)]' : 'bg-white border-nude text-brown hover:border-brown'}`}
                     style={{ fontFamily: "'Inter', sans-serif" }}
                   >
-                    {sizeOptions.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brown-muted pointer-events-none" />
+                    In Stock Only
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setQueryInput('');
+                      setOnlyInStock(false);
+                      setSelectedSize('All Sizes');
+                      setSelectedColor('All Colors');
+                      setActiveCategory('All');
+                      setPriceMin(bounds.min);
+                      setPriceMax(bounds.max);
+                      setSortBy('featured');
+                    }}
+                    className="h-10 rounded-xl px-2 sm:px-4 text-[10px] sm:text-[11px] tracking-[0.05em] sm:tracking-[0.12em] uppercase text-brown-muted border border-transparent hover:border-nude/60 hover:bg-cream hover:text-brown transition-colors"
+                  >
+                    Reset
+                  </button>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => setOnlyInStock((v) => !v)}
-                  className={`h-11 rounded-xl px-4 text-[11px] tracking-[0.12em] uppercase font-inter border transition-all duration-300 ${onlyInStock ? 'bg-brown text-cream border-brown shadow-[0_10px_24px_-18px_rgba(58,46,42,0.75)]' : 'bg-white border-nude text-brown hover:border-brown'}`}
-                  style={{ fontFamily: "'Inter', sans-serif" }}
-                >
-                  In Stock Only
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => {
-                    setQueryInput('');
-                    setOnlyInStock(false);
-                    setSelectedSize('All Sizes');
-                    setSelectedColor('All Colors');
-                    setActiveCategory('All');
-                    setPriceMin(bounds.min);
-                    setPriceMax(bounds.max);
-                    setSortBy('featured');
-                  }}
-                  className="h-11 rounded-xl px-4 text-[11px] tracking-[0.12em] uppercase text-brown-muted border border-transparent hover:border-nude/60 hover:bg-cream hover:text-brown transition-colors"
-                >
-                  Reset
-                </button>
-              </div>
               </div>
             </div>
           </div>
