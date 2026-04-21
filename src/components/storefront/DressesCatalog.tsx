@@ -384,62 +384,13 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                       className="inline-flex h-10 flex-1 sm:flex-none items-center justify-center gap-2 rounded-xl px-4 border border-nude text-[11px] tracking-[0.12em] uppercase text-brown hover:border-brown hover:bg-cream transition-colors"
                     >
                       <SlidersHorizontal size={14} />
-                      Filters
+                      Filters & Search
                     </button>
 
                     <div className="inline-flex h-10 flex-1 sm:flex-none items-center justify-center rounded-xl border border-brown/10 bg-brown/[0.04] px-3 text-xs text-brown-muted font-inter whitespace-nowrap">
                       {filtered.length} pieces
                     </div>
                   </div>
-                </div>
-
-                <div className="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-[1.2fr_0.9fr_auto_auto] gap-2.5 xl:items-center">
-                  <input
-                    value={queryInput}
-                    onChange={(e) => setQueryInput(e.target.value)}
-                    placeholder="Search dresses"
-                    className="input-luxury h-10 rounded-xl bg-white col-span-2 md:col-span-1"
-                  />
-
-                  <div className="relative col-span-2 md:col-span-1">
-                    <select
-                      value={selectedSize}
-                      onChange={(e) => setSelectedSize(e.target.value)}
-                      className="appearance-none w-full h-10 rounded-xl pl-4 pr-10 bg-white border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
-                    >
-                      {sizeOptions.map((s) => (
-                        <option key={s} value={s}>{s}</option>
-                      ))}
-                    </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-brown-muted pointer-events-none" />
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() => setOnlyInStock((v) => !v)}
-                    className={`h-10 rounded-xl px-2 sm:px-4 text-[10px] sm:text-[11px] tracking-[0.05em] sm:tracking-[0.12em] uppercase font-inter border transition-all duration-300 ${onlyInStock ? 'bg-brown text-cream border-brown shadow-[0_10px_24px_-18px_rgba(58,46,42,0.75)]' : 'bg-white border-nude text-brown hover:border-brown'}`}
-                    style={{ fontFamily: "'Inter', sans-serif" }}
-                  >
-                    In Stock Only
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setQueryInput('');
-                      setOnlyInStock(false);
-                      setSelectedSize('All Sizes');
-                      setSelectedColor('All Colors');
-                      setActiveCategory('All');
-                      setPriceMin(bounds.min);
-                      setPriceMax(bounds.max);
-                      setSortBy('featured');
-                    }}
-                    className="h-10 rounded-xl px-2 sm:px-4 text-[10px] sm:text-[11px] tracking-[0.05em] sm:tracking-[0.12em] uppercase text-brown-muted border border-transparent hover:border-nude/60 hover:bg-cream hover:text-brown transition-colors"
-                  >
-                    Reset
-                  </button>
                 </div>
               </div>
             </div>
@@ -454,13 +405,37 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                 transition={{ duration: 0.25 }}
                 className="overflow-hidden rounded-2xl border border-nude/20 bg-white/55 p-4 mb-6"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-end">
+                  <div className="sm:col-span-2 lg:col-span-3 xl:col-span-1">
+                    <label className="block text-[10px] tracking-[0.12em] uppercase text-brown-muted mb-2">Search</label>
+                    <input
+                      value={queryInput}
+                      onChange={(e) => setQueryInput(e.target.value)}
+                      placeholder="Search for pieces..."
+                      className="input-luxury h-[48px] rounded-xl bg-white/60"
+                    />
+                  </div>
+
+                  <div className="relative">
+                    <label className="block text-[10px] tracking-[0.12em] uppercase text-brown-muted mb-2">Size</label>
+                    <select
+                      value={selectedSize}
+                      onChange={(e) => setSelectedSize(e.target.value)}
+                      className="appearance-none w-full h-[48px] rounded-xl pl-4 pr-10 bg-white/60 border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
+                    >
+                      {sizeOptions.map((s) => (
+                        <option key={s} value={s}>{s}</option>
+                      ))}
+                    </select>
+                    <ChevronDown size={14} className="absolute right-3 top-[36px] -translate-y-1/2 text-brown-muted pointer-events-none" />
+                  </div>
+
                   <div className="relative">
                     <label className="block text-[10px] tracking-[0.12em] uppercase text-brown-muted mb-2">Color</label>
                     <select
                       value={selectedColor}
                       onChange={(e) => setSelectedColor(e.target.value)}
-                      className="appearance-none w-full h-[48px] pl-4 pr-10 py-3 bg-transparent border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
+                      className="appearance-none w-full h-[48px] rounded-xl pl-4 pr-10 bg-white/60 border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
                     >
                       {colorOptions.map((c) => (
                         <option key={c} value={c}>{c}</option>
@@ -480,7 +455,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                         const next = Number(e.target.value) || bounds.min;
                         setPriceMin(Math.min(next, priceMax));
                       }}
-                      className="input-luxury h-[48px]"
+                      className="input-luxury h-[48px] rounded-xl bg-white/60"
                     />
                   </div>
 
@@ -495,14 +470,41 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                         const next = Number(e.target.value) || bounds.max;
                         setPriceMax(Math.max(next, priceMin));
                       }}
-                      className="input-luxury h-[48px]"
+                      className="input-luxury h-[48px] rounded-xl bg-white/60"
                     />
+                  </div>
+
+                  <div className="flex gap-2 sm:col-span-2 lg:col-span-3 xl:col-span-2">
+                    <button
+                      type="button"
+                      onClick={() => setOnlyInStock((v) => !v)}
+                      className={`h-[48px] flex-1 rounded-xl px-4 text-[11px] tracking-[0.12em] uppercase font-inter border transition-all duration-300 ${onlyInStock ? 'bg-brown text-cream border-brown shadow-md' : 'bg-white/60 border-nude text-brown hover:border-brown'}`}
+                    >
+                      In Stock Only
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setQueryInput('');
+                        setOnlyInStock(false);
+                        setSelectedSize('All Sizes');
+                        setSelectedColor('All Colors');
+                        setActiveCategory('All');
+                        setPriceMin(bounds.min);
+                        setPriceMax(bounds.max);
+                        setSortBy('featured');
+                      }}
+                      className="h-[48px] flex-1 rounded-xl px-4 text-[11px] tracking-[0.12em] uppercase text-brown-muted border border-transparent hover:border-nude/60 hover:bg-cream hover:text-brown transition-colors"
+                    >
+                      Reset All
+                    </button>
                   </div>
 
                   <button
                     type="button"
                     onClick={() => setShowAdvancedFilters(false)}
-                    className="h-[48px] px-4 text-xs tracking-[0.12em] uppercase font-inter border border-nude text-brown hover:border-brown"
+                    className="h-[48px] w-full rounded-xl px-4 text-xs tracking-[0.12em] uppercase font-inter border border-nude bg-brown text-cream hover:bg-brown/90 shadow-md"
                   >
                     Done
                   </button>
