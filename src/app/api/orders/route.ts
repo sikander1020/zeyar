@@ -207,15 +207,23 @@ export async function POST(req: NextRequest) {
       await session.endSession();
     }
 
-    // Try sending email async (fire and forget for all payment methods)
+    // Try sending email and discord notification async (fire and forget for all payment methods)
     const orderDoc = await Order.findOne({ orderId }).lean() as any;
-    if (orderDoc && customer?.email) {
-      import('@/lib/sendEmail').then(({ sendEmail }) => {
-        import('@/lib/emailTemplates').then(({ getOrderConfirmationEmail }) => {
-          const html = getOrderConfirmationEmail(orderId, customer.firstName, orderDoc.items, orderDoc.total);
-          sendEmail(customer.email.toLowerCase(), `Zaybaash Order Confirmation #${orderId}`, html);
-        });
+    if (orderDoc) {
+      // Fire Discord webhook Push Notification
+      import('@/lib/discordNotify').then(({ sendDiscordOrderNotification }) => {
+        sendDiscordOrderNotification(orderDoc);
       }).catch(console.error);
+
+      // Fire HTML Email
+      if (customer?.email) {
+        import('@/lib/sendEmail').then(({ sendEmail }) => {
+          import('@/lib/emailTemplates').then(({ getOrderConfirmationEmail }) => {
+            const html = getOrderConfirmationEmail(orderId, customer.firstName, orderDoc.items, orderDoc.total);
+            sendEmail(customer.email.toLowerCase(), `Zaybaash Order Confirmation #${orderId}`, html);
+          });
+        }).catch(console.error);
+      }
     }
 
     // If bank transfer, send token back for the proof upload page.
