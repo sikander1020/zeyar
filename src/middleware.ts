@@ -10,11 +10,11 @@ export function middleware(request: NextRequest) {
 
   const hostHeader = request.headers.get('host') ?? '';
   const host = hostHeader.split(':')[0].toLowerCase();
-  const isLegacyDomain = host === 'zeyar.me' || host === 'www.zeyar.me';
-  const isVercelPreview = host.endsWith('.vercel.app');
-  const needsHttpsOnCanonical = host === 'www.zaybaash.com' && request.nextUrl.protocol !== 'https:';
+  const canonicalHost = new URL(SITE_ORIGIN).host.toLowerCase();
+  const needsHostCanonicalRedirect = Boolean(host) && host !== canonicalHost;
+  const needsHttpsOnCanonical = host === canonicalHost && request.nextUrl.protocol !== 'https:';
 
-  if (!isLegacyDomain && !isVercelPreview && !needsHttpsOnCanonical) {
+  if (!needsHostCanonicalRedirect && !needsHttpsOnCanonical) {
     return NextResponse.next();
   }
 
