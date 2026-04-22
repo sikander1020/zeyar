@@ -156,6 +156,15 @@ interface ReviewRow {
   isVerifiedPurchase: boolean;
   createdAt: string;
 }
+interface SignupUserRow {
+  userId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  role: string;
+  createdAt: string | null;
+}
 interface DashData {
   summary: Summary[]; orders: Order[]; orderItems: OrderItem[];
   dailyRevenue: DailyRevenue[]; monthlyRevenue: MonthlyRevenue[];
@@ -226,6 +235,7 @@ const TABS = [
   { id: 'categories', label: 'Categories',      icon: '▤' },
   { id: 'inventory',  label: 'Inventory',       icon: '▤' },
   { id: 'customers',  label: 'Customers',       icon: '⊙' },
+  { id: 'signups',    label: 'Signed Up Users', icon: '👤' },
   { id: 'sales-mgr',  label: 'Sales',           icon: '🔥' },
   { id: 'reviews',    label: 'Reviews',         icon: '★' },
   { id: 'finance',    label: 'Finance',         icon: '₨' },
@@ -323,6 +333,31 @@ function LoginWall({ onLogin }: { onLogin: () => void }) {
 function OverviewTab({ data }: { data: DashData }) {
   const s = data.summary[0];
   const hasError = data._error;
+  const [signupCount, setSignupCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadSignups() {
+      try {
+        const token = localStorage.getItem('zaybaash_admin_token') ?? '';
+        const ts = localStorage.getItem('zaybaash_admin_ts') ?? '';
+        const res = await fetch('/api/admin/users', {
+          cache: 'no-store',
+          headers: { 'x-admin-token': token, 'x-admin-ts': ts, 'Cache-Control': 'no-cache' },
+        });
+        const d = await res.json() as { users?: SignupUserRow[] };
+        if (!cancelled && res.ok) {
+          setSignupCount((d.users ?? []).length);
+        }
+      } catch {
+        if (!cancelled) setSignupCount(null);
+      }
+    }
+
+    void loadSignups();
+    return () => { cancelled = true; };
+  }, []);
   
   if (!s) return <p style={{ color: MUTED }}>No data yet. Place your first order to see stats.</p>;
   
@@ -348,6 +383,7 @@ function OverviewTab({ data }: { data: DashData }) {
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(220px,1fr))', gap: 20 }}>
         <KpiCard label="Total Revenue"   value={fmt(s.totalRevenue)}   accent />
         <KpiCard label="Total Orders"    value={fmtN(s.totalOrders)} />
+        <KpiCard label="Signed Up Users" value={signupCount === null ? '...' : fmtN(signupCount)} />
         <KpiCard label="Gross Profit"    value={fmt(s.grossProfit)}    accent />
         <KpiCard label="Profit Margin"   value={`${s.profitMargin}%`} />
         <KpiCard label="Avg Order Value" value={fmt(s.avgOrderValue)} />
@@ -2500,6 +2536,140 @@ function CustomersTab({ data }: { data: DashData }) {
   );
 }
 
+// ── Signed Up Users Tab ─────────────────────────────────────────────────────
+function SignupsTab() {
+  const [rows, setRows] = useState<SignupUserRow[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState('');
+  const [search, setSearch] = useState('');
+
+  const authHeaders = useCallback(() => {
+    const token = localStorage.getItem('zaybaash_admin_token') ?? '';
+    const ts = localStorage.getItem('zaybaash_admin_ts') ?? '';
+    return { 'x-admin-token': token, 'x-admin-ts': ts };
+  }, []);
+
+  const load = useCallback(async () => {
+    setErr('');
+    setLoading(true);
+    try {
+      const res = await fetch('/api/admin/users', {
+        cache: 'no-store',
+        headers: { ...authHeaders(), 'Cache-Control': 'no-cache' },
+      });
+      const data = await res.json() as { users?: SignupUserRow[]; error?: string };
+      if (!res.ok) {
+        setErr(data.error ?? 'Failed to load users');
+        return;
+      }
+      setRows(data.users ?? []);
+    } catch {
+      setErr('Failed to load users');
+    } finally {
+      setLoading(false);
+    }
+  }, [authHeaders]);
+
+  useEffect(() => { void load(); }, [load]);
+
+  const filtered = rows.filter((u) => {
+    if (!search.trim()) return true;
+    const s = search.toLowerCase();
+    const fullName = `${u.firstName} ${u.lastName}`.trim().toLowerCase();
+    return (
+      fullName.includes(s) ||
+      u.email.toLowerCase().includes(s) ||
+      (u.phone || '').toLowerCase().includes(s)
+    );
+  });
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+        <input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by name, email, or phone…"
+          style={{
+            minWidth: 260,
+            maxWidth: 420,
+            width: '100%',
+            padding: '10px 14px',
+            border: '1px solid #EBD9CC',
+            borderRadius: 8,
+            fontSize: 13,
+            color: BROWN,
+            background: CREAM,
+            outline: 'none',
+          }}
+        />
+        <button
+          onClick={() => load()}
+          disabled={loading}
+          style={{
+            padding: '10px 14px',
+            background: loading ? MUTED : ROSE,
+            color: '#fff',
+            border: 'none',
+            borderRadius: 8,
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: loading ? 'default' : 'pointer',
+          }}
+        >
+          {loading ? 'Loading…' : 'Refresh'}
+        </button>
+      </div>
+
+      <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>
+        Signed up users: {filtered.length}
+      </p>
+
+      {err && (
+        <div style={{ padding: 12, borderRadius: 10, background: '#fff', border: '1px solid #EBD9CC', color: '#C0504D' }}>
+          {err}
+        </div>
+      )}
+
+      <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 0, overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+            <thead>
+              <tr style={{ background: ROSE, color: '#fff' }}>
+                {['Name', 'Email', 'Phone', 'Role', 'Signed Up'].map((h) => (
+                  <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={5} style={{ padding: 28, textAlign: 'center', color: MUTED }}>
+                    {loading ? 'Loading users…' : 'No signed-up users found.'}
+                  </td>
+                </tr>
+              )}
+              {filtered.map((u, i) => {
+                const name = `${u.firstName} ${u.lastName}`.trim() || '—';
+                const signed = u.createdAt ? new Date(u.createdAt).toLocaleString() : '—';
+                return (
+                  <tr key={u.userId} style={{ background: i % 2 === 0 ? '#fff' : BEIGE }}>
+                    <td style={{ padding: '10px 14px', fontWeight: 500 }}>{name}</td>
+                    <td style={{ padding: '10px 14px', color: MUTED, fontSize: 12 }}>{u.email || '—'}</td>
+                    <td style={{ padding: '10px 14px' }}>{u.phone || '—'}</td>
+                    <td style={{ padding: '10px 14px', textTransform: 'capitalize' }}>{u.role || 'customer'}</td>
+                    <td style={{ padding: '10px 14px' }}>{signed}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Bank Proofs Tab ───────────────────────────────────────────────────────────
 function BankProofsTab() {
   const [rows, setRows] = useState<BankProofRow[]>([]);
@@ -2989,6 +3159,7 @@ export default function DashboardPage() {
             {tab === 'categories' && <CategoriesTab />}
             {tab === 'inventory'  && <InventoryTab  data={data} />}
             {tab === 'customers'  && <CustomersTab  data={data} />}
+            {tab === 'signups'    && <SignupsTab />}
             {tab === 'sales-mgr'  && <SalesMgrTab />}
             {tab === 'campaigns'  && <CampaignsTab />}
             {tab === 'reviews'    && <ReviewsTab />}
