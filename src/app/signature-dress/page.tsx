@@ -5,8 +5,23 @@ import { SITE_ORIGIN } from '@/lib/siteUrl';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  title: 'Signature Dress — ZAYBAASH\'s Most Iconic Handcrafted Piece',
+  description: 'Discover the ZAYBAASH Signature Dress — a limited-edition, handcrafted masterpiece. The most iconic and sought-after piece from Pakistan\'s premier luxury women\'s fashion brand.',
   alternates: {
     canonical: `${SITE_ORIGIN}/signature-dress`,
+  },
+  openGraph: {
+    title: 'ZAYBAASH Signature Dress — Limited Edition Handcrafted Luxury',
+    description: 'Own the ZAYBAASH Signature Dress. A limited-edition, handcrafted luxury piece from Pakistan\'s most prestigious women\'s fashion brand.',
+    url: `${SITE_ORIGIN}/signature-dress`,
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'ZAYBAASH Signature Dress — Handcrafted Luxury',
+      },
+    ],
   },
 };
 

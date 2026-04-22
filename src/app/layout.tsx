@@ -23,35 +23,54 @@ export const metadata: Metadata = {
     shortcut: '/apple-icon.png',
   },
   title: {
-    template: "%s | ZAYBAASH — Beauty with Style in Pakistan",
-    default: "ZAYBAASH — Beauty with Style in Pakistan | Premium Women's Fashion",
+    template: "ZAYBAASH | %s",
+    default: "ZAYBAASH",
   },
-  description: "Discover ZAYBAASH's exclusive collection of beauty with style in Pakistan. Elegant one-piece statement pieces, matched two-piece sets, and premium designer wear for the modern Pakistani woman. Shop luxury fashion online.",
-  keywords: "ZAYBAASH, beauty with style Pakistan, women's clothing Pakistan, elegant dresses, one piece dresses, two piece suits, premium fashion Karachi, Lahore, Islamabad, Pakistani designer wear, luxury fashion online",
+  description: "ZAYBAASH official store. Premium women's fashion in Pakistan with luxury one-piece dresses, two-piece suits, and signature handcrafted styles.",
+  keywords: [
+    "ZAYBAASH",
+    "beauty with style Pakistan",
+    "women's clothing Pakistan",
+    "luxury dresses Pakistan",
+    "one piece dresses Pakistan",
+    "two piece suits Pakistan",
+    "premium women fashion Islamabad",
+    "Pakistani designer wear online",
+    "buy dresses online Pakistan",
+    "women fashion Karachi Lahore",
+    "zaybaash.com",
+    "ZAYBAASH brand",
+  ],
+  authors: [{ name: 'ZAYBAASH', url: SITE_ORIGIN }],
+  creator: 'ZAYBAASH',
+  publisher: 'ZAYBAASH',
+  category: 'fashion',
   verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
     ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
     : undefined,
   openGraph: {
-    title: "ZAYBAASH — Beauty with Style Pakistan | Premium Fashion",
-    description: "Discover ZAYBAASH's exclusive collection of beauty with style in Pakistan. Shop elegant dresses, one-piece & two-piece designer wear.",
+    title: "ZAYBAASH — Premium Women's Fashion in Pakistan",
+    description: "Shop ZAYBAASH — Pakistan's premier luxury women's fashion brand. One-piece dresses, two-piece suits, and signature handcrafted pieces. Free delivery across major cities.",
     url: SITE_ORIGIN,
     siteName: 'ZAYBAASH',
     locale: 'en_PK',
     type: "website",
     images: [
       {
-        url: '/apple-icon.png',
-        width: 192,
-        height: 192,
-        alt: 'ZAYBAASH Logo - Beauty with Style',
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'ZAYBAASH — Beauty with Style in Pakistan',
       },
     ],
   },
   twitter: {
-    card: 'summary',
-    title: "ZAYBAASH — Beauty with Style Pakistan",
-    description: "Discover ZAYBAASH's exclusive collection of premium women's fashion in Pakistan.",
-    images: ['/apple-icon.png'],
+    card: 'summary_large_image',
+    site: '@zaybaash',
+    creator: '@zaybaash',
+    title: "ZAYBAASH — Premium Women's Fashion in Pakistan",
+    description: "Pakistan's premier luxury women's fashion. Shop one-piece dresses, two-piece suits & signature pieces. Free delivery.",
+    images: ['/og-image.png'],
   },
   robots: {
     index: true,
@@ -66,10 +85,14 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: SITE_ORIGIN,
+    languages: {
+      'en-PK': SITE_ORIGIN,
+      'x-default': SITE_ORIGIN,
+    },
   },
   other: {
     'facebook-domain-verification': 'i1l8y9vlrmov8985cem7vqx9yty908',
-  }
+  },
 };
 
 export default function RootLayout({
@@ -77,17 +100,77 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const jsonLd = {
+  const organizationLd = {
     '@context': 'https://schema.org',
     '@type': 'Organization',
+    '@id': `${SITE_ORIGIN}/#organization`,
     name: 'ZAYBAASH',
+    alternateName: 'Zaybaash Fashion',
     url: SITE_ORIGIN,
-    logo: `${SITE_ORIGIN}/apple-icon.png`,
-    description: 'Beauty with Style in Pakistan - Premium women\'s fashion',
+    logo: {
+      '@type': 'ImageObject',
+      url: `${SITE_ORIGIN}/apple-icon.png`,
+      width: 192,
+      height: 192,
+    },
+    image: `${SITE_ORIGIN}/og-image.png`,
+    description: 'ZAYBAASH is Pakistan\'s premier luxury women\'s fashion brand. Beauty with Style — premium one-piece dresses, two-piece suits and signature handcrafted pieces delivered across Pakistan.',
+    foundingDate: '2026',
+    foundingLocation: 'Islamabad, Pakistan',
+    areaServed: 'PK',
+    contactPoint: [
+      {
+        '@type': 'ContactPoint',
+        telephone: '+92-321-964-3246',
+        contactType: 'customer service',
+        email: 'care.zaybaash@gmail.com',
+        availableLanguage: ['en', 'ur'],
+        areaServed: 'PK',
+        hoursAvailable: {
+          '@type': 'OpeningHoursSpecification',
+          dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+          opens: '10:00',
+          closes: '18:00',
+        },
+      },
+    ],
     sameAs: [
       'https://www.instagram.com/zaybaash/',
       'https://www.tiktok.com/@zaybaash/',
-      'https://facebook.com/zaybaash',
+      'https://www.facebook.com/zaybaash/',
+      'https://x.com/zaybaash',
+    ],
+  };
+
+  const websiteLd = {
+    '@context': 'https://schema.org',
+    '@type': 'WebSite',
+    '@id': `${SITE_ORIGIN}/#website`,
+    url: SITE_ORIGIN,
+    name: 'ZAYBAASH',
+    description: 'Pakistan\'s premier luxury women\'s fashion brand',
+    publisher: { '@id': `${SITE_ORIGIN}/#organization` },
+    inLanguage: 'en-PK',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${SITE_ORIGIN}/dresses?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  };
+
+  const breadcrumbLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: SITE_ORIGIN,
+      },
     ],
   };
 
@@ -125,7 +208,15 @@ gtag('config', 'G-ERQGVY9029');`,
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbLd) }}
         />
       </head>
       <body suppressHydrationWarning>

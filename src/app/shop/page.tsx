@@ -14,8 +14,23 @@ import { SITE_ORIGIN } from '@/lib/siteUrl';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  title: 'Shop Women\'s Fashion — Dresses, Suits & More',
+  description: 'Browse the full ZAYBAASH collection. Shop premium women\'s dresses, two-piece suits, one-piece statement pieces, and signature handcrafted fashion. Cash on Delivery available across Pakistan.',
   alternates: {
     canonical: `${SITE_ORIGIN}/shop`,
+  },
+  openGraph: {
+    title: 'Shop ZAYBAASH — Premium Women\'s Fashion Pakistan',
+    description: 'Discover our full collection of luxury dresses, two-piece suits and signature pieces. Fast delivery across Pakistan. COD available.',
+    url: `${SITE_ORIGIN}/shop`,
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'ZAYBAASH Shop — Women\'s Fashion Pakistan',
+      },
+    ],
   },
 };
 

@@ -1,4 +1,6 @@
+import type { Metadata } from 'next';
 import AppShell from '@/components/layout/AppShell';
+import { SITE_ORIGIN } from '@/lib/siteUrl';
 
 const faqs = [
   {
@@ -27,19 +29,39 @@ const faqs = [
   },
 ];
 
-import { SITE_ORIGIN } from '@/lib/siteUrl';
-
-export const metadata = {
-  title: 'FAQ',
-  description: 'Frequently asked questions about orders, delivery, payments, returns, and support at ZAYBAASH.',
+export const metadata: Metadata = {
+  title: 'FAQ — Frequently Asked Questions About Orders & Delivery',
+  description: 'Find answers to common questions about ZAYBAASH orders, delivery times in Pakistan, Cash on Delivery, returns, exchanges, size guidance, bank transfer payments, and customer support.',
   alternates: {
     canonical: `${SITE_ORIGIN}/faq`,
+  },
+  openGraph: {
+    title: 'ZAYBAASH FAQ — Orders, Delivery, Returns & Support',
+    description: 'Everything you need to know about shopping at ZAYBAASH. Delivery, COD, returns, size guide, and more.',
+    url: `${SITE_ORIGIN}/faq`,
   },
 };
 
 export default function FaqPage() {
+  const faqPageLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqs.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.a,
+      },
+    })),
+  };
+
   return (
     <AppShell>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqPageLd) }}
+      />
       <div className="pt-32 pb-24 bg-cream min-h-screen">
         <div className="max-w-4xl mx-auto px-6">
           <div className="text-center mb-14">

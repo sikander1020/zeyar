@@ -5,8 +5,23 @@ import { SITE_ORIGIN } from '@/lib/siteUrl';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  title: 'Women\'s Dresses — Buy Premium Dresses Online in Pakistan',
+  description: 'Shop ZAYBAASH\'s exclusive collection of premium women\'s dresses in Pakistan. Elegant two-piece suits, stylish kurtas, and designer fashion. Delivered to Islamabad, Lahore, Karachi & beyond. COD available.',
   alternates: {
     canonical: `${SITE_ORIGIN}/dresses`,
+  },
+  openGraph: {
+    title: 'Women\'s Dresses — Buy Premium Dresses Online | ZAYBAASH Pakistan',
+    description: 'Explore a curated range of luxury women\'s dresses. Two-piece suits, designer wear and more — with fast delivery across Pakistan.',
+    url: `${SITE_ORIGIN}/dresses`,
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'ZAYBAASH Women\'s Dresses Collection',
+      },
+    ],
   },
 };
 
