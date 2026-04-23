@@ -297,22 +297,20 @@ export default function ContactForm() {
 
               {error && <p className="text-sm text-[#ffc7bf]">{error}</p>}
 
-              <motion.button
-                variants={fieldVariants}
-                initial="hidden"
-                animate="visible"
-                custom={3}
-                type="submit"
-                disabled={loading}
-                whileTap={!loading ? { scale: 0.98 } : undefined}
-                whileHover={!loading ? { scale: 1.02, y: -2 } : undefined}
-                animate={reduceMotion ? undefined : { backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
-                transition={{ duration: 3.2, repeat: Infinity, ease: 'linear' }}
-                className="mt-1 w-full rounded-xl bg-gradient-to-r from-[#bf746d] to-[#c98a7e] px-4 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#2d1f22] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
-                style={{ backgroundSize: '200% 200%' }}
-              >
-                {loading ? 'Sending...' : 'Submit'}
-              </motion.button>
+              <motion.div variants={fieldVariants} initial="hidden" animate="visible" custom={3}>
+                <motion.button
+                  type="submit"
+                  disabled={loading}
+                  whileTap={!loading ? { scale: 0.98 } : undefined}
+                  whileHover={!loading ? { scale: 1.02, y: -2 } : undefined}
+                  animate={reduceMotion ? undefined : { backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+                  transition={{ duration: 3.2, repeat: Infinity, ease: 'linear' }}
+                  className="mt-1 w-full rounded-xl bg-gradient-to-r from-[#bf746d] to-[#c98a7e] px-4 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#2d1f22] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+                  style={{ backgroundSize: '200% 200%' }}
+                >
+                  {loading ? 'Sending...' : 'Submit'}
+                </motion.button>
+              </motion.div>
             </form>
           )}
         </div>
