@@ -1,11 +1,10 @@
 'use client';
 
-import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import dynamic from 'next/dynamic';
+import Script from 'next/script';
 import AppShell from '@/components/layout/AppShell';
-import ContactForm from '@/components/forms/ContactForm';
 
 const ShaderGradientCanvas = dynamic(() => import('@/components/3d/ShaderGradient'), {
   ssr: false,
@@ -39,37 +38,6 @@ function IconFacebook({ size = 16 }: { size?: number }) {
 }
 
 export default function ContactPage() {
-  const [sent, setSent] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-
-  const handleSubmit = async (formData: { name: string; email: string; subject: string; message: string }) => {
-    setLoading(true);
-    setError('');
-
-    try {
-      const res = await fetch('/api/contact', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (!res.ok) {
-        throw new Error('Failed to send message');
-      }
-
-      setSent(true);
-      // Reset form after 3 seconds
-      setTimeout(() => setSent(false), 3000);
-    } catch (err) {
-      setError('Something went wrong. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <AppShell>
       <div className="pt-24 min-h-screen bg-cream relative overflow-hidden">
@@ -233,14 +201,20 @@ export default function ContactPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.7 }}
-                className="glass rounded-2xl p-8 sm:p-10 backdrop-blur-md"
+                className="glass rounded-2xl p-3 sm:p-4 backdrop-blur-md"
               >
-                <ContactForm 
-                  onSubmit={handleSubmit}
-                  loading={loading}
-                  error={error}
-                  sent={sent}
-                  setSent={setSent}
+                <div
+                  className="visme_d"
+                  data-title="Animated Online Contact Form"
+                  data-url="op6o6v3e-animated-online-contact-form?fullPage=true"
+                  data-domain="forms"
+                  data-full-page="true"
+                  data-min-height="100vh"
+                  data-form-id="174832"
+                />
+                <Script
+                  src="https://static-bundles.visme.co/forms/vismeforms-embed.js"
+                  strategy="afterInteractive"
                 />
               </motion.div>
             </div>
