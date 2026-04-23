@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import AppShell from '@/components/layout/AppShell';
-import ContactForm from '../../components/forms/ContactForm';
+import { ContactForm } from '@/components/forms';
 
 const ShaderGradientCanvas = dynamic(() => import('@/components/3d/ShaderGradient'), {
   ssr: false,

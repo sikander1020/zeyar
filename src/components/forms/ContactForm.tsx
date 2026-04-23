@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { CheckCircle2, Sparkles } from 'lucide-react';
 
@@ -21,10 +21,31 @@ const fieldVariants = {
 
 export default function ContactForm() {
   const reduceMotion = useReducedMotion();
+  const titleText = "We'd Love to Hear from You";
+  const [typedTitle, setTypedTitle] = useState('');
+
   const [form, setForm] = useState<FormState>({ name: '', email: '', message: '' });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (reduceMotion) {
+      setTypedTitle(titleText);
+      return;
+    }
+
+    let i = 0;
+    const timer = window.setInterval(() => {
+      i += 1;
+      setTypedTitle(titleText.slice(0, i));
+      if (i >= titleText.length) {
+        window.clearInterval(timer);
+      }
+    }, 45);
+
+    return () => window.clearInterval(timer);
+  }, [reduceMotion]);
 
   const update = (key: keyof FormState, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -81,7 +102,7 @@ export default function ContactForm() {
           className="pointer-events-none absolute h-2 w-2 rounded-full bg-nude/50"
           style={{ top: `${20 + dot * 25}%`, right: `${8 + dot * 6}%` }}
           animate={reduceMotion ? undefined : { y: [0, -10, 0], opacity: [0.2, 0.8, 0.2] }}
-          transition={reduceMotion ? undefined : { duration: 2.8 + dot * 0.5, repeat: Infinity, ease: 'easeInOut', delay: dot * 0.3 }}
+          transition={{ duration: 2.8 + dot * 0.5, repeat: Infinity, ease: 'easeInOut', delay: dot * 0.3 }}
         />
       ))}
 
@@ -89,7 +110,7 @@ export default function ContactForm() {
         aria-hidden
         className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-gradient-to-br from-rose-gold/30 to-nude/10 blur-3xl"
         animate={reduceMotion ? undefined : { scale: [1, 1.08, 1], rotate: [0, 12, 0] }}
-        transition={reduceMotion ? undefined : { duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
       />
 
       <div className="relative grid grid-cols-1 gap-5 sm:grid-cols-[110px_1fr] sm:gap-6">
@@ -102,40 +123,50 @@ export default function ContactForm() {
           <motion.div
             className="relative h-52 w-20"
             animate={reduceMotion ? undefined : { y: [0, -6, 0], rotate: [0, 1.5, -1.5, 0] }}
-            transition={reduceMotion ? undefined : { duration: 3.6, repeat: Infinity, ease: 'easeInOut' }}
+            transition={{ duration: 3.6, repeat: Infinity, ease: 'easeInOut' }}
           >
             <motion.div
               className="absolute left-1/2 top-0 h-9 w-9 -translate-x-1/2 rounded-full bg-[#f0c9bf]"
               animate={reduceMotion ? undefined : { y: [0, -2, 0] }}
-              transition={reduceMotion ? undefined : { duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+              transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
             />
             <div className="absolute left-1/2 top-2.5 h-3.5 w-10 -translate-x-1/2 rounded-full bg-[#2a1f24]">
               <motion.span
                 className="absolute left-[10px] top-[5px] h-[2px] w-[5px] rounded-full bg-[#f7d8cc]"
                 animate={reduceMotion ? undefined : { scaleY: [1, 0.2, 1] }}
-                transition={reduceMotion ? undefined : { duration: 2.2, repeat: Infinity, repeatDelay: 1.3 }}
+                transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 1.3 }}
               />
               <motion.span
                 className="absolute right-[10px] top-[5px] h-[2px] w-[5px] rounded-full bg-[#f7d8cc]"
                 animate={reduceMotion ? undefined : { scaleY: [1, 0.2, 1] }}
-                transition={reduceMotion ? undefined : { duration: 2.2, repeat: Infinity, repeatDelay: 1.3 }}
+                transition={{ duration: 2.2, repeat: Infinity, repeatDelay: 1.3 }}
               />
             </div>
             <motion.div
               className="absolute left-1/2 top-8 h-20 w-14 -translate-x-1/2 rounded-t-3xl rounded-b-xl bg-gradient-to-b from-[#9a5b67] to-[#6b3f48]"
               animate={reduceMotion ? undefined : { rotate: [-2, 2, -2], y: [0, 2, 0] }}
-              transition={reduceMotion ? undefined : { duration: 3.4, repeat: Infinity, ease: 'easeInOut' }}
+              transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut' }}
             />
             <motion.div
               className="absolute left-[20px] top-[111px] h-20 w-[10px] rounded-full bg-[#2f2529]"
               animate={reduceMotion ? undefined : { rotate: [-1.5, 1.5, -1.5] }}
-              transition={reduceMotion ? undefined : { duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
+              transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
             />
             <motion.div
               className="absolute left-[48px] top-[111px] h-20 w-[10px] rounded-full bg-[#2f2529]"
               animate={reduceMotion ? undefined : { rotate: [1.5, -1.5, 1.5] }}
-              transition={reduceMotion ? undefined : { duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
+              transition={{ duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
             />
+
+            {[0, 1, 2].map((idx) => (
+              <motion.span
+                key={idx}
+                className="absolute left-[58px] top-[98px] h-2 w-2 rounded-full bg-[#f0c9bf]"
+                animate={reduceMotion ? undefined : { x: [0, 12, 22], y: [0, -6, -10], opacity: [0.8, 0.45, 0] }}
+                transition={{ duration: 1.1, repeat: Infinity, ease: 'easeOut', delay: idx * 0.2 }}
+              />
+            ))}
+
             <div className="absolute left-[14px] top-[186px] h-3 w-[24px] rounded-full bg-[#e7d7cf]" />
             <div className="absolute left-[44px] top-[186px] h-3 w-[24px] rounded-full bg-[#e7d7cf]" />
           </motion.div>
@@ -153,7 +184,14 @@ export default function ContactForm() {
               Personal Assistance
             </div>
             <h3 className="text-2xl font-playfair text-cream" style={{ fontFamily: "'Playfair Display', serif" }}>
-              We&apos;d Love to Hear from You
+              {typedTitle}
+              {!reduceMotion && typedTitle.length < titleText.length && (
+                <motion.span
+                  className="ml-1 inline-block h-6 w-[2px] bg-nude align-middle"
+                  animate={{ opacity: [1, 0, 1] }}
+                  transition={{ duration: 0.9, repeat: Infinity }}
+                />
+              )}
             </h3>
             <p className="mt-1 text-xs font-inter text-[#d7c6bf]" style={{ fontFamily: "'Inter', sans-serif" }}>
               Share your inquiry and our team will get back to you quickly.
@@ -185,38 +223,74 @@ export default function ContactForm() {
             <form onSubmit={handleSubmit} className="space-y-3">
               <motion.div variants={fieldVariants} initial="hidden" animate="visible" custom={0}>
                 <label className="mb-1 block text-[11px] uppercase tracking-[0.16em] text-[#d4b6ae]">Full Name</label>
-                <input
+                <motion.input
                   value={form.name}
                   onChange={(e) => update('name', e.target.value)}
                   required
                   disabled={loading}
                   placeholder="Your name"
+                  animate={
+                    reduceMotion
+                      ? undefined
+                      : {
+                          boxShadow: [
+                            '0 0 0px rgba(245, 190, 176, 0.0)',
+                            '0 0 10px rgba(245, 190, 176, 0.18)',
+                            '0 0 0px rgba(245, 190, 176, 0.0)',
+                          ],
+                        }
+                  }
+                  transition={{ duration: 2.8, repeat: Infinity, ease: 'easeInOut' }}
                   className="w-full rounded-xl border border-[#77585f] bg-[#60464d]/40 px-4 py-3 text-sm text-cream outline-none transition placeholder:text-[#b99795] focus:border-nude/70 focus:ring-2 focus:ring-nude/20"
                 />
               </motion.div>
 
               <motion.div variants={fieldVariants} initial="hidden" animate="visible" custom={1}>
                 <label className="mb-1 block text-[11px] uppercase tracking-[0.16em] text-[#d4b6ae]">Email</label>
-                <input
+                <motion.input
                   type="email"
                   value={form.email}
                   onChange={(e) => update('email', e.target.value)}
                   required
                   disabled={loading}
                   placeholder="you@email.com"
+                  animate={
+                    reduceMotion
+                      ? undefined
+                      : {
+                          boxShadow: [
+                            '0 0 0px rgba(245, 190, 176, 0.0)',
+                            '0 0 10px rgba(245, 190, 176, 0.16)',
+                            '0 0 0px rgba(245, 190, 176, 0.0)',
+                          ],
+                        }
+                  }
+                  transition={{ duration: 3.1, repeat: Infinity, ease: 'easeInOut', delay: 0.35 }}
                   className="w-full rounded-xl border border-[#77585f] bg-[#60464d]/40 px-4 py-3 text-sm text-cream outline-none transition placeholder:text-[#b99795] focus:border-nude/70 focus:ring-2 focus:ring-nude/20"
                 />
               </motion.div>
 
               <motion.div variants={fieldVariants} initial="hidden" animate="visible" custom={2}>
                 <label className="mb-1 block text-[11px] uppercase tracking-[0.16em] text-[#d4b6ae]">Message</label>
-                <textarea
+                <motion.textarea
                   value={form.message}
                   onChange={(e) => update('message', e.target.value)}
                   required
                   rows={5}
                   disabled={loading}
                   placeholder="Tell us how we can help..."
+                  animate={
+                    reduceMotion
+                      ? undefined
+                      : {
+                          boxShadow: [
+                            '0 0 0px rgba(245, 190, 176, 0.0)',
+                            '0 0 12px rgba(245, 190, 176, 0.2)',
+                            '0 0 0px rgba(245, 190, 176, 0.0)',
+                          ],
+                        }
+                  }
+                  transition={{ duration: 3.4, repeat: Infinity, ease: 'easeInOut', delay: 0.7 }}
                   className="w-full resize-none rounded-xl border border-[#77585f] bg-[#60464d]/40 px-4 py-3 text-sm text-cream outline-none transition placeholder:text-[#b99795] focus:border-nude/70 focus:ring-2 focus:ring-nude/20"
                 />
               </motion.div>
@@ -233,7 +307,7 @@ export default function ContactForm() {
                 whileTap={!loading ? { scale: 0.98 } : undefined}
                 whileHover={!loading ? { scale: 1.02, y: -2 } : undefined}
                 animate={reduceMotion ? undefined : { backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
-                transition={reduceMotion ? undefined : { duration: 3.2, repeat: Infinity, ease: 'linear' }}
+                transition={{ duration: 3.2, repeat: Infinity, ease: 'linear' }}
                 className="mt-1 w-full rounded-xl bg-gradient-to-r from-[#bf746d] to-[#c98a7e] px-4 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#2d1f22] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
                 style={{ backgroundSize: '200% 200%' }}
               >
