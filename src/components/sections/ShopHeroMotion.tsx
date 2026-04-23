@@ -2,6 +2,12 @@
 
 import Link from 'next/link';
 import { motion, useReducedMotion } from 'framer-motion';
+import dynamic from 'next/dynamic';
+
+const ShaderGradientCanvas = dynamic(() => import('@/components/3d/ShaderGradient'), {
+  ssr: false,
+  loading: () => null,
+});
 
 export default function ShopHeroMotion() {
   const reduceMotion = useReducedMotion();
@@ -20,6 +26,18 @@ export default function ShopHeroMotion() {
 
   return (
     <section className="relative overflow-hidden bg-beige py-20 text-center mb-0">
+      {/* Animated Shader Gradient Background */}
+      <div className="absolute inset-0 opacity-50">
+        <ShaderGradientCanvas 
+          className="w-full h-full"
+          color1="#F5EDE6"
+          color2="#E6B7A9"
+          color3="#D4919A"
+          intensity={0.5}
+        />
+      </div>
+
+      {/* Floating blob animations */}
       <motion.div
         aria-hidden
         className="pointer-events-none absolute -top-20 -left-24 h-56 w-56 rounded-full bg-rose-gold/20 blur-3xl"

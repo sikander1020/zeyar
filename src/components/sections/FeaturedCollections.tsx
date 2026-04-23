@@ -4,8 +4,14 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { useInView } from 'framer-motion';
 import { useRef, useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
 import CoverflowCarousel from '@/components/carousel/CoverflowCarousel';
 import type { StoreProduct } from '@/types/storefront';
+
+const ShaderGradientCanvas = dynamic(() => import('@/components/3d/ShaderGradient'), {
+  ssr: false,
+  loading: () => null,
+});
 
 export default function FeaturedCollections({ initialProducts }: { initialProducts?: StoreProduct[] } = {}) {
   const ref = useRef(null);
@@ -53,8 +59,19 @@ export default function FeaturedCollections({ initialProducts }: { initialProduc
   };
 
   return (
-    <section className="section-padding bg-cream">
-      <div className="max-w-7xl mx-auto px-6" ref={ref}>
+    <section className="section-padding bg-cream relative overflow-hidden">
+      {/* Animated Shader Gradient Background */}
+      <div className="absolute inset-0 opacity-35">
+        <ShaderGradientCanvas 
+          className="w-full h-full"
+          color1="#FAF7F4"
+          color2="#F0C9BF"
+          color3="#D4919A"
+          intensity={0.5}
+        />
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6 relative" ref={ref}>
         {/* Section header */}
         <motion.div
           variants={sectionVariants}

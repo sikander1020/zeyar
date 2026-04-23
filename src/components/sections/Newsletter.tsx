@@ -3,6 +3,12 @@
 import { useRef, useState } from 'react';
 import { motion, useInView } from 'framer-motion';
 import { Send } from 'lucide-react';
+import dynamic from 'next/dynamic';
+
+const ShaderGradientCanvas = dynamic(() => import('@/components/3d/ShaderGradient'), {
+  ssr: false,
+  loading: () => null,
+});
 
 export default function Newsletter() {
   const ref = useRef(null);
@@ -19,6 +25,17 @@ export default function Newsletter() {
 
   return (
     <section className="py-24 bg-beige relative overflow-hidden" ref={ref}>
+      {/* Animated Shader Gradient Background */}
+      <div className="absolute inset-0 opacity-40">
+        <ShaderGradientCanvas 
+          className="w-full h-full"
+          color1="#F5EDE6"
+          color2="#FAF7F4"
+          color3="#E6B7A9"
+          intensity={0.4}
+        />
+      </div>
+
       {/* Decorative blobs */}
       <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full bg-nude/20 blur-3xl" />
       <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-rose-gold/10 blur-3xl" />

@@ -3,7 +3,14 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import AppShell from '@/components/layout/AppShell';
+import ContactForm from '@/components/forms/ContactForm';
+
+const ShaderGradientCanvas = dynamic(() => import('@/components/3d/ShaderGradient'), {
+  ssr: false,
+  loading: () => null,
+});
 
 function IconInstagram({ size = 16 }: { size?: number }) {
   return (
@@ -32,15 +39,11 @@ function IconFacebook({ size = 16 }: { size?: number }) {
 }
 
 export default function ContactPage() {
-  const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' });
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const update = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (formData: { name: string; email: string; subject: string; message: string }) => {
     setLoading(true);
     setError('');
 
@@ -50,7 +53,7 @@ export default function ContactPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify(formData),
       });
 
       if (!res.ok) {
@@ -58,6 +61,8 @@ export default function ContactPage() {
       }
 
       setSent(true);
+      // Reset form after 3 seconds
+      setTimeout(() => setSent(false), 3000);
     } catch (err) {
       setError('Something went wrong. Please try again later.');
     } finally {
@@ -67,26 +72,65 @@ export default function ContactPage() {
 
   return (
     <AppShell>
-      <div className="pt-24 min-h-screen bg-cream">
-        {/* Header */}
-        <div className="bg-beige py-12 sm:py-16 text-center mb-0 px-4">
-          <span className="text-xs tracking-[0.3em] uppercase text-rose-gold font-inter block mb-3" style={{ fontFamily: "'Inter', sans-serif" }}>
-            Get in Touch
-          </span>
-          <h1 className="text-4xl sm:text-5xl font-playfair text-brown leading-tight" style={{ fontFamily: "'Playfair Display', serif" }}>
-            Contact <span className="italic gradient-rose-text">Us</span>
-          </h1>
-          <div className="divider-rose" />
-          <p className="text-brown-muted font-inter mt-4 max-w-sm mx-auto px-2" style={{ fontFamily: "'Inter', sans-serif" }}>
-            We&apos;d love to hear from you. Our team responds within 24 hours.
-          </p>
+      <div className="pt-24 min-h-screen bg-cream relative overflow-hidden">
+        {/* Animated Shader Gradient Background */}
+        <div className="absolute inset-0 opacity-45">
+          <ShaderGradientCanvas 
+            className="w-full h-full"
+            color1="#FAF7F4"
+            color2="#F0C9BF"
+            color3="#B76E79"
+            intensity={0.5}
+          />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16">
+        {/* Header */}
+        <div className="bg-beige py-12 sm:py-16 text-center mb-0 px-4 relative z-10">
+          <motion.span
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="text-xs tracking-[0.3em] uppercase text-rose-gold font-inter block mb-3"
+            style={{ fontFamily: "'Inter', sans-serif" }}
+          >
+            Get in Touch
+          </motion.span>
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+            className="text-4xl sm:text-5xl font-playfair text-brown leading-tight"
+            style={{ fontFamily: "'Playfair Display', serif" }}
+          >
+            Contact <span className="italic gradient-rose-text">Us</span>
+          </motion.h1>
+          <motion.div
+            initial={{ scaleX: 0 }}
+            animate={{ scaleX: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="divider-rose"
+          />
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="text-brown-muted font-inter mt-4 max-w-sm mx-auto px-2"
+            style={{ fontFamily: "'Inter', sans-serif" }}
+          >
+            We&apos;d love to hear from you. Our team responds within 24 hours.
+          </motion.p>
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-10 sm:py-16 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-10 sm:gap-16">
             {/* Info */}
             <div className="lg:col-span-2 space-y-10">
-              <div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+              >
                 <h2 className="text-2xl font-playfair text-brown mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>
                   Reach Out
                 </h2>
@@ -95,22 +139,34 @@ export default function ContactPage() {
                     { icon: Mail, label: 'Email', value: 'care.zaybaash@gmail.com' },
                     { icon: Phone, label: 'Phone', value: '+92 321 964 3246' },
                     { icon: MapPin, label: 'Address', value: 'Islamabad, Pakistan' },
-                  ].map(({ icon: Icon, label, value }) => (
-                    <div key={label} className="flex gap-4">
-                      <div className="w-10 h-10 bg-nude/20 flex items-center justify-center flex-shrink-0">
+                  ].map(({ icon: Icon, label, value }, idx) => (
+                    <motion.div
+                      key={label}
+                      initial={{ opacity: 0, x: -20 }}
+                      whileInView={{ opacity: 1, x: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.5, delay: idx * 0.1 }}
+                      className="flex gap-4"
+                    >
+                      <div className="w-10 h-10 bg-nude/20 flex items-center justify-center flex-shrink-0 rounded-lg hover:bg-rose-gold/10 transition-colors">
                         <Icon size={16} className="text-rose-gold" strokeWidth={1.5} />
                       </div>
                       <div>
                         <p className="text-xs tracking-[0.15em] uppercase text-brown-muted font-inter mb-1" style={{ fontFamily: "'Inter', sans-serif" }}>{label}</p>
                         <p className="text-sm text-brown font-inter break-words" style={{ fontFamily: "'Inter', sans-serif" }}>{value}</p>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
-              </div>
+              </motion.div>
 
               {/* Social */}
-              <div>
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.2 }}
+              >
                 <h3 className="text-xs tracking-[0.2em] uppercase text-brown-muted font-inter mb-5" style={{ fontFamily: "'Inter', sans-serif" }}>
                   Follow ZAYBAASH
                 </h3>
@@ -119,23 +175,34 @@ export default function ContactPage() {
                     { icon: IconInstagram, href: 'https://www.instagram.com/zaybaash/', label: 'Instagram' },
                     { icon: IconTikTok,    href: 'https://www.tiktok.com/@zaybaash/',   label: 'TikTok'    },
                     { icon: IconFacebook,  href: 'https://facebook.com/zaybaash',  label: 'Facebook'  },
-                  ].map(({ icon: Icon, href, label }) => (
-                    <a
+                  ].map(({ icon: Icon, href, label }, idx) => (
+                    <motion.a
                       key={label}
                       href={href}
                       target="_blank"
                       rel="noopener noreferrer"
                       aria-label={label}
-                      className="w-10 h-10 border border-nude flex items-center justify-center text-brown hover:bg-nude hover:text-white hover:border-nude transition-all duration-300"
+                      initial={{ opacity: 0, scale: 0.8 }}
+                      whileInView={{ opacity: 1, scale: 1 }}
+                      whileHover={{ scale: 1.1 }}
+                      viewport={{ once: true }}
+                      transition={{ duration: 0.3, delay: 0.2 + idx * 0.05 }}
+                      className="w-10 h-10 border border-nude flex items-center justify-center text-brown hover:bg-nude hover:text-white hover:border-nude transition-all duration-300 rounded"
                     >
                       <Icon size={16} />
-                    </a>
+                    </motion.a>
                   ))}
                 </div>
-              </div>
+              </motion.div>
 
               {/* Map placeholder */}
-              <div className="aspect-video bg-beige border border-nude/20 flex items-center justify-center relative overflow-hidden">
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="aspect-video bg-beige border border-nude/20 flex items-center justify-center relative overflow-hidden rounded-xl hover:border-nude/40 transition-colors"
+              >
                 <div className="absolute inset-0"
                   style={{
                     backgroundImage: `
@@ -146,75 +213,36 @@ export default function ContactPage() {
                   }}
                 />
                 <div className="text-center relative z-10">
-                  <MapPin size={32} className="text-rose-gold mx-auto mb-3" strokeWidth={1.5} />
+                  <motion.div
+                    animate={{ y: [0, -8, 0] }}
+                    transition={{ duration: 3, repeat: Infinity }}
+                  >
+                    <MapPin size={32} className="text-rose-gold mx-auto mb-3" strokeWidth={1.5} />
+                  </motion.div>
                   <p className="text-sm text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
                     Islamabad, Pakistan
                   </p>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
             {/* Form */}
             <div className="lg:col-span-3">
-              {sent ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="text-center py-20"
-                >
-                  <div className="text-5xl mb-6">💌</div>
-                  <h2 className="text-3xl font-playfair text-brown mb-4" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    Message Sent
-                  </h2>
-                  <p className="text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    Thank you for reaching out. We&apos;ll be in touch within 24 hours.
-                  </p>
-                </motion.div>
-              ) : (
-                <form onSubmit={handleSubmit} className="space-y-6">
-                  <h2 className="text-2xl font-playfair text-brown mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>
-                    Send a Message
-                  </h2>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                    <div>
-                      <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Name</label>
-                      <input value={form.name} onChange={e => update('name', e.target.value)} required className="input-luxury" placeholder="Your name" />
-                    </div>
-                    <div>
-                      <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Email</label>
-                      <input type="email" value={form.email} onChange={e => update('email', e.target.value)} required className="input-luxury" placeholder="your@email.com" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Subject</label>
-                    <input value={form.subject} onChange={e => update('subject', e.target.value)} required className="input-luxury" placeholder="How can we help you?" />
-                  </div>
-                  <div>
-                    <label className="text-xs tracking-[0.12em] uppercase text-brown-muted font-inter block mb-2" style={{ fontFamily: "'Inter', sans-serif" }}>Message</label>
-                    <textarea
-                      value={form.message}
-                      onChange={e => update('message', e.target.value)}
-                      required
-                      rows={8}
-                      className="input-luxury resize-none"
-                      placeholder="Tell us about your inquiry..."
-                    />
-                  </div>
-                  {error && (
-                    <div className="text-red-500 text-sm font-inter">
-                      {error}
-                    </div>
-                  )}
-                  <motion.button
-                    type="submit"
-                    disabled={loading}
-                    whileTap={!loading ? { scale: 0.98 } : undefined}
-                    className="btn-luxury btn-primary w-full disabled:opacity-70 disabled:cursor-not-allowed"
-                  >
-                    {loading ? 'Sending...' : 'Send Message'}
-                  </motion.button>
-                </form>
-              )}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.7 }}
+                className="glass rounded-2xl p-8 sm:p-10 backdrop-blur-md"
+              >
+                <ContactForm 
+                  onSubmit={handleSubmit}
+                  loading={loading}
+                  error={error}
+                  sent={sent}
+                  setSent={setSent}
+                />
+              </motion.div>
             </div>
           </div>
         </div>

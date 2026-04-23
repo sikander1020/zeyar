@@ -16,6 +16,11 @@ const HeroScene = dynamic(() => import('@/components/3d/HeroScene'), {
   ),
 });
 
+const ShaderGradientCanvas = dynamic(() => import('@/components/3d/ShaderGradient'), {
+  ssr: false,
+  loading: () => null,
+});
+
 export default function HeroSection() {
   const router = useRouter();
   const stagger = {
@@ -53,8 +58,19 @@ export default function HeroSection() {
 
   return (
     <section className="relative min-h-screen overflow-hidden bg-gradient-to-br from-cream via-beige to-cream-dark">
-      {/* Background texture */}
-      <div className="absolute inset-0 opacity-30"
+      {/* Animated Shader Gradient Background */}
+      <div className="absolute inset-0 opacity-60">
+        <ShaderGradientCanvas 
+          className="w-full h-full"
+          color1="#FAF7F4"
+          color2="#F5EDE6"
+          color3="#B76E79"
+          intensity={0.6}
+        />
+      </div>
+
+      {/* Background texture overlay */}
+      <div className="absolute inset-0 opacity-20"
         style={{
           backgroundImage: `radial-gradient(circle at 30% 40%, rgba(230,183,169,0.4) 0%, transparent 50%),
             radial-gradient(circle at 70% 60%, rgba(183,110,121,0.2) 0%, transparent 50%)`,
