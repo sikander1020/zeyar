@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { CheckCircle2, Sparkles } from 'lucide-react';
 
 type FormState = {
@@ -20,6 +20,7 @@ const fieldVariants = {
 };
 
 export default function ContactForm() {
+  const reduceMotion = useReducedMotion();
   const [form, setForm] = useState<FormState>({ name: '', email: '', message: '' });
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
@@ -61,12 +62,34 @@ export default function ContactForm() {
   };
 
   return (
-    <div className="relative rounded-[1.5rem] border border-[#6a4e54]/40 bg-gradient-to-br from-[#4c363c] via-[#3f2d33] to-[#34252a] p-5 sm:p-6 shadow-[0_30px_80px_-28px_rgba(45,27,32,0.6)]">
+    <motion.div
+      className="relative overflow-hidden rounded-[1.5rem] border border-[#6a4e54]/40 bg-gradient-to-br from-[#4c363c] via-[#3f2d33] to-[#34252a] p-5 sm:p-6 shadow-[0_30px_80px_-28px_rgba(45,27,32,0.6)]"
+      animate={reduceMotion ? undefined : { y: [0, -4, 0], rotate: [0, 0.3, 0] }}
+      transition={reduceMotion ? undefined : { duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+    >
+      <motion.div
+        aria-hidden
+        className="pointer-events-none absolute inset-y-0 -left-40 w-32 bg-gradient-to-r from-transparent via-white/10 to-transparent"
+        animate={reduceMotion ? undefined : { x: ['0%', '520%'] }}
+        transition={reduceMotion ? undefined : { duration: 5, repeat: Infinity, ease: 'linear' }}
+      />
+
+      {[0, 1, 2].map((dot) => (
+        <motion.span
+          key={dot}
+          aria-hidden
+          className="pointer-events-none absolute h-2 w-2 rounded-full bg-nude/50"
+          style={{ top: `${20 + dot * 25}%`, right: `${8 + dot * 6}%` }}
+          animate={reduceMotion ? undefined : { y: [0, -10, 0], opacity: [0.2, 0.8, 0.2] }}
+          transition={reduceMotion ? undefined : { duration: 2.8 + dot * 0.5, repeat: Infinity, ease: 'easeInOut', delay: dot * 0.3 }}
+        />
+      ))}
+
       <motion.div
         aria-hidden
         className="pointer-events-none absolute -right-16 -top-16 h-44 w-44 rounded-full bg-gradient-to-br from-rose-gold/30 to-nude/10 blur-3xl"
-        animate={{ scale: [1, 1.08, 1], rotate: [0, 12, 0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
+        animate={reduceMotion ? undefined : { scale: [1, 1.08, 1], rotate: [0, 12, 0] }}
+        transition={reduceMotion ? undefined : { duration: 8, repeat: Infinity, ease: 'easeInOut' }}
       />
 
       <div className="relative grid grid-cols-1 gap-5 sm:grid-cols-[110px_1fr] sm:gap-6">
@@ -76,23 +99,46 @@ export default function ContactForm() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="relative h-52 w-20">
+          <motion.div
+            className="relative h-52 w-20"
+            animate={reduceMotion ? undefined : { y: [0, -6, 0], rotate: [0, 1.5, -1.5, 0] }}
+            transition={reduceMotion ? undefined : { duration: 3.6, repeat: Infinity, ease: 'easeInOut' }}
+          >
             <motion.div
               className="absolute left-1/2 top-0 h-9 w-9 -translate-x-1/2 rounded-full bg-[#f0c9bf]"
-              animate={{ y: [0, -2, 0] }}
-              transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
+              animate={reduceMotion ? undefined : { y: [0, -2, 0] }}
+              transition={reduceMotion ? undefined : { duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
             />
-            <div className="absolute left-1/2 top-2.5 h-3.5 w-10 -translate-x-1/2 rounded-full bg-[#2a1f24]" />
+            <div className="absolute left-1/2 top-2.5 h-3.5 w-10 -translate-x-1/2 rounded-full bg-[#2a1f24]">
+              <motion.span
+                className="absolute left-[10px] top-[5px] h-[2px] w-[5px] rounded-full bg-[#f7d8cc]"
+                animate={reduceMotion ? undefined : { scaleY: [1, 0.2, 1] }}
+                transition={reduceMotion ? undefined : { duration: 2.2, repeat: Infinity, repeatDelay: 1.3 }}
+              />
+              <motion.span
+                className="absolute right-[10px] top-[5px] h-[2px] w-[5px] rounded-full bg-[#f7d8cc]"
+                animate={reduceMotion ? undefined : { scaleY: [1, 0.2, 1] }}
+                transition={reduceMotion ? undefined : { duration: 2.2, repeat: Infinity, repeatDelay: 1.3 }}
+              />
+            </div>
             <motion.div
               className="absolute left-1/2 top-8 h-20 w-14 -translate-x-1/2 rounded-t-3xl rounded-b-xl bg-gradient-to-b from-[#9a5b67] to-[#6b3f48]"
-              animate={{ rotate: [-1.5, 1.5, -1.5] }}
-              transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+              animate={reduceMotion ? undefined : { rotate: [-2, 2, -2], y: [0, 2, 0] }}
+              transition={reduceMotion ? undefined : { duration: 3.4, repeat: Infinity, ease: 'easeInOut' }}
             />
-            <div className="absolute left-[20px] top-[111px] h-20 w-[10px] rounded-full bg-[#2f2529]" />
-            <div className="absolute left-[48px] top-[111px] h-20 w-[10px] rounded-full bg-[#2f2529]" />
+            <motion.div
+              className="absolute left-[20px] top-[111px] h-20 w-[10px] rounded-full bg-[#2f2529]"
+              animate={reduceMotion ? undefined : { rotate: [-1.5, 1.5, -1.5] }}
+              transition={reduceMotion ? undefined : { duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
+            />
+            <motion.div
+              className="absolute left-[48px] top-[111px] h-20 w-[10px] rounded-full bg-[#2f2529]"
+              animate={reduceMotion ? undefined : { rotate: [1.5, -1.5, 1.5] }}
+              transition={reduceMotion ? undefined : { duration: 1.1, repeat: Infinity, ease: 'easeInOut' }}
+            />
             <div className="absolute left-[14px] top-[186px] h-3 w-[24px] rounded-full bg-[#e7d7cf]" />
             <div className="absolute left-[44px] top-[186px] h-3 w-[24px] rounded-full bg-[#e7d7cf]" />
-          </div>
+          </motion.div>
         </motion.div>
 
         <div>
@@ -185,7 +231,11 @@ export default function ContactForm() {
                 type="submit"
                 disabled={loading}
                 whileTap={!loading ? { scale: 0.98 } : undefined}
+                whileHover={!loading ? { scale: 1.02, y: -2 } : undefined}
+                animate={reduceMotion ? undefined : { backgroundPosition: ['0% 50%', '100% 50%', '0% 50%'] }}
+                transition={reduceMotion ? undefined : { duration: 3.2, repeat: Infinity, ease: 'linear' }}
                 className="mt-1 w-full rounded-xl bg-gradient-to-r from-[#bf746d] to-[#c98a7e] px-4 py-3 text-sm font-semibold uppercase tracking-[0.16em] text-[#2d1f22] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-70"
+                style={{ backgroundSize: '200% 200%' }}
               >
                 {loading ? 'Sending...' : 'Submit'}
               </motion.button>
@@ -193,6 +243,6 @@ export default function ContactForm() {
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
