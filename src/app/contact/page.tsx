@@ -3,8 +3,8 @@
 import { motion } from 'framer-motion';
 import { Mail, Phone, MapPin } from 'lucide-react';
 import dynamic from 'next/dynamic';
-import Script from 'next/script';
 import AppShell from '@/components/layout/AppShell';
+import ContactForm from '../../components/forms/ContactForm';
 
 const ShaderGradientCanvas = dynamic(() => import('@/components/3d/ShaderGradient'), {
   ssr: false,
@@ -203,19 +203,7 @@ export default function ContactPage() {
                 transition={{ duration: 0.7 }}
                 className="glass rounded-2xl p-3 sm:p-4 backdrop-blur-md"
               >
-                <div
-                  className="visme_d"
-                  data-title="Animated Online Contact Form"
-                  data-url="op6o6v3e-animated-online-contact-form?fullPage=true"
-                  data-domain="forms"
-                  data-full-page="true"
-                  data-min-height="100vh"
-                  data-form-id="174832"
-                />
-                <Script
-                  src="https://static-bundles.visme.co/forms/vismeforms-embed.js"
-                  strategy="afterInteractive"
-                />
+                <ContactForm />
               </motion.div>
             </div>
           </div>
