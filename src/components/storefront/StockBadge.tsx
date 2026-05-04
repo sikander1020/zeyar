@@ -1,6 +1,5 @@
 import React from 'react';
 import { Package } from 'lucide-react';
-import { cn } from '@/lib/utils'; // Assuming standard cn utility, or fallback to classNames
 
 interface StockBadgeProps {
   /** The current exact stock count */
