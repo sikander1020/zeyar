@@ -12,6 +12,8 @@ import { useToast } from '@/components/layout/ToastProvider';
 import dynamic from 'next/dynamic';
 import { useParams, useRouter } from 'next/navigation';
 import type { StoreProduct } from '@/types/storefront';
+import { StockBadge } from '@/components/storefront/StockBadge';
+import { AttributeCard } from '@/components/storefront/AttributeCard';
 
 const ModelViewer3D = dynamic(() => import('@/components/storefront/ModelViewer3D'), {
   ssr: false,
@@ -647,27 +649,11 @@ export default function ProductPage() {
 
               {/* Stock remaining badge */}
               <div className="mb-8 flex flex-wrap items-center gap-2">
-                {product.outOfStock ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-600 font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    <Package size={12} />
-                    Out of Stock
-                  </span>
-                ) : product.stock <= 3 && product.stock > 0 ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-600 font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    <Package size={12} />
-                    Only {product.stock} remaining!
-                  </span>
-                ) : product.stock <= 10 && product.stock > 0 ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    <Package size={12} />
-                    {product.stock} remaining
-                  </span>
-                ) : product.stock > 10 ? (
-                  <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-green-50 border border-green-200 text-green-700 font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                    <Package size={12} />
-                    In stock
-                  </span>
-                ) : null}
+                <StockBadge 
+                  stock={product.stock} 
+                  outOfStock={product.outOfStock} 
+                  lowStockThreshold={10} 
+                />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
@@ -676,20 +662,13 @@ export default function ProductPage() {
                   { icon: ShieldCheck, label: 'Craft', value: craftLabel },
                   { icon: Sparkles, label: 'Color', value: selectedColorSafe.name || 'Default' },
                   { icon: Ruler, label: 'Line', value: lineLabel },
-                ].map(({ icon: Icon, label, value }) => (
-                  <div key={label} className="border border-nude/25 bg-white/70 px-4 py-3">
-                    <div className="flex items-start gap-2.5">
-                      <Icon size={14} className="mt-0.5 text-rose-gold" strokeWidth={1.6} />
-                      <div>
-                        <p className="text-[10px] tracking-[0.14em] uppercase text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          {label}
-                        </p>
-                        <p className="text-sm text-brown font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                          {value}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
+                ].map(({ icon, label, value }) => (
+                  <AttributeCard 
+                    key={label}
+                    label={label}
+                    value={value}
+                    icon={icon}
+                  />
                 ))}
               </div>
 
