@@ -625,7 +625,7 @@ export default function ProductPage() {
                 </span>
               </div>
 
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-rose-gold/25 bg-rose-gold/10 px-3 py-1.5 text-xs text-rose-gold font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-rose-gold/25 bg-rose-gold/10 px-3 py-1.5 text-xs text-rose-gold font-inter transition-all duration-300 hover:bg-rose-gold/15 hover:shadow-sm" style={{ fontFamily: "'Inter', sans-serif" }}>
                 <Heart size={12} className="fill-current" />
                 Loved by {lovedByCount.toLocaleString()} shoppers
               </div>
@@ -718,16 +718,16 @@ export default function ProductPage() {
               <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 mb-8">
                 <motion.button
                   whileTap={{ scale: 0.98 }}
-                  disabled={product.outOfStock || addingToCart}
+                  disabled={product.outOfStock || product.stock <= 0 || addingToCart}
                   onClick={handleAddToCart}
                   className="btn-luxury btn-primary flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <ShoppingBag size={15} strokeWidth={2} />
-                  {product.outOfStock ? 'Out of Stock' : addingToCart ? 'Adding...' : 'Add to Bag'}
+                  {(product.outOfStock || product.stock <= 0) ? 'Out of Stock' : addingToCart ? 'Adding...' : 'Add to Bag'}
                 </motion.button>
                 <button
                   type="button"
-                  disabled={product.outOfStock || buyingNow}
+                  disabled={product.outOfStock || product.stock <= 0 || buyingNow}
                   onClick={handleBuyNow}
                   className="btn-luxury btn-outline disabled:opacity-60 disabled:cursor-not-allowed"
                 >

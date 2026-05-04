@@ -44,7 +44,7 @@ export const AttributeCard: React.FC<AttributeCardProps> = ({
   const displayValue = value?.trim() || 'N/A';
 
   return (
-    <div className="border border-nude/25 bg-white/70 px-4 py-3 transition-colors hover:bg-white/90">
+    <div className="border border-nude/25 bg-white/70 backdrop-blur-sm px-4 py-3 transition-all duration-300 hover:bg-white/80 hover:shadow-sm hover:border-rose-gold/30 hover:-translate-y-0.5">
       <div className="flex items-start gap-2.5">
         <Icon size={14} className="mt-0.5 text-rose-gold shrink-0" strokeWidth={1.6} aria-hidden="true" />
         <div>

@@ -196,7 +196,7 @@ textarea:focus-visible {
   text-transform: uppercase;
   border-radius: 0;
   cursor: pointer;
-  transition: all 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
   transform: translateY(0) scale(1);
@@ -210,8 +210,8 @@ textarea:focus-visible {
 }
 .btn-primary:hover {
   background: var(--brown-light);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(58, 46, 42, 0.25);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px -5px rgba(58, 46, 42, 0.35), 0 4px 15px rgba(58, 46, 42, 0.2);
 }
 .btn-luxury:active {
   transform: translateY(1px) scale(0.98);
@@ -225,7 +225,8 @@ textarea:focus-visible {
 .btn-outline:hover {
   background: var(--nude);
   color: var(--white);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px -5px rgba(230, 183, 169, 0.35), 0 4px 15px rgba(230, 183, 169, 0.2);
 }
 
 .btn-rose {
@@ -235,21 +236,24 @@ textarea:focus-visible {
 }
 .btn-rose:hover {
   background: linear-gradient(135deg, #D4957F 0%, #9B4F5C 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(183, 110, 121, 0.4);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px -5px rgba(183, 110, 121, 0.4), 0 4px 15px rgba(183, 110, 121, 0.25);
 }
 
 /* Product card hover */
 .product-card {
-  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94),
-              box-shadow 0.4s ease,
-              filter 0.4s ease;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              filter 0.6s ease;
   will-change: transform, box-shadow, filter;
+  border: 1px solid rgba(230, 183, 169, 0.1);
+  background: var(--cream);
 }
 .product-card:hover {
-  transform: translateY(-12px) scale(1.01);
-  box-shadow: 0 28px 70px rgba(58, 46, 42, 0.16);
-  filter: saturate(1.04);
+  transform: translateY(-10px) scale(1.02);
+  box-shadow: 0 35px 80px -15px rgba(58, 46, 42, 0.2), 0 15px 35px -5px rgba(230, 183, 169, 0.15);
+  filter: saturate(1.08);
+  border-color: rgba(230, 183, 169, 0.3);
 }
 
 @keyframes soft-pulse {
