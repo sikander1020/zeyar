@@ -327,7 +327,7 @@ export default function Navbar() {
                           <Link
                             href={`/product/${p.id}`}
                             onClick={() => { setSearchOpen(false); setSearchQuery(''); }}
-                            className="group flex justify-between items-center bg-white/50 p-4 hover:bg-white transition-colors"
+                            className="group flex justify-between items-center bg-cream/80 border border-transparent p-4 hover:border-nude/30 hover:bg-beige transition-colors"
                           >
                             <span className="text-lg font-playfair text-brown group-hover:text-rose-gold transition-colors">
                               {p.name}

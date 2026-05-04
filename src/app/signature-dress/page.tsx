@@ -34,7 +34,7 @@ export default async function SignatureDressPage() {
   return (
     <AppShell>
       <div className="pt-24 min-h-screen bg-cream">
-        <section className="relative overflow-hidden border-b border-nude/20 bg-[linear-gradient(135deg,#f8eee8_0%,#fcf8f5_45%,#f2e7df_100%)]">
+        <section className="relative overflow-hidden border-b border-nude/20 gradient-beige">
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 opacity-70"
@@ -63,9 +63,9 @@ export default async function SignatureDressPage() {
               This page is reserved for the house signature dress only. It is updated automatically from the dashboard and presents the one-of-a-kind dress in a calm, editorial, and luxurious layout.
             </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-3 text-[11px] tracking-[0.18em] uppercase text-brown-muted">
-              <span className="rounded-full border border-nude/40 bg-white/70 px-3 py-1">Limited Edit</span>
-              <span className="rounded-full border border-nude/40 bg-white/70 px-3 py-1">Handcrafted</span>
-              <span className="rounded-full border border-nude/40 bg-white/70 px-3 py-1">Signature Only</span>
+              <span className="rounded-full border border-nude/40 glass px-3 py-1">Limited Edit</span>
+              <span className="rounded-full border border-nude/40 glass px-3 py-1">Handcrafted</span>
+              <span className="rounded-full border border-nude/40 glass px-3 py-1">Signature Only</span>
             </div>
           </div>
         </section>

@@ -345,7 +345,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 md:py-10">
           <div className="relative xl:sticky xl:top-20 z-30 mb-5">
-            <div className="rounded-2xl border border-nude/30 bg-white/95 xl:bg-white/80 xl:backdrop-blur-sm shadow-[0_20px_45px_-30px_rgba(58,46,42,0.38)] p-3 sm:p-4 md:p-5">
+            <div className="rounded-2xl border border-nude/30 bg-cream/95 xl:bg-cream/80 xl:backdrop-blur-sm shadow-[0_20px_45px_-30px_rgba(58,46,42,0.38)] p-3 sm:p-4 md:p-5">
               <div className="space-y-3.5">
                 <div className="w-full overflow-x-auto pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                   <div className="flex min-w-max gap-2">
@@ -353,7 +353,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                     <button
                       key={cat}
                       onClick={() => setActiveCategory(cat)}
-                      className={`h-10 rounded-full px-4 text-[11px] tracking-[0.13em] uppercase font-inter border transition-all duration-300 ${activeCategory === cat ? 'bg-brown text-cream border-brown shadow-[0_10px_24px_-18px_rgba(58,46,42,0.75)]' : 'bg-white text-brown border-nude hover:border-brown hover:bg-cream'}`}
+                      className={`h-10 rounded-full px-4 text-[11px] tracking-[0.13em] uppercase font-inter border transition-all duration-300 ${activeCategory === cat ? 'bg-brown text-cream border-brown shadow-[0_10px_24px_-18px_rgba(58,46,42,0.75)]' : 'bg-cream text-brown border-nude/40 hover:border-brown hover:bg-beige'}`}
                       style={{ fontFamily: "'Inter', sans-serif" }}
                     >
                       {cat}
@@ -367,7 +367,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="appearance-none h-10 w-full rounded-xl pl-4 pr-10 bg-white border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
+                      className="appearance-none h-10 w-full rounded-xl pl-4 pr-10 bg-cream border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
                       style={{ fontFamily: "'Inter', sans-serif" }}
                     >
                       {sortOptions.map((o) => (
@@ -403,7 +403,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.25 }}
-                className="overflow-hidden rounded-2xl border border-nude/20 bg-white/55 p-4 mb-6"
+                className="overflow-hidden rounded-2xl border border-nude/20 bg-beige/50 p-4 mb-6"
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 items-end">
                   <div className="sm:col-span-2 lg:col-span-3 xl:col-span-1">
@@ -412,7 +412,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                       value={queryInput}
                       onChange={(e) => setQueryInput(e.target.value)}
                       placeholder="Search for pieces..."
-                      className="input-luxury h-[48px] rounded-xl bg-white/60"
+                      className="input-luxury h-[48px] rounded-xl bg-cream/80"
                     />
                   </div>
 
@@ -421,7 +421,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                     <select
                       value={selectedSize}
                       onChange={(e) => setSelectedSize(e.target.value)}
-                      className="appearance-none w-full h-[48px] rounded-xl pl-4 pr-10 bg-white/60 border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
+                      className="appearance-none w-full h-[48px] rounded-xl pl-4 pr-10 bg-cream/80 border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
                     >
                       {sizeOptions.map((s) => (
                         <option key={s} value={s}>{s}</option>
@@ -435,7 +435,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                     <select
                       value={selectedColor}
                       onChange={(e) => setSelectedColor(e.target.value)}
-                      className="appearance-none w-full h-[48px] rounded-xl pl-4 pr-10 bg-white/60 border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
+                      className="appearance-none w-full h-[48px] rounded-xl pl-4 pr-10 bg-cream/80 border border-nude text-sm text-brown font-inter outline-none cursor-pointer"
                     >
                       {colorOptions.map((c) => (
                         <option key={c} value={c}>{c}</option>
@@ -455,7 +455,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                         const next = Number(e.target.value) || bounds.min;
                         setPriceMin(Math.min(next, priceMax));
                       }}
-                      className="input-luxury h-[48px] rounded-xl bg-white/60"
+                      className="input-luxury h-[48px] rounded-xl bg-cream/80"
                     />
                   </div>
 
@@ -470,7 +470,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                         const next = Number(e.target.value) || bounds.max;
                         setPriceMax(Math.max(next, priceMin));
                       }}
-                      className="input-luxury h-[48px] rounded-xl bg-white/60"
+                      className="input-luxury h-[48px] rounded-xl bg-cream/80"
                     />
                   </div>
 
@@ -478,7 +478,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
                     <button
                       type="button"
                       onClick={() => setOnlyInStock((v) => !v)}
-                      className={`h-[48px] flex-1 rounded-xl px-4 text-[11px] tracking-[0.12em] uppercase font-inter border transition-all duration-300 ${onlyInStock ? 'bg-brown text-cream border-brown shadow-md' : 'bg-white/60 border-nude text-brown hover:border-brown'}`}
+                      className={`h-[48px] flex-1 rounded-xl px-4 text-[11px] tracking-[0.12em] uppercase font-inter border transition-all duration-300 ${onlyInStock ? 'bg-brown text-cream border-brown shadow-md' : 'bg-cream border-nude text-brown hover:border-brown'}`}
                     >
                       In Stock Only
                     </button>
