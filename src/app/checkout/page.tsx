@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useCallback } from 'react';
 import { motion } from 'framer-motion';
@@ -21,7 +21,7 @@ export default function CheckoutPage() {
   const router = useRouter();
   const [submitError, setSubmitError] = useState('');
   const bankName = process.env.NEXT_PUBLIC_BANK_NAME ?? 'JazzCash';
-  const bankAccountTitle = process.env.NEXT_PUBLIC_BANK_ACCOUNT_TITLE ?? 'ZAYBAASH';
+  const bankAccountTitle = process.env.NEXT_PUBLIC_BANK_ACCOUNT_TITLE ?? 'Muhammad Umair';
   const bankAccountNumber = process.env.NEXT_PUBLIC_BANK_ACCOUNT_NUMBER ?? '03219643246';
   const hasBankDetails = Boolean(bankName && bankAccountTitle && bankAccountNumber);
 

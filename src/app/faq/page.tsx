@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     q: 'How can I contact support quickly?',
-    a: 'Use the WhatsApp button on the site for quick assistance, or email us at care@zaybaash.com.',
+    a: 'Use the WhatsApp button on the site for quick assistance, or visit zaybaash.com/contact.',
   },
 ];
 

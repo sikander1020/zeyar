@@ -98,7 +98,7 @@ export default function CookiePolicyPage() {
             <section className="bg-nude/10 border-l-4 border-rose-gold p-6 rounded-r-lg">
               <h3 className="text-lg font-playfair text-brown mb-2">Need More Information?</h3>
               <p className="text-sm">
-                Email: care@zaybaash.com
+                Contact: <Link href="/contact" className="underline hover:text-brown">zaybaash.com/contact</Link>
                 <br />
                 Support Hours: Monday to Saturday, 10:00 AM to 6:00 PM (PKT)
               </p>

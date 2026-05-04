@@ -104,7 +104,7 @@ export default async function InvoicePage({ params }: { params: Promise<{ id: st
         {/* Notes */}
         <div className="mt-16 text-center text-xs text-gray-500 border-t border-gray-200 pt-6">
           <p>Thank you for shopping at Zaybaash.</p>
-          <p>If you have any questions, please contact us at support@zaybaash.com</p>
+          <p>If you have any questions, please visit us at zaybaash.com/contact</p>
         </div>
 
         {/* Auto Print Script */}
