@@ -1,5 +1,6 @@
 import AppShell from '@/components/layout/AppShell';
 import { SITE_ORIGIN } from '@/lib/siteUrl';
+import Link from 'next/link';
 
 export const metadata = {
   title: 'Cookie Policy',

@@ -1,4 +1,5 @@
 import AppShell from '@/components/layout/AppShell';
+import Link from 'next/link';
 
 import { SITE_ORIGIN } from '@/lib/siteUrl';
 
