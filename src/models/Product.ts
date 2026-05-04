@@ -1,4 +1,4 @@
-﻿import mongoose, { Schema, Document } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 
 export interface IProduct extends Document {
   productId: string;
@@ -38,6 +38,11 @@ export interface IProduct extends Document {
   model3dStatus?: 'none' | 'pending' | 'ready' | 'failed';
   model3dError?: string;
   model3dUpdatedAt?: Date;
+  // Editable product attribute cards
+  fabric?: string;
+  craft?: string;
+  line?: string;
+  lovedByCount?: number;
 }
 
 const ProductSchema = new Schema<IProduct>(
@@ -88,6 +93,11 @@ const ProductSchema = new Schema<IProduct>(
     model3dStatus: { type: String, enum: ['none', 'pending', 'ready', 'failed'], default: 'none' },
     model3dError:  { type: String, default: '' },
     model3dUpdatedAt: { type: Date },
+    // Editable attribute cards shown on product detail page
+    fabric:        { type: String, default: '' },
+    craft:         { type: String, default: '' },
+    line:          { type: String, default: '' },
+    lovedByCount:  { type: Number, default: 0 },
   },
   { timestamps: true }
 );

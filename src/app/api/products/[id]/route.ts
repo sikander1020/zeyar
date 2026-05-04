@@ -67,6 +67,10 @@ function normalizeProduct(p: {
   isNewArrival?: boolean;
   isSale?: boolean;
   isBestseller?: boolean;
+  fabric?: string;
+  craft?: string;
+  line?: string;
+  lovedByCount?: number;
 }) {
   const resolvedId = typeof p.productId === 'string' && p.productId.trim().length > 0
     ? p.productId.trim()
@@ -104,6 +108,10 @@ function normalizeProduct(p: {
     isNew: p.isNewArrival === true,
     isSale: p.isSale === true,
     isBestseller: p.isBestseller === true,
+    fabric: typeof p.fabric === 'string' ? p.fabric : '',
+    craft: typeof p.craft === 'string' ? p.craft : '',
+    line: typeof p.line === 'string' ? p.line : '',
+    lovedByCount: Number(p.lovedByCount) || 0,
   };
 }
 

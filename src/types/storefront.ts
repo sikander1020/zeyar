@@ -37,6 +37,11 @@ export interface StoreProduct {
   videoUrl?: string;
   model3dUrl?: string;
   model3dStatus?: 'none' | 'pending' | 'ready' | 'failed';
+  // Editable attribute cards
+  fabric?: string;
+  craft?: string;
+  line?: string;
+  lovedByCount?: number;
 }
 
 export interface StoreCategory {

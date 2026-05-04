@@ -120,7 +120,12 @@ export async function POST(req: NextRequest) {
       isSale: body.isSale || false,
       isBestseller: body.isBestseller || false,
       isSignatureDress: body.isSignatureDress === true,
+      fabric: typeof body.fabric === 'string' ? body.fabric.trim() : '',
+      craft: typeof body.craft === 'string' ? body.craft.trim() : '',
+      line: typeof body.line === 'string' ? body.line.trim() : '',
+      lovedByCount: Number(body.lovedByCount) || 0,
     });
+
 
     await product.save();
     return NextResponse.json({ product }, { status: 201 });

@@ -66,6 +66,10 @@ function normalizeProduct(p: {
   isNewArrival?: boolean;
   isSale?: boolean;
   isBestseller?: boolean;
+  fabric?: string;
+  craft?: string;
+  line?: string;
+  lovedByCount?: number;
 }) {
   const resolvedId = typeof p.productId === 'string' && p.productId.trim().length > 0
     ? p.productId.trim()
@@ -103,6 +107,10 @@ function normalizeProduct(p: {
     isNew: p.isNewArrival === true,
     isSale: p.isSale === true,
     isBestseller: p.isBestseller === true,
+    fabric: typeof p.fabric === 'string' ? p.fabric : '',
+    craft: typeof p.craft === 'string' ? p.craft : '',
+    line: typeof p.line === 'string' ? p.line : '',
+    lovedByCount: Number(p.lovedByCount) || 0,
   };
 }
 
@@ -133,7 +141,7 @@ export async function GET(req: NextRequest) {
     }
 
     const docs = await Product.find(q)
-      .select('productId name category price originalPrice images frontImageUrl backImageUrl sizeChartImageUrl videoUrl model3dUrl model3dStatus colors sizes sizeChartRows description details rating reviewCount tags stock isActive outOfStock isNewArrival isSale isBestseller')
+      .select('productId name category price originalPrice images frontImageUrl backImageUrl sizeChartImageUrl videoUrl model3dUrl model3dStatus colors sizes sizeChartRows description details rating reviewCount tags stock isActive outOfStock isNewArrival isSale isBestseller fabric craft line lovedByCount')
       .limit(limit || 0)
       .lean();
     const products = docs.map((d) => normalizeProduct(d as never));

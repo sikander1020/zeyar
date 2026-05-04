@@ -128,6 +128,11 @@ interface ProductRow {
   isSale: boolean;
   isBestseller: boolean;
   isSignatureDress?: boolean;
+  // Editable attribute cards
+  fabric?: string;
+  craft?: string;
+  line?: string;
+  lovedByCount?: number;
 }
 interface CouponRow {
   _id: string;
@@ -1153,7 +1158,13 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
     isSale: false,
     isBestseller: false,
     isSignatureDress: signatureOnly,
+    // Attribute card fields
+    fabric: '',
+    craft: '',
+    line: '',
+    lovedByCount: 0,
   });
+
 
   function parseCsvOrLines(value: string): string[] {
     return value
@@ -1319,6 +1330,10 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
       isSale: false,
       isBestseller: false,
       isSignatureDress: signatureOnly,
+      fabric: '',
+      craft: '',
+      line: '',
+      lovedByCount: 0,
     });
     setUploadedImages([]);
     setImageUrlInputs(['']);
@@ -1501,7 +1516,12 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
         isSale: formData.isSale,
         isBestseller: formData.isBestseller,
         isSignatureDress: formData.isSignatureDress,
+        fabric: formData.fabric,
+        craft: formData.craft,
+        line: formData.line,
+        lovedByCount: Number(formData.lovedByCount) || 0,
       };
+
 
       const res = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(payload) });
       if (!res.ok) {
@@ -1607,6 +1627,10 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
       isSale: prod.isSale,
       isBestseller: prod.isBestseller,
       isSignatureDress: prod.isSignatureDress === true,
+      fabric: prod.fabric || '',
+      craft: prod.craft || '',
+      line: prod.line || '',
+      lovedByCount: prod.lovedByCount || 0,
     });
     setUploadedImages(prod.images ?? []);
     setImageUrlInputs((prod.images ?? []).length > 0 ? (prod.images ?? []) : ['']);
@@ -2075,6 +2099,64 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
             <input value={formData.tagsText} onChange={(e) => setFormData({ ...formData, tagsText: e.target.value })} placeholder="Tags (comma separated)"
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
           </div>
+
+          {/* ── Attribute Cards ──────────────────────────────────────── */}
+          <div style={{ background: BEIGE, border: '1px solid #EBD9CC', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+            <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: BROWN }}>🏷️ Product Attribute Cards</p>
+            <p style={{ margin: '0 0 16px', fontSize: 11, color: MUTED }}>
+              These appear as info tiles on the product page (Fabric, Craft, Color, Line). Leave blank to auto-detect from tags.
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: BROWN, fontWeight: 700, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Fabric
+                </label>
+                <input
+                  value={formData.fabric}
+                  onChange={(e) => setFormData({ ...formData, fabric: e.target.value })}
+                  placeholder="e.g. Premium Lawn, Chiffon, Silk…"
+                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: '#fff', outline: 'none', boxSizing: 'border-box' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: BROWN, fontWeight: 700, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Craft
+                </label>
+                <input
+                  value={formData.craft}
+                  onChange={(e) => setFormData({ ...formData, craft: e.target.value })}
+                  placeholder="e.g. Handcrafted, Premium Finish…"
+                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: '#fff', outline: 'none', boxSizing: 'border-box' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: BROWN, fontWeight: 700, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  Line / Collection
+                </label>
+                <input
+                  value={formData.line}
+                  onChange={(e) => setFormData({ ...formData, line: e.target.value })}
+                  placeholder="e.g. Limelight Pret, Summer Luxe…"
+                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: '#fff', outline: 'none', boxSizing: 'border-box' }}
+                />
+              </div>
+              <div>
+                <label style={{ display: 'block', fontSize: 11, color: BROWN, fontWeight: 700, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  ❤️ Loved By Count
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={formData.lovedByCount === 0 ? '' : formData.lovedByCount}
+                  onChange={(e) => setFormData({ ...formData, lovedByCount: Number(e.target.value) || 0 })}
+                  placeholder="e.g. 401"
+                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: '#fff', outline: 'none', boxSizing: 'border-box' }}
+                />
+                <p style={{ margin: '4px 0 0', fontSize: 10, color: MUTED }}>Shown as "Loved by X shoppers" (auto-increments with sales if 0)</p>
+              </div>
+            </div>
+          </div>
+
           <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
               <input type="checkbox" checked={formData.isActive} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })} style={{ accentColor: ROSE }} />
@@ -2130,10 +2212,22 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
                 <td style={{ padding: '10px 14px' }}>{fmt(p.costPrice)}</td>
                 <td style={{ padding: '10px 14px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span>{p.stock}</span>
-                    {p.stock > 0 && p.stock <= lowStockThreshold && p.isActive !== false && (
+                    <span style={{ fontWeight: 700 }}>{p.stock}</span>
+                    {p.outOfStock ? (
+                      <span style={{ fontSize: 10, color: '#8A3A38', background: '#FDECEC', border: '1px solid #F3CACA', borderRadius: 999, padding: '2px 6px' }}>
+                        OUT
+                      </span>
+                    ) : p.stock === 0 ? (
+                      <span style={{ fontSize: 10, color: '#8A3A38', background: '#FDECEC', border: '1px solid #F3CACA', borderRadius: 999, padding: '2px 6px' }}>
+                        EMPTY
+                      </span>
+                    ) : p.stock <= lowStockThreshold && p.isActive !== false ? (
                       <span style={{ fontSize: 10, color: '#A0613E', background: '#FDF3EC', border: '1px solid #F1D9C7', borderRadius: 999, padding: '2px 6px' }}>
-                        LOW
+                        {p.stock} left!
+                      </span>
+                    ) : (
+                      <span style={{ fontSize: 10, color: '#3E7B4E', background: '#E8F5E9', border: '1px solid #C3E6CB', borderRadius: 999, padding: '2px 6px' }}>
+                        {p.stock} rem.
                       </span>
                     )}
                   </div>

@@ -452,11 +452,15 @@ export default function ProductPage() {
   const hasVideo = Boolean((product.videoUrl || '').trim());
   const showMediaTabs = hasModel3d || hasVideo;
   const activeMediaTab: 'images' | 'video' | '3d' = showMediaTabs ? activeTab : 'images';
-  const lovedByCount = Math.max(product.reviewCount * 9, 401);
+  const lovedByCount = product.lovedByCount && product.lovedByCount > 0
+    ? product.lovedByCount
+    : Math.max(product.reviewCount * 9, 401);
   const detailString = product.details.join(' ').toLowerCase();
   const hasHandcrafted = detailString.includes('hand') || product.tags.some((t) => t.toLowerCase().includes('hand'));
-  const fabricLabel = product.tags.find((tag) => /linen|cotton|silk|chiffon|organza|velvet|crepe/i.test(tag)) || 'Premium Blend';
-  const craftLabel = hasHandcrafted ? 'Handcrafted' : 'Premium Finish';
+  // Use admin-set fields if available, fall back to tag detection
+  const fabricLabel = product.fabric || product.tags.find((tag) => /linen|cotton|silk|chiffon|organza|velvet|crepe/i.test(tag)) || 'Premium Blend';
+  const craftLabel = product.craft || (hasHandcrafted ? 'Handcrafted' : 'Premium Finish');
+  const lineLabel = product.line || product.category;
   const now = new Date();
   const dispatchDate = new Date(now);
   dispatchDate.setDate(now.getDate() + 1);
@@ -625,7 +629,7 @@ export default function ProductPage() {
               </div>
 
               {/* Price */}
-              <div className="flex flex-wrap items-baseline gap-2 sm:gap-3 mb-8">
+              <div className="flex flex-wrap items-baseline gap-2 sm:gap-3 mb-4">
                 <span className="text-3xl font-playfair font-semibold text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
                   Rs {product.price.toLocaleString()}
                 </span>
@@ -641,12 +645,37 @@ export default function ProductPage() {
                 )}
               </div>
 
+              {/* Stock remaining badge */}
+              <div className="mb-8 flex flex-wrap items-center gap-2">
+                {product.outOfStock ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-600 font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <Package size={12} />
+                    Out of Stock
+                  </span>
+                ) : product.stock <= 3 && product.stock > 0 ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-red-50 border border-red-200 text-red-600 font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <Package size={12} />
+                    Only {product.stock} remaining!
+                  </span>
+                ) : product.stock <= 10 && product.stock > 0 ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <Package size={12} />
+                    {product.stock} remaining
+                  </span>
+                ) : product.stock > 10 ? (
+                  <span className="inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full bg-green-50 border border-green-200 text-green-700 font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <Package size={12} />
+                    In stock
+                  </span>
+                ) : null}
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
                 {[
                   { icon: Sparkles, label: 'Fabric', value: fabricLabel },
                   { icon: ShieldCheck, label: 'Craft', value: craftLabel },
                   { icon: Sparkles, label: 'Color', value: selectedColorSafe.name || 'Default' },
-                  { icon: Ruler, label: 'Line', value: product.category },
+                  { icon: Ruler, label: 'Line', value: lineLabel },
                 ].map(({ icon: Icon, label, value }) => (
                   <div key={label} className="border border-nude/25 bg-white/70 px-4 py-3">
                     <div className="flex items-start gap-2.5">

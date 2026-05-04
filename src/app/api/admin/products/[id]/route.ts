@@ -114,9 +114,14 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         isSale: body.isSale,
         isBestseller: body.isBestseller,
         isSignatureDress: body.isSignatureDress === true,
+        fabric: typeof body.fabric === 'string' ? body.fabric.trim() : undefined,
+        craft: typeof body.craft === 'string' ? body.craft.trim() : undefined,
+        line: typeof body.line === 'string' ? body.line.trim() : undefined,
+        ...(body.lovedByCount !== undefined && { lovedByCount: Number(body.lovedByCount) || 0 }),
       },
       { new: true }
     );
+
 
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
