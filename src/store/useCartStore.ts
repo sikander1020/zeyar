@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { StoreProduct } from '@/types/storefront';
+import * as fbq from '@/lib/fpixel';
 
 export interface CartItem {
   product: StoreProduct;
@@ -28,6 +29,13 @@ export const useCartStore = create<CartStore>()(
       isOpen: false,
 
       addItem: (product, size, color) => {
+        fbq.event('AddToCart', {
+          content_name: product.name,
+          content_ids: [product.id],
+          content_type: 'product',
+          value: product.price,
+          currency: 'PKR',
+        });
         set((state) => {
           const existing = state.items.find(
             (i) => i.product.id === product.id && i.selectedSize === size && i.selectedColor.name === color.name

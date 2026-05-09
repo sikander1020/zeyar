@@ -226,6 +226,22 @@ export async function POST(req: NextRequest) {
       }
     }
 
+      // Fire Facebook Conversions API Event
+      import('@/lib/capi').then(({ sendServerEvent }) => {
+        sendServerEvent('Purchase', {
+          currency: 'PKR',
+          value: orderDoc.total,
+          order_id: orderId,
+        }, {
+          em: customer?.email,
+          ph: customer?.phone?.replace(/\D/g, ''),
+          fn: customer?.firstName,
+          ln: customer?.lastName,
+          ct: customer?.city,
+          country: 'PK'
+        }, orderId);
+      }).catch(console.error);
+
     // If bank transfer, send token back for the proof upload page.
     if (paymentMethod === 'bank') {
       const uploadToken = orderDoc?.bankTransfer?.uploadToken ?? '';
