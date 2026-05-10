@@ -696,7 +696,7 @@ export default function ProductPage() {
                   <p className="text-xs tracking-[0.15em] uppercase text-brown font-semibold font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
                     Variant Picker — <span className="normal-case font-normal text-brown-muted tracking-normal">{selectedSize}</span>
                   </p>
-                  <Link href="/size-guide" className="text-xs underline text-brown-muted font-inter inline-flex items-center gap-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+                  <Link href={`/size-guide?product=${product.productId}`} className="text-xs underline text-brown-muted font-inter inline-flex items-center gap-1" style={{ fontFamily: "'Inter', sans-serif" }}>
                     <Ruler size={12} /> Find my size
                   </Link>
                 </div>
