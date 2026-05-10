@@ -1635,6 +1635,20 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
     setShowForm(true);
   }
 
+  async function handleClearCache() {
+    try {
+      const res = await fetch('/api/admin/clear-cache', { headers: authHeaders() });
+      const data = await res.json();
+      if (data.success) {
+        alert('Storefront cache successfully cleared! Your changes should now be visible.');
+      } else {
+        throw new Error(data.error || 'Failed to clear cache');
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to clear cache');
+    }
+  }
+
   const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= lowStockThreshold && p.isActive !== false).length;
   const outOfStockCount = products.filter((p) => p.outOfStock).length;
   const inactiveCount = products.filter((p) => p.isActive === false).length;
@@ -3211,6 +3225,14 @@ export default function DashboardPage() {
                 cursor: loading ? 'default' : 'pointer', display: 'flex', alignItems: 'center', gap: 8,
               }}>
               {loading ? '⟳ Loading…' : '⟳ Refresh now'}
+            </button>
+            <button type="button" onClick={handleClearCache}
+              style={{
+                padding: '10px 20px', background: '#3E7B4E', color: '#fff',
+                border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600,
+                cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
+              }}>
+              ✨ Clear Store Cache
             </button>
           </div>
         </div>
