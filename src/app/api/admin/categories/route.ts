@@ -1,10 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import { connectDB } from '@/lib/mongodb';
 import Category from '@/models/Category';
 import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/adminAuth';
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: NextRequest) {
   try {
     await connectDB();
     let categories = await Category.find({}).sort({ sortOrder: 1, createdAt: -1 }).lean();
@@ -93,6 +96,9 @@ export async function POST(req: NextRequest) {
     });
 
     await category.save();
+
+    revalidateTag('storefront-categories');
+
     return NextResponse.json({ category }, { status: 201 });
   } catch (err) {
     console.error('POST /api/admin/categories error:', err);

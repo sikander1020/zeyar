@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { revalidateTag } from 'next/cache';
 import mongoose from 'mongoose';
 import Category from '@/models/Category';
@@ -10,7 +10,9 @@ const IMG_DUMMY_2 = "https://images.unsplash.com/photo-1583391733959-f156d90b240
 const IMG_DUMMY_3 = "https://images.unsplash.com/photo-1512413513146-24e54e4c274d?q=80&w=600&auto=format&fit=crop";
 const IMG_DUMMY_4 = "https://images.unsplash.com/photo-1574349141014-9b596e1a4dca?q=80&w=600&auto=format&fit=crop";
 
-export async function GET() {
+export const dynamic = 'force-dynamic';
+
+export async function GET(req: NextRequest) {
   try {
     await connectDB();
 

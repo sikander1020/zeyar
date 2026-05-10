@@ -4,6 +4,8 @@ import { CampaignFilm } from '@/models/CampaignFilm';
 
 export const revalidate = 60; // 1 min cache
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     await connectDB();

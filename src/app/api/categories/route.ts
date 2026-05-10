@@ -5,6 +5,8 @@ import Product from '@/models/Product';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1594938298603-c8148c4b69c8?w=800&q=80';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET() {
   try {
     await connectDB();
