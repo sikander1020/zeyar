@@ -1503,7 +1503,7 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
         sizeChartImageUrl: formData.sizeChartImageUrl,
         videoUrl: formData.videoUrl,
         model3dUrl: formData.model3dUrl,
-        details: parseCsvOrLines(formData.detailsText),
+        details: [formData.detailsText.trim()],
         sizes: parseCsvOrLines(formData.sizesText),
         sizeChartRows: parseSizeChartRows(formData.sizeChartText),
         colors: parseColors(formData.colorsText),
@@ -1983,8 +1983,8 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
                 3D generation uses Front/Back uploads above first. If empty, it falls back to Product Images #1 and #2.
               </p>
             </div>
-            <textarea value={formData.detailsText} onChange={(e) => setFormData({ ...formData, detailsText: e.target.value })} placeholder="Details (comma or line separated)"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 90 }} />
+            <textarea value={formData.detailsText} onChange={(e) => setFormData({ ...formData, detailsText: e.target.value })} placeholder="Details & Care instructions (formatting will be preserved)"
+              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 120, gridColumn: '1 / -1' }} />
             <input value={formData.sizesText} onChange={(e) => setFormData({ ...formData, sizesText: e.target.value })} placeholder="Sizes (e.g. XS,S,M,L)"
               style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
             <textarea value={formData.sizeChartText} onChange={(e) => setFormData({ ...formData, sizeChartText: e.target.value })} placeholder="Size chart rows: size,chest,waist,hips,length"

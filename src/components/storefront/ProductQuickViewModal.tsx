@@ -161,7 +161,7 @@ function ProductQuickViewModalBody({ product, onClose }: { product: StoreProduct
               )}
             </div>
 
-            <p className="mt-4 text-sm text-brown-muted leading-relaxed">
+            <p className="mt-4 text-sm text-brown-muted leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>
               {product.description || 'A refined ZAYBAASH piece designed for statement elegance.'}
             </p>
 

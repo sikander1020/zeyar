@@ -115,7 +115,7 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
                 <p className="text-[10px] tracking-[0.14em] uppercase text-brown-muted">Handcrafted Piece</p>
                 <h3 className="mt-1 text-lg font-playfair text-brown leading-snug">{product.name}</h3>
                 <p className="mt-2 text-sm font-semibold text-brown">Rs {product.price.toLocaleString()}</p>
-                <p className="mt-2 text-xs text-brown-muted leading-relaxed">
+                <p className="mt-2 text-xs text-brown-muted leading-relaxed" style={{ whiteSpace: 'pre-wrap' }}>
                   {product.description || 'Totally handcrafted signature dress from our atelier.'}
                 </p>
               </div>

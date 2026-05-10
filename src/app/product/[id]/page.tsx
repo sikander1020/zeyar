@@ -783,7 +783,7 @@ export default function ProductPage() {
               {/* Accordion sections */}
               {[
                 { id: 'desc', title: 'Description', content: product.description },
-                { id: 'details', title: 'Details & Care', content: product.details.join(' · ') },
+                { id: 'details', title: 'Details & Care', content: product.details.join('\n') },
               ].map(({ id, title, content }) => (
                 <div key={id} className="border-t border-nude/20 py-4">
                   <button
@@ -803,7 +803,7 @@ export default function ProductPage() {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
                       className="text-sm text-brown-muted font-inter leading-relaxed mt-4"
-                      style={{ fontFamily: "'Inter', sans-serif" }}
+                      style={{ fontFamily: "'Inter', sans-serif", whiteSpace: 'pre-wrap' }}
                     >
                       {content}
                     </motion.p>
