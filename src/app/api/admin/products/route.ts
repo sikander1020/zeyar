@@ -130,8 +130,8 @@ export async function POST(req: NextRequest) {
 
     await product.save();
 
-    revalidateTag('storefront-products');
-    revalidateTag('storefront-categories');
+    revalidateTag('storefront-products', 'max');
+    revalidateTag('storefront-categories', 'max');
 
     return NextResponse.json({ product }, { status: 201 });
   } catch (err) {

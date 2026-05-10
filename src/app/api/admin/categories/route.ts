@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
 
     await category.save();
 
-    revalidateTag('storefront-categories');
+    revalidateTag('storefront-categories', 'max');
 
     return NextResponse.json({ category }, { status: 201 });
   } catch (err) {

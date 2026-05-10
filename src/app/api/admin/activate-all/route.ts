@@ -16,8 +16,8 @@ export async function POST(req: NextRequest) {
       { isActive: true }
     );
 
-    revalidateTag('storefront-products');
-    revalidateTag('storefront-categories');
+    revalidateTag('storefront-products', 'max');
+    revalidateTag('storefront-categories', 'max');
 
     return NextResponse.json({ 
       success: true, 

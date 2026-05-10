@@ -128,8 +128,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    revalidateTag('storefront-products');
-    revalidateTag('storefront-categories');
+    revalidateTag('storefront-products', 'max');
+    revalidateTag('storefront-categories', 'max');
 
     return NextResponse.json({ product });
   } catch (err) {
@@ -153,8 +153,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
-    revalidateTag('storefront-products');
-    revalidateTag('storefront-categories');
+    revalidateTag('storefront-products', 'max');
+    revalidateTag('storefront-categories', 'max');
 
     return NextResponse.json({ success: true });
   } catch (err) {
