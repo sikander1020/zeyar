@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { connectDB } from '@/lib/mongodb';
 import Category from '@/models/Category';
 import { requireAdmin } from '@/lib/adminAuth';
@@ -34,6 +35,8 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Category not found' }, { status: 404 });
     }
 
+    revalidatePath('/', 'layout');
+
     return NextResponse.json({ category });
   } catch (err) {
     console.error('PUT /api/admin/categories/[id] error:', err);
@@ -58,6 +61,8 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     if (!category) {
       return NextResponse.json({ error: 'Category not found' }, { status: 404 });
     }
+
+    revalidatePath('/', 'layout');
 
     return NextResponse.json({ success: true });
   } catch (err) {
