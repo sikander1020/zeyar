@@ -811,7 +811,7 @@ export default function ProductPage() {
                 </div>
               ))}
 
-              {product.sizeChartRows.length > 0 && (
+              {(product.sizeChartRows.length > 0 || product.sizeChartImageUrl) && (
                 <div className="border-t border-nude/20 py-4">
                   <button
                     type="button"
@@ -829,42 +829,42 @@ export default function ProductPage() {
 
                   {expandedSection === 'size-chart' && (
                     <div className="mt-4 space-y-4">
-                      {product.sizeChartImageUrl && (
+                      {product.sizeChartImageUrl ? (
                         <div className="overflow-hidden border border-nude/20 bg-white">
-                          <div className="relative aspect-[4/5] w-full">
-                            <Image
-                              src={product.sizeChartImageUrl}
-                              alt={`${product.name} size chart`}
-                              fill
-                              className="object-contain bg-white"
-                            />
-                          </div>
+                          <Image
+                            src={product.sizeChartImageUrl}
+                            alt={`${product.name} size chart`}
+                            width={1000}
+                            height={1000}
+                            className="w-full h-auto object-contain"
+                          />
                         </div>
-                      )}
-                      <div className="overflow-x-auto border border-nude/20">
-                        <table className="w-full text-left min-w-[540px]">
-                        <thead>
-                          <tr className="bg-brown text-cream text-[10px] tracking-[0.12em] uppercase">
-                            <th className="px-3 py-2">Size</th>
-                            <th className="px-3 py-2">Chest</th>
-                            <th className="px-3 py-2">Waist</th>
-                            <th className="px-3 py-2">Hips</th>
-                            <th className="px-3 py-2">Length</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {product.sizeChartRows.map((row) => (
-                            <tr key={row.size} className="border-t border-nude/20 bg-white">
-                              <td className="px-3 py-2 text-xs text-brown font-semibold">{row.size}</td>
-                              <td className="px-3 py-2 text-xs text-brown-muted">{row.chest}&quot;</td>
-                              <td className="px-3 py-2 text-xs text-brown-muted">{row.waist}&quot;</td>
-                              <td className="px-3 py-2 text-xs text-brown-muted">{row.hips}&quot;</td>
-                              <td className="px-3 py-2 text-xs text-brown-muted">{row.length}&quot;</td>
+                      ) : product.sizeChartRows.length > 0 ? (
+                        <div className="overflow-x-auto border border-nude/20">
+                          <table className="w-full text-left min-w-[540px]">
+                          <thead>
+                            <tr className="bg-brown text-cream text-[10px] tracking-[0.12em] uppercase">
+                              <th className="px-3 py-2">Size</th>
+                              <th className="px-3 py-2">Chest</th>
+                              <th className="px-3 py-2">Waist</th>
+                              <th className="px-3 py-2">Hips</th>
+                              <th className="px-3 py-2">Length</th>
                             </tr>
-                          ))}
-                        </tbody>
-                        </table>
-                      </div>
+                          </thead>
+                          <tbody>
+                            {product.sizeChartRows.map((row) => (
+                              <tr key={row.size} className="border-t border-nude/20 bg-white">
+                                <td className="px-3 py-2 text-xs text-brown font-semibold">{row.size}</td>
+                                <td className="px-3 py-2 text-xs text-brown-muted">{row.chest}&quot;</td>
+                                <td className="px-3 py-2 text-xs text-brown-muted">{row.waist}&quot;</td>
+                                <td className="px-3 py-2 text-xs text-brown-muted">{row.hips}&quot;</td>
+                                <td className="px-3 py-2 text-xs text-brown-muted">{row.length}&quot;</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                          </table>
+                        </div>
+                      ) : null}
                     </div>
                   )}
                 </div>
