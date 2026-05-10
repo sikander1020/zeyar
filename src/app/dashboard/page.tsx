@@ -963,14 +963,17 @@ function CategoriesTab() {
     const file = files[0];
     setUploadingCategoryImage(true);
     try {
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const dataUrl = event.target?.result as string;
-        setUploadedCategoryImage(dataUrl);
-      };
-      reader.readAsDataURL(file);
+      const { ['Content-Type']: _ct, ...uploadHeaders } = authHeaders();
+      void _ct;
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/admin/upload', { method: 'POST', headers: uploadHeaders, body: fd });
+      const data = await res.json() as { success?: boolean; url?: string; error?: string };
+      if (!res.ok || !data.url) throw new Error(data.error || 'Upload failed');
+      setUploadedCategoryImage(data.url);
     } catch (err) {
-      console.error('Error reading category image:', err);
+      console.error('Error uploading category image:', err);
+      alert(err instanceof Error ? err.message : 'Failed to upload category image. Please try again.');
     } finally {
       setUploadingCategoryImage(false);
       e.currentTarget.value = '';
@@ -1354,37 +1357,32 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
     });
   }
 
-  function readFileAsDataUrl(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const value = typeof reader.result === 'string' ? reader.result : '';
-        if (!value) {
-          reject(new Error('Could not read image file'));
-          return;
-        }
-        resolve(value);
-      };
-      reader.onerror = () => reject(new Error('Could not read image file'));
-      reader.readAsDataURL(file);
-    });
+  async function uploadFileToCloudinary(file: File): Promise<string> {
+    const { ['Content-Type']: _ct, ...uploadHeaders } = authHeaders();
+    void _ct;
+    const fd = new FormData();
+    fd.append('file', file);
+    const res = await fetch('/api/admin/upload', { method: 'POST', headers: uploadHeaders, body: fd });
+    const data = await res.json() as { success?: boolean; url?: string; error?: string };
+    if (!res.ok || !data.url) throw new Error(data.error || 'Upload failed');
+    return data.url;
   }
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.currentTarget.files;
-    if (!files) return;
+    if (!files || files.length === 0) return;
 
     setUploadingImage(true);
     try {
-      const nextImages = await Promise.all(Array.from(files).map((file) => readFileAsDataUrl(file)));
-      setUploadedImages((prev) => [...(prev ?? []), ...nextImages]);
+      const urls = await Promise.all(Array.from(files).map((file) => uploadFileToCloudinary(file)));
+      setUploadedImages((prev) => [...(prev ?? []), ...urls]);
     } catch (err) {
-      console.error('Error reading file:', err);
-      alert('Failed to read one or more images. Please try again.');
+      console.error('Error uploading images:', err);
+      alert(err instanceof Error ? err.message : 'Failed to upload one or more images. Please try again.');
     } finally {
       setUploadingImage(false);
+      e.currentTarget.value = '';
     }
-    e.currentTarget.value = '';
   }
 
   async function handleFrontBackImageUpload(
@@ -1394,11 +1392,11 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
     const file = e.currentTarget.files?.[0];
     if (!file) return;
     try {
-      const dataUrl = await readFileAsDataUrl(file);
-      setFormData((prev) => ({ ...prev, [key]: dataUrl }));
+      const url = await uploadFileToCloudinary(file);
+      setFormData((prev) => ({ ...prev, [key]: url }));
     } catch (err) {
-      console.error('Error reading front/back image:', err);
-      alert('Failed to read image. Please try again.');
+      console.error('Error uploading front/back image:', err);
+      alert(err instanceof Error ? err.message : 'Failed to upload image. Please try again.');
     } finally {
       e.currentTarget.value = '';
     }
@@ -1410,11 +1408,11 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
 
     setUploadingSizeChartImage(true);
     try {
-      const dataUrl = await readFileAsDataUrl(file);
-      setFormData((prev) => ({ ...prev, sizeChartImageUrl: dataUrl }));
+      const url = await uploadFileToCloudinary(file);
+      setFormData((prev) => ({ ...prev, sizeChartImageUrl: url }));
     } catch (err) {
-      console.error('Error reading size chart image:', err);
-      alert('Failed to read size chart image. Please try again.');
+      console.error('Error uploading size chart image:', err);
+      alert(err instanceof Error ? err.message : 'Failed to upload size chart image. Please try again.');
     } finally {
       setUploadingSizeChartImage(false);
       e.currentTarget.value = '';

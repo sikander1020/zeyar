@@ -10,18 +10,8 @@ cloudinary.config({
 
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
-const ALLOWED_TYPES = new Set([
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-  'video/mp4',
-  'video/webm',
-  'video/quicktime',
-]);
-
 function getResourceType(fileType: string) {
-  return fileType.startsWith('video/') ? 'video' : 'image';
+  return fileType.startsWith('video/') ? 'video' : fileType.startsWith('image/') ? 'image' : 'auto';
 }
 
 export async function POST(req: NextRequest) {
@@ -36,8 +26,8 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
     }
 
-    if (!ALLOWED_TYPES.has(file.type)) {
-      return NextResponse.json({ error: 'File must be an image or video' }, { status: 400 });
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+      return NextResponse.json({ error: 'File must be an image or video format' }, { status: 400 });
     }
 
     if (file.size > MAX_FILE_SIZE) {
@@ -54,12 +44,10 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(await file.arrayBuffer());
     const dataUrl = `data:${file.type};base64,${buffer.toString('base64')}`;
     const resourceType = getResourceType(file.type);
-    const ext = file.type.includes('webp') ? 'webp' : file.type.includes('png') ? 'png' : file.type.includes('gif') ? 'gif' : file.type.includes('quicktime') ? 'mov' : file.type.startsWith('video/') ? 'mp4' : 'jpg';
+    
     const uploaded = await cloudinary.uploader.upload(dataUrl, {
       folder: 'zaybaash/admin-uploads',
-      resource_type: resourceType,
-      public_id: `${Date.now()}-${file.name.replace(/[^a-zA-Z0-9._-]+/g, '-')}.${ext}`,
-      overwrite: true,
+      resource_type: 'auto',
     });
 
     return NextResponse.json({ 
