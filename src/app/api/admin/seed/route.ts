@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import mongoose from 'mongoose';
 import Category from '@/models/Category';
 import Product from '@/models/Product';
@@ -125,6 +126,9 @@ export async function GET() {
     for (const prod of productsData) {
       await Product.findOneAndUpdate({ productId: prod.productId }, prod, { upsert: true, new: true });
     }
+
+    revalidateTag('storefront-products');
+    revalidateTag('storefront-categories');
 
     return NextResponse.json({ 
       success: true, 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import { connectDB } from '@/lib/mongodb';
 import Product from '@/models/Product';
 import { requireAdmin } from '@/lib/adminAuth';
@@ -14,6 +15,9 @@ export async function POST(req: NextRequest) {
       { isActive: false },
       { isActive: true }
     );
+
+    revalidateTag('storefront-products');
+    revalidateTag('storefront-categories');
 
     return NextResponse.json({ 
       success: true, 

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidateTag } from 'next/cache';
 import mongoose from 'mongoose';
 import { connectDB } from '@/lib/mongodb';
 import Product from '@/models/Product';
@@ -127,6 +128,9 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
 
+    revalidateTag('storefront-products');
+    revalidateTag('storefront-categories');
+
     return NextResponse.json({ product });
   } catch (err) {
     console.error('PUT /api/admin/products/[id] error:', err);
@@ -148,6 +152,9 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
     if (!product) {
       return NextResponse.json({ error: 'Product not found' }, { status: 404 });
     }
+
+    revalidateTag('storefront-products');
+    revalidateTag('storefront-categories');
 
     return NextResponse.json({ success: true });
   } catch (err) {
