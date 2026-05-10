@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
-import { revalidateTag } from 'next/cache';
+import { revalidatePath } from 'next/cache';
 import { connectDB } from '@/lib/mongodb';
 import { requireAdmin } from '@/lib/adminAuth';
 import Product from '@/models/Product';
@@ -58,8 +58,7 @@ export async function POST(req: NextRequest) {
     });
     await session.endSession();
 
-    revalidateTag('storefront-products', 'max');
-    revalidateTag('storefront-categories', 'max');
+    revalidatePath('/', 'layout');
 
     return NextResponse.json({ success: true, ...result });
   } catch (err) {

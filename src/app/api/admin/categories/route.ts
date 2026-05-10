@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidateTag } from 'next/cache';
+import { revalidatePath } from 'next/cache';
 import { connectDB } from '@/lib/mongodb';
 import Category from '@/models/Category';
 import Product from '@/models/Product';
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
 
     await category.save();
 
-    revalidateTag('storefront-categories', 'max');
+    revalidatePath('/', 'layout');
 
     return NextResponse.json({ category }, { status: 201 });
   } catch (err) {

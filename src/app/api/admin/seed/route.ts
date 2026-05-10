@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { revalidateTag } from 'next/cache';
+import { revalidatePath } from 'next/cache';
 import mongoose from 'mongoose';
 import Category from '@/models/Category';
 import Product from '@/models/Product';
@@ -129,8 +129,7 @@ export async function GET(req: NextRequest) {
       await Product.findOneAndUpdate({ productId: prod.productId }, prod, { upsert: true, new: true });
     }
 
-    revalidateTag('storefront-products', 'max');
-    revalidateTag('storefront-categories', 'max');
+    revalidatePath('/', 'layout');
 
     return NextResponse.json({ 
       success: true, 
