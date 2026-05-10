@@ -1635,19 +1635,6 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
     setShowForm(true);
   }
 
-  async function handleClearCache() {
-    try {
-      const res = await fetch('/api/admin/clear-cache', { headers: authHeaders() });
-      const data = await res.json();
-      if (data.success) {
-        alert('Storefront cache successfully cleared! Your changes should now be visible.');
-      } else {
-        throw new Error(data.error || 'Failed to clear cache');
-      }
-    } catch (err) {
-      alert(err instanceof Error ? err.message : 'Failed to clear cache');
-    }
-  }
 
   const lowStockCount = products.filter((p) => p.stock > 0 && p.stock <= lowStockThreshold && p.isActive !== false).length;
   const outOfStockCount = products.filter((p) => p.outOfStock).length;
@@ -3027,6 +3014,27 @@ export default function DashboardPage() {
       window.removeEventListener('focus', onVisible);
     };
   }, [authed, liveOn, fetchData]);
+
+  async function handleClearCache() {
+    try {
+      const token = localStorage.getItem('zaybaash_admin_token') ?? '';
+      const ts    = localStorage.getItem('zaybaash_admin_ts') ?? '';
+      const res = await fetch('/api/admin/clear-cache', {
+        headers: {
+          'x-admin-token': token,
+          'x-admin-ts': ts,
+        },
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert('Storefront cache successfully cleared! Your changes should now be visible.');
+      } else {
+        throw new Error(data.error || 'Failed to clear cache');
+      }
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to clear cache');
+    }
+  }
 
   function handleLock() {
     localStorage.removeItem('zaybaash_admin_token');
