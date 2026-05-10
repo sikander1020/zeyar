@@ -35,20 +35,33 @@ export async function GET() {
       count: countByCategory.get(c.name) ?? 0,
     }));
 
-    if (result.length === 0) {
-      result = Array.from(countByCategory.entries())
-        .sort((a, b) => b[1] - a[1])
-        .map(([name, count], i) => ({
+    const dedup = new Map<string, typeof result[0]>();
+
+    for (const c of result) {
+      dedup.set(c.name, c);
+    }
+
+    for (const [name, count] of countByCategory.entries()) {
+      if (!dedup.has(name) && count > 0) {
+        dedup.set(name, {
           id: `cat_${String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
           name,
           slug: String(name).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
           description: `${name} collection`,
           image: FALLBACK_IMAGE,
           isActive: true,
-          sortOrder: i,
+          sortOrder: 999, // push dynamically created ones to the end
           count,
-        }));
+        });
+      }
     }
+
+    result = Array.from(dedup.values())
+      .filter((c) => c.count > 0)
+      .sort((a, b) => {
+        if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
+        return b.count - a.count;
+      });
 
     return NextResponse.json(
       { categories: result },

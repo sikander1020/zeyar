@@ -199,39 +199,45 @@ const getRawCategories = unstable_cache(
       countMap.set(key, (countMap.get(key) ?? 0) + (Number(row.count) || 0));
     }
 
-    let result: StoreCategory[];
-    if (categories.length > 0) {
-      const dedup = new Map<string, StoreCategory>();
-      for (const c of categories) {
-        const key = categoryKey(String(c.name || c.slug || ''));
-        if (!key) continue;
+    const dedup = new Map<string, StoreCategory>();
 
-        const normalized = normalizeCategory({
-          _id: c._id,
-          categoryId: String(c.categoryId || ''),
-          name: categoryDisplayName(String(c.name || key)),
-          slug: String(c.slug || key).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-          description: c.description,
-          image: c.image,
-          isActive: c.isActive,
-          sortOrder: c.sortOrder,
-        }, countMap.get(key) ?? 0);
+    // 1. Add explicitly defined categories
+    for (const c of categories) {
+      const key = categoryKey(String(c.name || c.slug || ''));
+      if (!key) continue;
 
-        const prev = dedup.get(key);
-        if (!prev || normalized.sortOrder < prev.sortOrder) {
-          dedup.set(key, normalized);
-        }
-      }
-      result = Array.from(dedup.values()).sort((a, b) => a.sortOrder - b.sortOrder);
-    } else {
-      result = Array.from(countMap.entries())
-        .sort((a, b) => b[1] - a[1])
-        .map(([key, count]) => normalizeCategory({
+      const normalized = normalizeCategory({
+        _id: c._id,
+        categoryId: String(c.categoryId || ''),
+        name: categoryDisplayName(String(c.name || key)),
+        slug: String(c.slug || key).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+        description: c.description,
+        image: c.image,
+        isActive: c.isActive,
+        sortOrder: c.sortOrder,
+      }, countMap.get(key) ?? 0);
+
+      dedup.set(key, normalized);
+    }
+
+    // 2. Add implicit categories from products
+    for (const [key, count] of countMap.entries()) {
+      if (!dedup.has(key) && count > 0) {
+        dedup.set(key, normalizeCategory({
           categoryId: `cat_${String(key).replace(/[^a-z0-9]+/g, '-')}`,
           name: categoryDisplayName(key),
           slug: String(key).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         }, count));
+      }
     }
+
+    // 3. Return only categories that actually have products
+    const result = Array.from(dedup.values())
+      .filter((c) => c.count > 0)
+      .sort((a, b) => {
+        if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
+        return b.count - a.count;
+      });
 
     return result;
   },
