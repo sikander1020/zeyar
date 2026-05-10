@@ -5,6 +5,7 @@ export interface StoreColor {
 
 export interface StoreProduct {
   id: string;
+  productId: string;
   name: string;
   category: string;
   price: number;

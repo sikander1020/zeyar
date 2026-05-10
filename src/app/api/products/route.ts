@@ -82,6 +82,7 @@ function normalizeProduct(p: {
 
   return {
     id: resolvedId,
+    productId: resolvedId,
     name: p.name,
     category: p.category,
     price: Number(p.price) || 0,
