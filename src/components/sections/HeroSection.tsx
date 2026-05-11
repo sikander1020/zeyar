@@ -150,7 +150,7 @@ export default function HeroSection() {
                   fill 
                   priority 
                   sizes="(max-width: 1024px) 100vw, 55vw" 
-                  className="object-cover object-top" 
+                  className={heroProducts[activeHeroIdx]?.isSignatureDress ? "object-contain" : "object-cover object-top"} 
                 />
               ) : (
                 <div className="absolute inset-0 bg-beige/30 animate-pulse" />
