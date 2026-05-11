@@ -30,8 +30,12 @@ export default function HeroSection() {
     router.prefetch('/shop');
     router.prefetch('/dresses');
 
-    fetch('/api/products?sort=newest&limit=12')
-      .then(r => r.json()).then(d => { if (Array.isArray(d.products)) setProducts(d.products); })
+    fetch('/api/products?isHomeCarousel=true&limit=12')
+      .then(r => r.json())
+      .then(d => { 
+        if (Array.isArray(d.products) && d.products.length > 0) setProducts(d.products); 
+        else fetch('/api/products?sort=newest&limit=12').then(r2 => r2.json()).then(d2 => { if (Array.isArray(d2.products)) setProducts(d2.products); });
+      })
       .catch(() => {});
 
     fetch('/api/articles?limit=6')

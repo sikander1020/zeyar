@@ -32,6 +32,7 @@ export interface StoreProduct {
   isSale?: boolean;
   isBestseller?: boolean;
   isSignatureDress?: boolean;
+  isHomeCarousel?: boolean;
   frontImageUrl?: string;
   backImageUrl?: string;
   sizeChartImageUrl?: string;

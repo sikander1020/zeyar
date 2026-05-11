@@ -4,12 +4,24 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useInView, useReducedMotion } from 'framer-motion';
 import { useRef } from 'react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { StoreProduct } from '@/types/storefront';
 
 export default function SignatureDressSpotlight({ products }: { products: StoreProduct[] }) {
   const ref = useRef(null);
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const prefersReducedMotion = useReducedMotion();
+
+  const scroll = (direction: 'left' | 'right') => {
+    if (scrollContainerRef.current) {
+      const scrollAmount = scrollContainerRef.current.clientWidth * 0.8;
+      scrollContainerRef.current.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth',
+      });
+    }
+  };
 
   if (!products || products.length === 0) return null;
 
@@ -79,17 +91,39 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
         </div>
       </motion.div>
 
-      <div id="signature-grid" className="relative mt-7 grid grid-cols-2 gap-3 sm:gap-4 justify-items-center sm:grid-cols-2 xl:grid-cols-3">
-        {products.map((product, index) => (
-          <motion.article
-            key={product.id}
-            initial={{ opacity: 0, y: 30, scale: 0.96 }}
-            whileInView={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
-            viewport={{ once: true, amount: 0.25 }}
-            whileHover={prefersReducedMotion ? undefined : { y: -6, scale: 1.01 }}
-            transition={{ duration: 0.6, delay: index * 0.08 }}
-            className="group overflow-hidden border border-nude/40 bg-white w-full max-w-[360px] shadow-[0_10px_34px_rgba(58,46,42,0.08)]"
-          >
+      <div className="relative mt-7 group/carousel">
+        <button
+          onClick={() => scroll('left')}
+          className="absolute left-2 top-[40%] -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-brown shadow-lg hover:bg-brown hover:text-white transition-all opacity-0 group-hover/carousel:opacity-100 hidden md:flex"
+          aria-label="Previous"
+        >
+          <ChevronLeft size={20} />
+        </button>
+
+        <button
+          onClick={() => scroll('right')}
+          className="absolute right-2 top-[40%] -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-brown shadow-lg hover:bg-brown hover:text-white transition-all opacity-0 group-hover/carousel:opacity-100 hidden md:flex"
+          aria-label="Next"
+        >
+          <ChevronRight size={20} />
+        </button>
+
+        <div 
+          ref={scrollContainerRef}
+          id="signature-grid" 
+          className="flex overflow-x-auto snap-x snap-mandatory gap-4 pb-8 hide-scrollbar scroll-smooth px-1"
+          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+        >
+          {products.map((product, index) => (
+            <motion.article
+              key={product.id}
+              initial={{ opacity: 0, y: 30, scale: 0.96 }}
+              whileInView={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
+              viewport={{ once: true, amount: 0.25 }}
+              whileHover={prefersReducedMotion ? undefined : { y: -6, scale: 1.01 }}
+              transition={{ duration: 0.6, delay: index * 0.08 }}
+              className="group relative overflow-hidden border border-nude/40 bg-white w-[85vw] sm:w-[calc(50%-8px)] lg:w-[calc(33.333%-11px)] max-w-[360px] shrink-0 snap-center sm:snap-start shadow-[0_10px_34px_rgba(58,46,42,0.08)]"
+            >
             <Link 
               href={`/product/${product.id}`} 
               className="block"
@@ -134,6 +168,7 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
             </Link>
           </motion.article>
         ))}
+        </div>
       </div>
 
       <div className="relative mt-8 flex flex-col items-center gap-3 text-center">

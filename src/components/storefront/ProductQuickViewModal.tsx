@@ -208,7 +208,7 @@ function ProductQuickViewModalBody({ product, onClose }: { product: StoreProduct
                 whileTap={product.outOfStock ? undefined : { scale: 0.98 }}
                 className="btn-luxury btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                {product.outOfStock ? 'Out of Stock' : adding ? 'Adding...' : 'Add to Bag'}
+                {product.outOfStock ? 'Out of Stock' : adding ? 'Adding...' : product.isSignatureDress ? 'Pre Order' : 'Add to Bag'}
               </motion.button>
 
               <motion.button

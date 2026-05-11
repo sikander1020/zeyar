@@ -30,6 +30,7 @@ export interface IProduct extends Document {
   isSale?: boolean;
   isBestseller?: boolean;
   isSignatureDress?: boolean;
+  isHomeCarousel?: boolean;
   frontImageUrl?: string;
   backImageUrl?: string;
   sizeChartImageUrl?: string;
@@ -85,6 +86,7 @@ const ProductSchema = new Schema<IProduct>(
     isSale:        { type: Boolean, default: false },
     isBestseller:  { type: Boolean, default: false },
     isSignatureDress: { type: Boolean, default: false },
+    isHomeCarousel: { type: Boolean, default: false },
     frontImageUrl: { type: String, default: '' },
     backImageUrl:  { type: String, default: '' },
     sizeChartImageUrl: { type: String, default: '' },

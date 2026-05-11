@@ -714,7 +714,7 @@ export default function ProductPage() {
               </div>
 
               {/* Add to cart */}
-              <div className="grid grid-cols-2 sm:grid-cols-[1fr_1fr_auto] gap-3 mb-8">
+              <div className={`grid ${product.isSignatureDress ? 'grid-cols-1 sm:grid-cols-[1fr_auto]' : 'grid-cols-2 sm:grid-cols-[1fr_1fr_auto]'} gap-3 mb-8`}>
                 <motion.button
                   whileTap={{ scale: 0.98 }}
                   disabled={product.outOfStock || product.stock <= 0 || addingToCart}
@@ -722,16 +722,18 @@ export default function ProductPage() {
                   className="btn-luxury btn-primary flex items-center justify-center gap-1.5 md:gap-2 disabled:opacity-60 disabled:cursor-not-allowed !px-1 md:!px-6 !py-2 md:!py-4 !text-[9px] md:!text-xs"
                 >
                   <ShoppingBag size={14} className="md:w-[15px] md:h-[15px] w-3 h-3" strokeWidth={2} />
-                  {(product.outOfStock || product.stock <= 0) ? 'Out of Stock' : addingToCart ? 'Adding...' : 'Add to Bag'}
+                  {(product.outOfStock || product.stock <= 0) ? 'Out of Stock' : addingToCart ? 'Adding...' : product.isSignatureDress ? 'Pre Order' : 'Add to Bag'}
                 </motion.button>
-                <button
-                  type="button"
-                  disabled={product.outOfStock || product.stock <= 0 || buyingNow}
-                  onClick={handleBuyNow}
-                  className="btn-luxury btn-outline disabled:opacity-60 disabled:cursor-not-allowed !px-1 md:!px-6 !py-2 md:!py-4 !text-[9px] md:!text-xs"
-                >
-                  {buyingNow ? 'Redirecting...' : 'Buy Now'}
-                </button>
+                {!product.isSignatureDress && (
+                  <button
+                    type="button"
+                    disabled={product.outOfStock || product.stock <= 0 || buyingNow}
+                    onClick={handleBuyNow}
+                    className="btn-luxury btn-outline disabled:opacity-60 disabled:cursor-not-allowed !px-1 md:!px-6 !py-2 md:!py-4 !text-[9px] md:!text-xs"
+                  >
+                    {buyingNow ? 'Redirecting...' : 'Buy Now'}
+                  </button>
+                )}
                 <button
                   onClick={handleToggleWishlist}
                   className={`col-span-2 sm:col-span-1 btn-luxury px-5 border ${wishlisted ? 'bg-rose-gold border-rose-gold text-white' : 'border-nude text-brown hover:border-rose-gold hover:text-rose-gold'} transition-all duration-300`}

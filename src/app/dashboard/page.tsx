@@ -141,6 +141,7 @@ interface ProductRow {
   isSale: boolean;
   isBestseller: boolean;
   isSignatureDress?: boolean;
+  isHomeCarousel?: boolean;
   // Editable attribute cards
   fabric?: string;
   craft?: string;
@@ -1349,6 +1350,7 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
       isSale: false,
       isBestseller: false,
       isSignatureDress: signatureOnly,
+      isHomeCarousel: false,
       fabric: '',
       craft: '',
       line: '',
@@ -1530,6 +1532,7 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
         isSale: formData.isSale,
         isBestseller: formData.isBestseller,
         isSignatureDress: formData.isSignatureDress,
+        isHomeCarousel: formData.isHomeCarousel,
         fabric: formData.fabric,
         craft: formData.craft,
         line: formData.line,
@@ -1606,6 +1609,7 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
       isSale: prod.isSale,
       isBestseller: prod.isBestseller,
       isSignatureDress: prod.isSignatureDress,
+      isHomeCarousel: prod.isHomeCarousel,
     };
     await fetch(`/api/admin/products/${prod.productId}`, {
       method: 'PUT',
@@ -1641,6 +1645,7 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
       isSale: prod.isSale,
       isBestseller: prod.isBestseller,
       isSignatureDress: prod.isSignatureDress === true,
+      isHomeCarousel: prod.isHomeCarousel === true,
       fabric: prod.fabric || '',
       craft: prod.craft || '',
       line: prod.line || '',
@@ -2266,6 +2271,10 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
             <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
               <input type="checkbox" checked={formData.isSignatureDress} onChange={(e) => setFormData({ ...formData, isSignatureDress: e.target.checked })} style={{ accentColor: ROSE }} />
               Signature Dress (Handcrafted)
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
+              <input type="checkbox" checked={formData.isHomeCarousel} onChange={(e) => setFormData({ ...formData, isHomeCarousel: e.target.checked })} style={{ accentColor: ROSE }} />
+              Show in Home Carousel
             </label>
           </div>
           <button type="submit" style={{ padding: '10px 20px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>

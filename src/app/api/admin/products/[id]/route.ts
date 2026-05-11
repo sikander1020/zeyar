@@ -115,6 +115,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         isSale: body.isSale,
         isBestseller: body.isBestseller,
         isSignatureDress: body.isSignatureDress === true,
+        isHomeCarousel: body.isHomeCarousel === true,
         fabric: typeof body.fabric === 'string' ? body.fabric.trim() : undefined,
         craft: typeof body.craft === 'string' ? body.craft.trim() : undefined,
         line: typeof body.line === 'string' ? body.line.trim() : undefined,

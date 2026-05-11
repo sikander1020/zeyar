@@ -328,7 +328,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
                               className="flex-1 h-10 rounded bg-cream text-brown flex items-center justify-center gap-2 font-semibold hover:bg-rose-gold hover:text-cream transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed"
                             >
                               <ShoppingBag size={16} />
-                              {addingId === product.id ? 'Adding...' : 'Add'}
+                              {addingId === product.id ? 'Adding...' : product.isSignatureDress ? 'Pre Order' : 'Add'}
                             </button>
                           </div>
 

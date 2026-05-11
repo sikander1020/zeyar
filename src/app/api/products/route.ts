@@ -66,6 +66,8 @@ function normalizeProduct(p: {
   isNewArrival?: boolean;
   isSale?: boolean;
   isBestseller?: boolean;
+  isSignatureDress?: boolean;
+  isHomeCarousel?: boolean;
   fabric?: string;
   craft?: string;
   line?: string;
@@ -108,6 +110,8 @@ function normalizeProduct(p: {
     isNew: p.isNewArrival === true,
     isSale: p.isSale === true,
     isBestseller: p.isBestseller === true,
+    isSignatureDress: p.isSignatureDress === true,
+    isHomeCarousel: p.isHomeCarousel === true,
     fabric: typeof p.fabric === 'string' ? p.fabric : '',
     craft: typeof p.craft === 'string' ? p.craft : '',
     line: typeof p.line === 'string' ? p.line : '',
@@ -124,15 +128,21 @@ export async function GET(req: NextRequest) {
     const sort = (url.searchParams.get('sort') ?? 'featured').trim();
     const qRaw = (url.searchParams.get('q') ?? '').trim();
     const limitRaw = Number(url.searchParams.get('limit') ?? 0);
+    const isHomeCarousel = url.searchParams.get('isHomeCarousel') === 'true';
     const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.min(limitRaw, 40) : 0;
 
     const q: {
       isActive?: { $ne: boolean };
       category?: string;
+      isHomeCarousel?: boolean;
       $or?: Array<{ name?: RegExp; tags?: RegExp; category?: RegExp }>;
     } = { isActive: { $ne: false } };
+    
     if (category && category !== 'All') {
       q.category = category;
+    }
+    if (isHomeCarousel) {
+      q.isHomeCarousel = true;
     }
 
     if (qRaw.length >= 2) {
@@ -142,7 +152,7 @@ export async function GET(req: NextRequest) {
     }
 
     const docs = await Product.find(q)
-      .select('productId name category price originalPrice images frontImageUrl backImageUrl sizeChartImageUrl videoUrl model3dUrl model3dStatus colors sizes sizeChartRows description details rating reviewCount tags stock isActive outOfStock isNewArrival isSale isBestseller fabric craft line lovedByCount')
+      .select('productId name category price originalPrice images frontImageUrl backImageUrl sizeChartImageUrl videoUrl model3dUrl model3dStatus colors sizes sizeChartRows description details rating reviewCount tags stock isActive outOfStock isNewArrival isSale isBestseller isSignatureDress isHomeCarousel fabric craft line lovedByCount')
       .limit(limit || 0)
       .lean();
     const products = docs.map((d) => normalizeProduct(d as never));
