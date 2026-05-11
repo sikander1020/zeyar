@@ -1829,7 +1829,42 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
             Replace Catalog
           </button>
           <button onClick={() => { setShowForm(!showForm); setEditing(null); resetForm(); }}
-            style={{ padding: '10px 16px', background:      <AnimatePresence>
+            style={{ padding: '10px 16px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+            {showForm ? 'Cancel' : '+ Add Product'}
+          </button>
+        </div>
+      </div>
+
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
+        <label style={{ fontSize: 12, color: BROWN }}>Low-stock threshold</label>
+        <input
+          type="number"
+          min={1}
+          value={lowStockThreshold}
+          onChange={(e) => setLowStockThreshold(Math.max(1, Number(e.target.value) || 1))}
+          style={{ width: 80, padding: '8px 10px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: '#fff' }}
+        />
+        <button
+          onClick={() => setShowLowStockOnly((v) => !v)}
+          style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #EBD9CC', background: showLowStockOnly ? '#FBEDE6' : '#fff', color: BROWN, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
+        >
+          {showLowStockOnly ? 'Showing Low Stock Only' : 'Show Low Stock Only'}
+        </button>
+        {inactiveCount > 0 && (
+          <button
+            onClick={activateAllInactive}
+            style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #3E7B4E', background: '#E8F5E9', color: '#2E5C3E', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
+          >
+            Activate All {inactiveCount} Hidden
+          </button>
+        )}
+      </div>
+
+      {loading && (
+        <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>Loading products...</p>
+      )}
+
+      <AnimatePresence>
         {showForm && (
           <motion.form 
             initial={{ height: 0, opacity: 0, overflow: 'hidden' }}
