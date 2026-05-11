@@ -38,8 +38,8 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
   }, [initialProducts]);
 
   const newProducts = products.filter((p) => p.isNew);
-  const sliderProducts = newProducts.length > 0 ? newProducts : products.slice(0, 6);
-  const visible = 3;
+  const sliderProducts = newProducts.length > 0 ? newProducts : products.slice(0, 8);
+  const visible = 4;
   const maxStart = Math.max(0, sliderProducts.length - visible);
 
   useEffect(() => {
@@ -105,8 +105,8 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
         </div>
 
         {loading && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {Array.from({ length: 3 }).map((_, i) => (
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
               <div key={i} className="space-y-3">
                 <div className="aspect-[3/4] skeleton" />
                 <div className="h-4 w-2/3 skeleton" />
@@ -128,7 +128,7 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35, ease: [0.2, 0.8, 0.2, 1] }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-6"
+            className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 md:gap-6"
             onMouseEnter={() => setIsAutoplay(false)}
             onMouseLeave={() => setIsAutoplay(true)}
           >

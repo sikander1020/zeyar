@@ -58,7 +58,7 @@ export default function HeroSection() {
   return (
     <>
       {/* ══ DRIBBBLE-INSPIRED SPLIT HERO ═════════════════════════════════ */}
-      <section className="relative w-full min-h-[100svh] flex flex-col lg:flex-row overflow-hidden pt-20 lg:pt-0"
+      <section className="relative w-full min-h-[100svh] flex flex-col-reverse lg:flex-row overflow-hidden pt-20 lg:pt-0"
         style={{ background: 'var(--cream)' }}>
         
         {/* Left Content Half */}
