@@ -253,7 +253,17 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
                   }}
                 >
                   {/* Product Image */}
-                  <Link href={`/product/${product.id}`}>
+                  <Link 
+                    href={`/product/${product.id}`}
+                    onClick={() => {
+                      try {
+                        window.sessionStorage.setItem(
+                          `zaybaash-product-cache:${product.id}`,
+                          JSON.stringify({ cachedAt: Date.now(), product })
+                        );
+                      } catch (e) {}
+                    }}
+                  >
                     <div className="relative aspect-[3/4] bg-beige overflow-hidden group cursor-pointer">
                       <Image
                         src={product.images[0]}

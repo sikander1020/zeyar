@@ -90,7 +90,18 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
             transition={{ duration: 0.6, delay: index * 0.08 }}
             className="group overflow-hidden border border-nude/40 bg-white w-full max-w-[360px] shadow-[0_10px_34px_rgba(58,46,42,0.08)]"
           >
-            <Link href={`/product/${product.id}`} className="block">
+            <Link 
+              href={`/product/${product.id}`} 
+              className="block"
+              onClick={() => {
+                try {
+                  window.sessionStorage.setItem(
+                    `zaybaash-product-cache:${product.id}`,
+                    JSON.stringify({ cachedAt: Date.now(), product })
+                  );
+                } catch (e) {}
+              }}
+            >
               <div className="relative aspect-[3/4] overflow-hidden">
                 <Image
                   src={product.images?.[0] || ''}

@@ -158,12 +158,15 @@ export async function GET(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { products },
-      { headers: { 'Cache-Control': 'public, max-age=60, s-maxage=60, stale-while-revalidate=300' } },
+      { products, total: products.length },
+      {
+        headers: {
+          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+        },
+      }
     );
   } catch (err) {
     console.error('GET /api/products error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}
 

@@ -140,7 +140,17 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
                 transition={{ duration: 0.6, delay: i * 0.1 }}
                 className="product-card group"
               >
-                <Link href={`/product/${product.id}`}>
+                <Link 
+                  href={`/product/${product.id}`}
+                  onClick={() => {
+                    try {
+                      window.sessionStorage.setItem(
+                        `zaybaash-product-cache:${product.id}`,
+                        JSON.stringify({ cachedAt: Date.now(), product })
+                      );
+                    } catch (e) {}
+                  }}
+                >
                   <div className="relative overflow-hidden bg-beige aspect-[3/4]">
                     <Image
                       src={product.images[0]}
