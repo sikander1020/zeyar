@@ -169,4 +169,4 @@ export async function GET(req: NextRequest) {
     console.error('GET /api/products error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-
+}
