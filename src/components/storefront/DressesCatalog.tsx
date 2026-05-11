@@ -38,12 +38,6 @@ function ProductCard({ product, index, onQuickView }: { product: StoreProduct; i
   const wishlisted = isWishlisted(product.id);
   const [adding, setAdding] = useState(false);
   const cardRef = useRef<HTMLDivElement | null>(null);
-  const mx = useMotionValue(0);
-  const my = useMotionValue(0);
-  const smoothX = useSpring(mx, { stiffness: 220, damping: 20, mass: 0.4 });
-  const smoothY = useSpring(my, { stiffness: 220, damping: 20, mass: 0.4 });
-  const { scrollYProgress } = useScroll({ target: cardRef, offset: ['start end', 'end start'] });
-  const imageY = useTransform(scrollYProgress, [0, 1], [-10, 10]);
   const [hovered, setHovered] = useState(false);
   const badges = product.outOfStock
     ? [{ text: 'Out', className: 'badge-sale', style: undefined }]
@@ -64,25 +58,12 @@ function ProductCard({ product, index, onQuickView }: { product: StoreProduct; i
       transition={{ duration: 0.45, delay: Math.min(index * 0.06, 0.4), ease: [0.2, 0.8, 0.2, 1] }}
       className="product-card group"
       ref={cardRef}
-      style={{ x: smoothX, y: smoothY }}
       onMouseEnter={() => setHovered(true)}
-      onMouseMove={(e) => {
-        const rect = cardRef.current?.getBoundingClientRect();
-        if (!rect) return;
-        const px = (e.clientX - rect.left) / rect.width - 0.5;
-        const py = (e.clientY - rect.top) / rect.height - 0.5;
-        mx.set(px * 8);
-        my.set(py * 8);
-      }}
-      onMouseLeave={() => {
-        setHovered(false);
-        mx.set(0);
-        my.set(0);
-      }}
+      onMouseLeave={() => setHovered(false)}
     >
       <Link href={`/product/${product.id}`}>
         <div className="relative overflow-hidden bg-beige aspect-[3/4]">
-          <motion.div className="absolute inset-0" style={{ y: imageY }}>
+          <motion.div className="absolute inset-0">
             <Image
               src={hovered && product.images[1] ? product.images[1] : product.images[0]}
               alt={product.name}

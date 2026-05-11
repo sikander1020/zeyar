@@ -133,8 +133,8 @@ export default function HeroSection() {
           <AnimatePresence mode="wait">
             <motion.div
               key={`img-${activeHeroIdx}`}
-              initial={{ opacity: 0, scale: 1.05, filter: 'blur(10px)' }}
-              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.8, ease: 'easeOut' }}
               className="absolute inset-0 w-full h-full"
