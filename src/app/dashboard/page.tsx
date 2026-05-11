@@ -2331,7 +2331,7 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
             {filteredProducts.map((p, i) => (
               <tr key={p.productId} style={{ background: i % 2 === 0 ? '#fff' : BEIGE }}>
                 <td style={{ padding: '10px 14px' }}>
-                  <img src={p.frontImageUrl || p.images[0] || '/placeholder.png'} alt="" 
+                  <img src={p.frontImageUrl || p.images?.[0] || '/placeholder.png'} alt="" 
                     style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: 4, border: '1px solid #EBD9CC', background: '#fff' }} 
                     onError={(e) => (e.currentTarget.src = '/placeholder.png')} />
                 </td>
