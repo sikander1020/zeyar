@@ -124,7 +124,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                   </div>
                 )}
               </motion.div>
-              </motion.div>
             );
           })}
         </AnimatePresence>
