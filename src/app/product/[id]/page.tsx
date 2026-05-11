@@ -1010,7 +1010,7 @@ export default function ProductPage() {
           )}
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 z-[90] md:hidden bg-cream/95 backdrop-blur border-t border-nude/30 p-3">
+        <div className="fixed bottom-0 left-0 right-0 z-[70] md:hidden bg-cream/95 backdrop-blur border-t border-nude/30 p-3">
           <div className="max-w-7xl mx-auto flex items-center gap-3">
             <div className="min-w-0">
               <p className="text-[11px] tracking-[0.12em] uppercase text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -1039,7 +1039,7 @@ export default function ProductPage() {
           </div>
         </div>
 
-        <div className="hidden md:block fixed bottom-0 left-0 right-0 z-[85] bg-cream/95 backdrop-blur border-t border-nude/30 p-3">
+        <div className="hidden md:block fixed bottom-0 left-0 right-0 z-[70] bg-cream/95 backdrop-blur border-t border-nude/30 p-3">
           <div className="max-w-7xl mx-auto flex items-center gap-4">
             <div className="min-w-0 flex-1">
               <p className="text-[11px] tracking-[0.12em] uppercase text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
