@@ -68,6 +68,8 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
   const [addingId, setAddingId] = useState<string | null>(null);
   const [quickViewProduct, setQuickViewProduct] = useState<StoreProduct | null>(null);
   const reduceMotion = useReducedMotion();
+  const isMobile = viewportWidth < 768;
+  const useSimpleMotion = reduceMotion || isMobile;
   const containerRef = useRef<HTMLDivElement>(null);
   const autoplayTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -93,7 +95,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
     return () => {
       if (autoplayTimerRef.current) clearInterval(autoplayTimerRef.current);
     };
-  }, [isAutoplay, total, reduceMotion, onSlideChange]);
+  }, [isAutoplay, total, useSimpleMotion, onSlideChange]);
 
   useEffect(() => {
     const updateViewport = () => {
@@ -202,7 +204,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
         onMouseMove={handlePointerMove}
         onMouseOut={resetPointerTilt}
       >
-        <div className="pointer-events-none absolute inset-x-0 bottom-6 mx-auto h-20 w-[72%] rounded-full bg-brown/15 blur-2xl" />
+        <div className="hidden md:block pointer-events-none absolute inset-x-0 bottom-6 mx-auto h-20 w-[72%] rounded-full bg-brown/15 blur-2xl" />
 
         {/* Cards */}
         <div className="relative w-full h-full flex items-center justify-center">
@@ -220,14 +222,14 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
                 animate={{
                   x,
                   z,
-                  rotateY: reduceMotion ? 0 : isCenter ? centerTilt.y : angle,
-                  rotateX: reduceMotion ? 0 : isCenter ? centerTilt.x : 0,
+                  rotateY: useSimpleMotion ? (isCenter ? 0 : angle) : isCenter ? centerTilt.y : angle,
+                  rotateX: useSimpleMotion ? 0 : isCenter ? centerTilt.x : 0,
                   opacity,
                   scale,
                 }}
                 transition={{
-                  type: reduceMotion ? 'tween' : 'spring',
-                  duration: reduceMotion ? 0.22 : undefined,
+                  type: useSimpleMotion ? 'tween' : 'spring',
+                  duration: useSimpleMotion ? 0.35 : undefined,
                   stiffness: isCenter ? 120 : 220,
                   damping: isCenter ? 24 : 28,
                   mass: isCenter ? 1 : 0.9,

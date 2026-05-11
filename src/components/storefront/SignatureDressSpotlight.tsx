@@ -25,7 +25,7 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
       />
 
       {!prefersReducedMotion && (
-        <>
+        <div className="hidden md:block">
           <motion.div
             aria-hidden
             className="pointer-events-none absolute -left-12 top-12 h-40 w-40 rounded-full bg-rose-gold/12 blur-2xl"
@@ -38,7 +38,7 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
             animate={{ y: [0, 14, 0], x: [0, -10, 0] }}
             transition={{ duration: 9, repeat: Infinity, ease: 'easeInOut' }}
           />
-        </>
+        </div>
       )}
 
       <motion.div
@@ -96,6 +96,7 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
                   src={product.images?.[0] || ''}
                   alt={product.name}
                   fill
+                  sizes="(max-width: 640px) 50vw, 33vw"
                   className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
                 />
                 {!prefersReducedMotion && (

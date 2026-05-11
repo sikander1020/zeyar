@@ -18,6 +18,13 @@ export default function FeaturedCollections({ initialProducts }: { initialProduc
   const inView = useInView(ref, { once: true, margin: '-80px' });
   const [products, setProducts] = useState<StoreProduct[]>(initialProducts ?? []);
   const [loading, setLoading] = useState(!initialProducts);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setIsDesktop(window.innerWidth >= 768);
+    }
+  }, []);
 
   useEffect(() => {
     if (initialProducts) return;
@@ -63,15 +70,17 @@ export default function FeaturedCollections({ initialProducts }: { initialProduc
       {/* Animated Shader Gradient Background */}
       <div className="absolute inset-0 opacity-35">
         <div className="absolute inset-0 bg-gradient-to-br from-[#FAF7F4] via-[#F0C9BF] to-[#D4919A] md:hidden" />
-        <div className="hidden md:block w-full h-full">
-          <ShaderGradientCanvas 
-            className="w-full h-full"
-            color1="#FAF7F4"
-            color2="#F0C9BF"
-            color3="#D4919A"
-            intensity={0.5}
-          />
-        </div>
+        {isDesktop && (
+          <div className="hidden md:block w-full h-full">
+            <ShaderGradientCanvas 
+              className="w-full h-full"
+              color1="#FAF7F4"
+              color2="#F0C9BF"
+              color3="#D4919A"
+              intensity={0.5}
+            />
+          </div>
+        )}
       </div>
 
       <div className="max-w-7xl mx-auto px-6 relative" ref={ref}>

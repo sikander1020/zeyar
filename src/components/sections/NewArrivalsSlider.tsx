@@ -146,6 +146,7 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
                       src={product.images[0]}
                       alt={product.name}
                       fill
+                      sizes="(max-width: 640px) 50vw, 25vw"
                       className="object-cover transition-transform duration-700 group-hover:scale-110"
                     />
                     <div className="absolute top-4 left-4">

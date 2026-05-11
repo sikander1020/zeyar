@@ -1009,30 +1009,30 @@ export default function ProductPage() {
           )}
         </div>
 
-        <div className="fixed bottom-0 left-0 right-0 z-[70] md:hidden bg-cream/95 backdrop-blur border-t border-nude/30 p-3">
-          <div className="max-w-7xl mx-auto flex items-center gap-3">
-            <div className="min-w-0">
-              <p className="text-[11px] tracking-[0.12em] uppercase text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                {selectedSize ? `Size ${selectedSize}` : 'Select size'}
-              </p>
-              <p className="text-sm font-semibold text-brown font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                Rs {product.price.toLocaleString()}
-              </p>
-            </div>
+        <div className="fixed bottom-0 left-0 right-0 z-[70] md:hidden bg-cream/95 backdrop-blur border-t border-nude/30 p-3 flex flex-col gap-2.5 pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+          <div className="flex justify-between items-center px-1">
+            <p className="text-[10px] tracking-[0.15em] uppercase text-brown-muted font-inter font-medium" style={{ fontFamily: "'Inter', sans-serif" }}>
+              {selectedSize ? `Size: ${selectedSize}` : 'Select a size'}
+            </p>
+            <p className="text-sm font-semibold text-brown font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
+              Rs {product.price.toLocaleString()}
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
             <button
               type="button"
               disabled={product.outOfStock || addingToCart}
               onClick={handleAddToCart}
-              className="btn-luxury btn-primary flex-1 flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed !px-1 !py-2 !text-[9px]"
+              className="btn-luxury btn-primary flex-1 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed !px-2 !py-2.5 !text-[10px] sm:!text-xs"
             >
-              <ShoppingBag size={12} strokeWidth={2} />
+              <ShoppingBag size={14} strokeWidth={2} />
               {product.outOfStock ? 'Out of Stock' : addingToCart ? 'Adding...' : 'Add to Bag'}
             </button>
             <button
               type="button"
               disabled={product.outOfStock || buyingNow}
               onClick={handleBuyNow}
-              className="btn-luxury btn-outline flex-1 disabled:opacity-60 disabled:cursor-not-allowed !px-1 !py-2 !text-[9px]"
+              className="btn-luxury btn-outline flex-1 disabled:opacity-60 disabled:cursor-not-allowed !px-2 !py-2.5 !text-[10px] sm:!text-xs"
             >
               {buyingNow ? 'Redirecting...' : 'Buy Now'}
             </button>
