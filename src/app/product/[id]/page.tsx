@@ -349,8 +349,7 @@ export default function ProductPage() {
       size: selectedSizeSafe,
       color: selectedColorSafe.name,
     });
-    toast({ type: 'success', title: 'Added to bag', message: product.name });
-    toggleCart();
+    toast({ type: 'success', title: 'Added to bag', message: product.name, hasCheckout: true });
     window.setTimeout(() => setAddingToCart(false), 500);
   };
 

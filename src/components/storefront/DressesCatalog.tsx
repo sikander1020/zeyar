@@ -120,7 +120,7 @@ function ProductCard({ product, index, onQuickView }: { product: StoreProduct; i
                 if (adding || product.outOfStock) return;
                 setAdding(true);
                 addItem(product, product.sizes[1] || product.sizes[0], product.colors[0]);
-                toast({ type: 'success', title: 'Added to bag', message: product.name });
+                toast({ type: 'success', title: 'Added to bag', message: product.name, hasCheckout: true });
                 window.setTimeout(() => setAdding(false), 500);
               }}
               className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center text-brown hover:bg-brown hover:text-white transition-all opacity-0 group-hover:opacity-100 disabled:opacity-60 disabled:cursor-not-allowed"

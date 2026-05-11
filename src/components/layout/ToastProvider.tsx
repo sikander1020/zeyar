@@ -11,10 +11,11 @@ type Toast = {
   title: string;
   message?: string;
   type: ToastType;
+  hasCheckout?: boolean;
 };
 
 type ToastContextValue = {
-  toast: (input: { title: string; message?: string; type?: ToastType }) => void;
+  toast: (input: { title: string; message?: string; type?: ToastType; hasCheckout?: boolean }) => void;
 };
 
 const ToastContext = createContext<ToastContextValue | null>(null);
@@ -62,17 +63,18 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  const toast = useCallback((input: { title: string; message?: string; type?: ToastType }) => {
+  const toast = useCallback((input: { title: string; message?: string; type?: ToastType; hasCheckout?: boolean }) => {
     const id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
     const next: Toast = {
       id,
       title: input.title,
       message: input.message,
       type: input.type ?? 'info',
+      hasCheckout: input.hasCheckout,
     };
 
     setToasts((prev) => [next, ...prev].slice(0, 4));
-    window.setTimeout(() => dismiss(id), 2800);
+    window.setTimeout(() => dismiss(id), input.hasCheckout ? 5000 : 2800);
   }, [dismiss]);
 
   const value = useMemo<ToastContextValue>(() => ({ toast }), [toast]);
@@ -93,7 +95,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 animate={{ opacity: 1, x: 0, y: 0 }}
                 exit={{ opacity: 0, x: 12, y: -8 }}
                 transition={{ duration: 0.22 }}
-                className={`pointer-events-auto rounded-xl border ${c.border} ${c.bg} p-3 shadow-[0_16px_46px_-22px_rgba(58,46,42,0.45)] backdrop-blur`}
+                className={`pointer-events-auto rounded-xl border ${c.border} ${c.bg} p-3 shadow-[0_16px_46px_-22px_rgba(58,46,42,0.45)] backdrop-blur flex flex-col gap-2`}
               >
                 <div className="flex items-start gap-3">
                   <Icon size={18} className={`mt-0.5 ${c.icon}`} strokeWidth={2} />
@@ -110,6 +112,18 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                     <X size={14} strokeWidth={2} />
                   </button>
                 </div>
+                {t.hasCheckout && (
+                  <div className="pl-[30px] pt-1">
+                    <a
+                      href="/checkout"
+                      onClick={() => dismiss(t.id)}
+                      className="inline-block px-4 py-1.5 bg-brown text-cream text-[10px] tracking-[0.1em] uppercase font-semibold rounded hover:bg-brown/90 transition-colors"
+                    >
+                      Proceed to Checkout
+                    </a>
+                  </div>
+                )}
+              </motion.div>
               </motion.div>
             );
           })}
