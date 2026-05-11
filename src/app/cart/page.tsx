@@ -113,6 +113,7 @@ export default function CartPage() {
                       <span>Shipping</span>
                       <span className="text-rose-gold">Free</span>
                     </div>
+                  </div>
                   <div className="border-t border-nude/30 pt-4 mb-8 flex justify-between">
                     <span className="font-playfair text-brown font-semibold" style={{ fontFamily: "'Playfair Display', serif" }}>Total</span>
                     <span className="text-xl font-playfair font-semibold text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
