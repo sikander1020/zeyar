@@ -13,12 +13,7 @@ type ThemeContextValue = {
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 function resolveInitialTheme(): Theme {
-  if (typeof window === 'undefined') return 'light';
-
-  const stored = window.localStorage.getItem('zaybaash-theme');
-  if (stored === 'dark' || stored === 'light') return stored;
-
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return 'light';
 }
 
 function applyTheme(theme: Theme) {
