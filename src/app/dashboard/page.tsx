@@ -1176,6 +1176,7 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
     isSale: false,
     isBestseller: false,
     isSignatureDress: signatureOnly,
+    isHomeCarousel: false,
     // Attribute card fields
     fabric: '',
     craft: '',
