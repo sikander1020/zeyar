@@ -90,7 +90,7 @@ export default function CartPage() {
                           </button>
                         </div>
                         <span className="text-lg font-playfair font-semibold text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
-                          ${(item.product.price * item.quantity).toFixed(0)}
+                          Rs {(item.product.price * item.quantity).toLocaleString()}
                         </span>
                       </div>
                     </div>
@@ -107,21 +107,16 @@ export default function CartPage() {
                   <div className="space-y-4 mb-6">
                     <div className="flex justify-between text-sm font-inter text-brown-muted" style={{ fontFamily: "'Inter', sans-serif" }}>
                       <span>Subtotal</span>
-                      <span>${total().toFixed(0)}</span>
+                      <span>Rs {total().toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-sm font-inter text-brown-muted" style={{ fontFamily: "'Inter', sans-serif" }}>
                       <span>Shipping</span>
                       <span className="text-rose-gold">Free</span>
                     </div>
-                    <div className="flex justify-between text-sm font-inter text-brown-muted" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      <span>Estimated Tax</span>
-                      <span>${(total() * 0.08).toFixed(0)}</span>
-                    </div>
-                  </div>
                   <div className="border-t border-nude/30 pt-4 mb-8 flex justify-between">
                     <span className="font-playfair text-brown font-semibold" style={{ fontFamily: "'Playfair Display', serif" }}>Total</span>
                     <span className="text-xl font-playfair font-semibold text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
-                      ${(total() * 1.08).toFixed(0)}
+                      Rs {total().toLocaleString()}
                     </span>
                   </div>
                   <div className="space-y-3">

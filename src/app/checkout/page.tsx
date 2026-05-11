@@ -44,7 +44,7 @@ export default function CheckoutPage() {
   const subtotal = total();
   const discount = appliedCoupon?.discount ?? 0;
   const netTotal = Math.max(0, subtotal - discount);
-  const finalTotal = netTotal * 1.08;
+  const finalTotal = netTotal;
 
   const update = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
 
