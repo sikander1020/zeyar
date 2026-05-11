@@ -63,10 +63,7 @@ export async function GET() {
         return b.count - a.count;
       });
 
-    return NextResponse.json(
-      { categories: result },
-      { headers: { 'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300' } },
-    );
+    return NextResponse.json({ categories: result });
   } catch (err) {
     console.error('GET /api/categories error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

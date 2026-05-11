@@ -26,24 +26,36 @@ const PRODUCT_COLOR_PRESETS: Array<{ name: string; hex: string }> = [
   { name: 'Nude', hex: '#E6B7A9' },
   { name: 'Rose Gold', hex: '#B76E79' },
   { name: 'Brown', hex: '#6B5247' },
+  { name: 'Chocolate', hex: '#7B3F00' },
   { name: 'Maroon', hex: '#800000' },
   { name: 'Burgundy', hex: '#800020' },
+  { name: 'Plum', hex: '#8E4585' },
+  { name: 'Purple', hex: '#800080' },
+  { name: 'Lilac', hex: '#C8A2C8' },
+  { name: 'Lavender', hex: '#E6E6FA' },
   { name: 'Red', hex: '#FF0000' },
   { name: 'Pink', hex: '#FFC0CB' },
+  { name: 'Magenta', hex: '#FF00FF' },
   { name: 'Peach', hex: '#FFCBA4' },
   { name: 'Orange', hex: '#FFA500' },
+  { name: 'Coral', hex: '#FF7F50' },
+  { name: 'Mustard', hex: '#FFDB58' },
   { name: 'Yellow', hex: '#FFFF00' },
   { name: 'Gold', hex: '#FFD700' },
-  { name: 'Green', hex: '#008000' },
   { name: 'Olive', hex: '#808000' },
+  { name: 'Green', hex: '#008000' },
+  { name: 'Emerald', hex: '#50C878' },
   { name: 'Mint', hex: '#98FF98' },
+  { name: 'Teal', hex: '#008080' },
+  { name: 'Turquoise', hex: '#40E0D0' },
   { name: 'Sky Blue', hex: '#87CEEB' },
   { name: 'Blue', hex: '#0000FF' },
   { name: 'Navy', hex: '#000080' },
-  { name: 'Purple', hex: '#800080' },
-  { name: 'Lilac', hex: '#C8A2C8' },
+  { name: 'Rust', hex: '#B7410E' },
   { name: 'Gray', hex: '#808080' },
+  { name: 'Charcoal', hex: '#36454F' },
   { name: 'Silver', hex: '#C0C0C0' },
+  { name: 'Khaki', hex: '#C3B091' },
 ];
 
 /** How often to pull fresh data from MongoDB (orders, inventory, stats). */
@@ -1167,6 +1179,8 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
     line: '',
     lovedByCount: 0,
   });
+  const [quickColorName, setQuickColorName] = useState('');
+  const [quickColorHex, setQuickColorHex] = useState('');
 
 
   function parseCsvOrLines(value: string): string[] {
@@ -1658,12 +1672,48 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
   }
 
   function toggleColorPreset(color: { name: string; hex: string }) {
-    const exists = colorPreview.some((c) => c.hex.toUpperCase() === color.hex.toUpperCase());
-    if (exists) {
+    if (selectedColorHexes.has(color.hex.toUpperCase())) {
       applySelectedColors(colorPreview.filter((c) => c.hex.toUpperCase() !== color.hex.toUpperCase()));
-      return;
+    } else {
+      applySelectedColors([...colorPreview, color]);
     }
-    applySelectedColors([...colorPreview, color]);
+  }
+
+  function handleQuickAddColor() {
+    if (!quickColorName.trim() && !quickColorHex.trim()) return;
+
+    let resolvedHex = '';
+    let finalName = '';
+
+    if (quickColorHex.trim()) {
+      resolvedHex = resolveColorHex(quickColorHex) || '';
+      if (!resolvedHex) {
+        alert(`Could not resolve "${quickColorHex}" to a color hex.`);
+        return;
+      }
+      finalName = quickColorName.trim() || quickColorHex.trim();
+    } else {
+      resolvedHex = resolveColorHex(quickColorName) || '';
+      if (!resolvedHex) {
+        alert(`Could not resolve "${quickColorName}" to a color. Please try a common name or hex code like #FF0000.`);
+        return;
+      }
+      finalName = quickColorName.trim();
+    }
+
+    if (finalName.startsWith('#')) {
+      finalName = finalName.toUpperCase();
+    } else {
+      finalName = finalName.charAt(0).toUpperCase() + finalName.slice(1);
+    }
+
+    const newColor = { name: finalName, hex: resolvedHex };
+    const exists = colorPreview.some((c) => c.hex.toUpperCase() === newColor.hex.toUpperCase());
+    if (!exists) {
+      applySelectedColors([...colorPreview, newColor]);
+    }
+    setQuickColorName('');
+    setQuickColorHex('');
   }
 
   async function activateAllInactive() {
@@ -2054,6 +2104,33 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
                 })}
               </div>
 
+              {/* Quick Add Color */}
+              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                <input
+                  type="text"
+                  value={quickColorName}
+                  onChange={(e) => setQuickColorName(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleQuickAddColor(); } }}
+                  placeholder="Color Name (e.g. Midnight Blue)"
+                  style={{ flex: 1, padding: '8px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: '#fff', outline: 'none' }}
+                />
+                <input
+                  type="text"
+                  value={quickColorHex}
+                  onChange={(e) => setQuickColorHex(e.target.value)}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleQuickAddColor(); } }}
+                  placeholder="Hex Code (e.g. #1A1A2E)"
+                  style={{ flex: 1, padding: '8px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: '#fff', outline: 'none' }}
+                />
+                <button
+                  type="button"
+                  onClick={handleQuickAddColor}
+                  style={{ padding: '8px 12px', background: BROWN, color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Add
+                </button>
+              </div>
+
               <div style={{ marginTop: 8, minHeight: 24 }}>
                 {colorPreview.length > 0 ? (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -2085,6 +2162,13 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
                           }}
                         />
                         {c.name}
+                        <button
+                          type="button"
+                          onClick={() => applySelectedColors(colorPreview.filter((cp) => cp.hex !== c.hex))}
+                          style={{ border: 'none', background: 'transparent', color: MUTED, cursor: 'pointer', padding: '0 0 0 4px', fontSize: 14, display: 'flex', alignItems: 'center' }}
+                        >
+                          ×
+                        </button>
                       </span>
                     ))}
                   </div>

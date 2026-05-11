@@ -191,13 +191,26 @@ const getRawCategories = unstable_cache(
     const categories = await Category.find({ isActive: { $ne: false } }).sort({ sortOrder: 1, createdAt: -1 }).lean();
     const counts = await Product.aggregate([
       { $match: { isActive: { $ne: false } } },
-      { $group: { _id: '$category', count: { $sum: 1 } } },
+      { $sort: { createdAt: -1 } },
+      { 
+        $group: { 
+          _id: '$category', 
+          count: { $sum: 1 },
+          firstImage: { $first: '$frontImageUrl' },
+          altImage: { $first: { $arrayElemAt: ['$images', 0] } }
+        } 
+      },
     ]);
-    const countMap = new Map<string, number>();
+    const countMap = new Map<string, { count: number; fallbackImage: string }>();
     for (const row of counts) {
       const key = categoryKey(String(row._id ?? ''));
       if (!key) continue;
-      countMap.set(key, (countMap.get(key) ?? 0) + (Number(row.count) || 0));
+      const existing = countMap.get(key);
+      const fallback = row.firstImage || row.altImage || FALLBACK_CATEGORY_IMAGE;
+      countMap.set(key, { 
+        count: (existing?.count ?? 0) + (Number(row.count) || 0),
+        fallbackImage: existing?.fallbackImage || fallback
+      });
     }
 
     const dedup = new Map<string, StoreCategory>();
@@ -207,28 +220,30 @@ const getRawCategories = unstable_cache(
       const key = categoryKey(String(c.name || c.slug || ''));
       if (!key) continue;
 
+      const info = countMap.get(key);
       const normalized = normalizeCategory({
         _id: c._id,
         categoryId: String(c.categoryId || ''),
         name: categoryDisplayName(String(c.name || key)),
         slug: String(c.slug || key).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         description: c.description,
-        image: c.image,
+        image: c.image || info?.fallbackImage,
         isActive: c.isActive,
         sortOrder: c.sortOrder,
-      }, countMap.get(key) ?? 0);
+      }, info?.count ?? 0);
 
       dedup.set(key, normalized);
     }
 
     // 2. Add implicit categories from products
-    for (const [key, count] of countMap.entries()) {
-      if (!dedup.has(key) && count > 0) {
+    for (const [key, info] of countMap.entries()) {
+      if (!dedup.has(key) && info.count > 0) {
         dedup.set(key, normalizeCategory({
           categoryId: `cat_${String(key).replace(/[^a-z0-9]+/g, '-')}`,
           name: categoryDisplayName(key),
           slug: String(key).toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-        }, count));
+          image: info.fallbackImage,
+        }, info.count));
       }
     }
 
