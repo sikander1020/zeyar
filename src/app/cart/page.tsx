@@ -131,7 +131,7 @@ export default function CartPage() {
                   {/* Trust */}
                   <div className="mt-6 pt-6 border-t border-nude/20">
                     <p className="text-xs text-brown-muted text-center font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
-                      🔒 Secure 256-bit SSL encryption · We accept all major cards.
+                      Secure 256-bit SSL encryption. We accept all major cards.
                     </p>
                   </div>
                 </div>
