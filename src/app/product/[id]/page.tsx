@@ -715,12 +715,12 @@ export default function ProductPage() {
               </div>
 
               {/* Add to cart */}
-              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr_auto] gap-3 mb-8">
+              <div className="grid grid-cols-2 sm:grid-cols-[1fr_1fr_auto] gap-3 mb-8">
                 <motion.button
                   whileTap={{ scale: 0.98 }}
                   disabled={product.outOfStock || product.stock <= 0 || addingToCart}
                   onClick={handleAddToCart}
-                  className="btn-luxury btn-primary flex items-center justify-center gap-3 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="btn-luxury btn-primary flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed px-2"
                 >
                   <ShoppingBag size={15} strokeWidth={2} />
                   {(product.outOfStock || product.stock <= 0) ? 'Out of Stock' : addingToCart ? 'Adding...' : 'Add to Bag'}
@@ -729,15 +729,15 @@ export default function ProductPage() {
                   type="button"
                   disabled={product.outOfStock || product.stock <= 0 || buyingNow}
                   onClick={handleBuyNow}
-                  className="btn-luxury btn-outline disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="btn-luxury btn-outline disabled:opacity-60 disabled:cursor-not-allowed px-2"
                 >
                   {buyingNow ? 'Redirecting...' : 'Buy Now'}
                 </button>
                 <button
                   onClick={handleToggleWishlist}
-                  className={`btn-luxury px-5 border ${wishlisted ? 'bg-rose-gold border-rose-gold text-white' : 'border-nude text-brown hover:border-rose-gold hover:text-rose-gold'} transition-all duration-300`}
+                  className={`col-span-2 sm:col-span-1 btn-luxury px-5 border ${wishlisted ? 'bg-rose-gold border-rose-gold text-white' : 'border-nude text-brown hover:border-rose-gold hover:text-rose-gold'} transition-all duration-300`}
                 >
-                  <Heart size={15} className={wishlisted ? 'fill-current' : ''} strokeWidth={1.5} />
+                  <Heart size={15} className={`mx-auto ${wishlisted ? 'fill-current' : ''}`} strokeWidth={1.5} />
                 </button>
               </div>
 

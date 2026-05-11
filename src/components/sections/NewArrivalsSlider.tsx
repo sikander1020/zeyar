@@ -151,15 +151,15 @@ export default function NewArrivalsSlider({ initialProducts }: { initialProducts
                     <div className="absolute top-4 left-4">
                       <span className="badge-new">{product.isNew ? "New" : "Featured"}</span>
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-t from-brown/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-400" />
-                    <div className="absolute bottom-0 left-0 right-0 p-6 translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-400">
-                      <p className="text-xs text-cream font-inter tracking-[0.15em] uppercase" style={{ fontFamily: "'Inter', sans-serif" }}>
+                    <div className="absolute inset-0 bg-gradient-to-t from-brown/80 via-brown/20 to-transparent opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-400" />
+                    <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-4 md:p-6 translate-y-0 md:translate-y-full md:group-hover:translate-y-0 transition-transform duration-400">
+                      <p className="text-[10px] md:text-xs text-cream font-inter tracking-[0.15em] uppercase mb-0.5" style={{ fontFamily: "'Inter', sans-serif" }}>
                         {product.category}
                       </p>
-                      <h3 className="text-lg font-playfair text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
+                      <h3 className="text-sm md:text-lg font-playfair text-white leading-snug" style={{ fontFamily: "'Playfair Display', serif" }}>
                         {product.name}
                       </h3>
-                      <p className="text-sm text-nude font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
+                      <p className="text-xs md:text-sm text-nude font-inter mt-1" style={{ fontFamily: "'Inter', sans-serif" }}>
                         Rs {product.price.toLocaleString()}
                       </p>
                       {product.outOfStock && (

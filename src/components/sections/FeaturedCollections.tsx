@@ -62,13 +62,16 @@ export default function FeaturedCollections({ initialProducts }: { initialProduc
     <section className="section-padding bg-cream relative overflow-hidden">
       {/* Animated Shader Gradient Background */}
       <div className="absolute inset-0 opacity-35">
-        <ShaderGradientCanvas 
-          className="w-full h-full"
-          color1="#FAF7F4"
-          color2="#F0C9BF"
-          color3="#D4919A"
-          intensity={0.5}
-        />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#FAF7F4] via-[#F0C9BF] to-[#D4919A] md:hidden" />
+        <div className="hidden md:block w-full h-full">
+          <ShaderGradientCanvas 
+            className="w-full h-full"
+            color1="#FAF7F4"
+            color2="#F0C9BF"
+            color3="#D4919A"
+            intensity={0.5}
+          />
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-6 relative" ref={ref}>

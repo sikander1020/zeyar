@@ -30,7 +30,7 @@ export default function CartDrawer() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-            className="fixed top-0 right-0 bottom-0 w-full max-w-md bg-cream shadow-[0_0_60px_-15px_rgba(58,46,42,0.4)] z-[90] flex flex-col"
+            className="fixed top-0 right-0 h-[100dvh] w-full max-w-md bg-cream shadow-[0_0_60px_-15px_rgba(58,46,42,0.4)] z-[90] flex flex-col"
           >
             {/* Header */}
             <div className="flex items-center justify-between px-8 py-6 border-b border-nude/20">
@@ -144,7 +144,7 @@ export default function CartDrawer() {
 
             {/* Footer */}
             {items.length > 0 && (
-              <div className="px-8 py-6 border-t border-nude/20 space-y-4">
+              <div className="px-8 pt-6 pb-[calc(1.5rem+env(safe-area-inset-bottom))] border-t border-nude/20 space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-brown-muted font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
                     Subtotal
