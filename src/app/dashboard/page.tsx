@@ -4,6 +4,7 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import CampaignsTab from '@/components/admin/CampaignsTab';
+import ArticlesTab  from '@/components/admin/ArticlesTab';
 
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
@@ -257,6 +258,7 @@ const TABS = [
   { id: 'reviews',    label: 'Reviews',         icon: '★' },
   { id: 'finance',    label: 'Finance',         icon: '₨' },
   { id: 'campaigns',  label: 'Campaign Videos', icon: '▶' },
+  { id: 'articles',   label: 'Journal',         icon: '✎' },
   { id: 'locations',  label: 'Locations',       icon: '⊙' },
   { id: 'bankProofs', label: 'Bank Proofs',     icon: '✓' },
 ];
@@ -3368,6 +3370,7 @@ export default function DashboardPage() {
             {tab === 'signups'    && <SignupsTab />}
             {tab === 'sales-mgr'  && <SalesMgrTab />}
             {tab === 'campaigns'  && <CampaignsTab />}
+            {tab === 'articles'   && <ArticlesTab  />}
             {tab === 'reviews'    && <ReviewsTab />}
             {tab === 'finance'    && <FinanceTab    data={data} />}
             {tab === 'locations'  && <LocationsTab  data={data} />}
