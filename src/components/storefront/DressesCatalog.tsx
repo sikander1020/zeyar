@@ -87,7 +87,7 @@ function ProductCard({ product, index, onQuickView }: { product: StoreProduct; i
               src={hovered && product.images[1] ? product.images[1] : product.images[0]}
               alt={product.name}
               fill
-              className="object-cover transition-all duration-700 group-hover:scale-105"
+              className="object-cover object-top transition-all duration-700 group-hover:scale-105"
             />
           </motion.div>
           <div className="absolute top-3 left-3 flex flex-col gap-1">
@@ -530,7 +530,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
           )}
 
           <AnimatePresence mode="popLayout">
-            <motion.div layout className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            <motion.div layout className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
               {filtered.map((product, i) => (
                 <ProductCard key={product.id} product={product} index={i} onQuickView={setQuickViewProduct} />
               ))}

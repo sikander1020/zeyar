@@ -121,7 +121,7 @@ export default function HeroSection() {
                   i === activeHeroIdx ? 'ring-2 ring-rose-gold ring-offset-2 ring-offset-[var(--cream)] scale-105' : 'opacity-60 hover:opacity-100'
                 }`}
               >
-                <Image src={p.images[0] || '/hero-model.png'} alt={p.name} fill className="object-cover" sizes="80px" />
+                <Image src={p.images[0] || '/hero-model.png'} alt={p.name} fill className="object-cover object-top" sizes="80px" />
                 <div className={`absolute inset-0 bg-black/20 transition-opacity ${i === activeHeroIdx ? 'opacity-0' : 'opacity-100'}`} />
               </button>
             ))}
@@ -141,7 +141,7 @@ export default function HeroSection() {
             >
               {heroProducts.length > 0 ? (
                 <Image src={heroProducts[activeHeroIdx].images[0] || '/hero-model.png'} alt="Featured Product"
-                  fill priority sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover object-center" />
+                  fill priority sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover object-top" />
               ) : (
                 <div className="absolute inset-0 gradient-beige" />
               )}
@@ -257,7 +257,7 @@ export default function HeroSection() {
                   <div className="relative aspect-[4/3] overflow-hidden mb-5 bg-beige rounded-xl">
                     {art.coverImage ? (
                       <Image src={art.coverImage} alt={art.title} fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
                         sizes="(max-width:768px) 100vw, 33vw" />
                     ) : (
                       <div className="absolute inset-0 gradient-beige" />

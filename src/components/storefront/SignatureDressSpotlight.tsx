@@ -79,7 +79,7 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
         </div>
       </motion.div>
 
-      <div id="signature-grid" className="relative mt-7 grid grid-cols-1 gap-4 justify-items-center sm:grid-cols-2 xl:grid-cols-3">
+      <div id="signature-grid" className="relative mt-7 grid grid-cols-2 gap-3 sm:gap-4 justify-items-center sm:grid-cols-2 xl:grid-cols-3">
         {products.map((product, index) => (
           <motion.article
             key={product.id}
@@ -96,7 +96,7 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
                   src={product.images?.[0] || ''}
                   alt={product.name}
                   fill
-                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                  className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
                 />
                 {!prefersReducedMotion && (
                   <motion.div
