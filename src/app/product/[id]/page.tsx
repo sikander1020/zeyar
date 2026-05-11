@@ -719,16 +719,16 @@ export default function ProductPage() {
                   whileTap={{ scale: 0.98 }}
                   disabled={product.outOfStock || product.stock <= 0 || addingToCart}
                   onClick={handleAddToCart}
-                  className="btn-luxury btn-primary flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed px-2 py-2.5 md:py-4 text-[10px] md:text-xs"
+                  className="btn-luxury btn-primary flex items-center justify-center gap-1.5 md:gap-2 disabled:opacity-60 disabled:cursor-not-allowed !px-1 md:!px-6 !py-2 md:!py-4 !text-[9px] md:!text-xs"
                 >
-                  <ShoppingBag size={15} strokeWidth={2} />
+                  <ShoppingBag size={14} className="md:w-[15px] md:h-[15px] w-3 h-3" strokeWidth={2} />
                   {(product.outOfStock || product.stock <= 0) ? 'Out of Stock' : addingToCart ? 'Adding...' : 'Add to Bag'}
                 </motion.button>
                 <button
                   type="button"
                   disabled={product.outOfStock || product.stock <= 0 || buyingNow}
                   onClick={handleBuyNow}
-                  className="btn-luxury btn-outline disabled:opacity-60 disabled:cursor-not-allowed px-2 py-2.5 md:py-4 text-[10px] md:text-xs"
+                  className="btn-luxury btn-outline disabled:opacity-60 disabled:cursor-not-allowed !px-1 md:!px-6 !py-2 md:!py-4 !text-[9px] md:!text-xs"
                 >
                   {buyingNow ? 'Redirecting...' : 'Buy Now'}
                 </button>
@@ -1023,15 +1023,16 @@ export default function ProductPage() {
               type="button"
               disabled={product.outOfStock || addingToCart}
               onClick={handleAddToCart}
-              className="btn-luxury btn-primary flex-1 disabled:opacity-60 disabled:cursor-not-allowed px-2 py-2 text-[10px]"
+              className="btn-luxury btn-primary flex-1 flex items-center justify-center gap-1.5 disabled:opacity-60 disabled:cursor-not-allowed !px-1 !py-2 !text-[9px]"
             >
+              <ShoppingBag size={12} strokeWidth={2} />
               {product.outOfStock ? 'Out of Stock' : addingToCart ? 'Adding...' : 'Add to Bag'}
             </button>
             <button
               type="button"
               disabled={product.outOfStock || buyingNow}
               onClick={handleBuyNow}
-              className="btn-luxury btn-outline flex-1 disabled:opacity-60 disabled:cursor-not-allowed px-2 py-2 text-[10px]"
+              className="btn-luxury btn-outline flex-1 disabled:opacity-60 disabled:cursor-not-allowed !px-1 !py-2 !text-[9px]"
             >
               {buyingNow ? 'Redirecting...' : 'Buy Now'}
             </button>
