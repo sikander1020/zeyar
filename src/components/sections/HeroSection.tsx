@@ -30,11 +30,12 @@ export default function HeroSection() {
     router.prefetch('/shop');
     router.prefetch('/dresses');
 
-    fetch('/api/products?isHomeCarousel=true&limit=12')
+    // Increase limit to ensure we have enough products for both Hero (4) and Featured (remaining)
+    fetch('/api/products?isHomeCarousel=true&limit=20')
       .then(r => r.json())
       .then(d => { 
         if (Array.isArray(d.products) && d.products.length > 0) setProducts(d.products); 
-        else fetch('/api/products?sort=newest&limit=12').then(r2 => r2.json()).then(d2 => { if (Array.isArray(d2.products)) setProducts(d2.products); });
+        else fetch('/api/products?sort=newest&limit=20').then(r2 => r2.json()).then(d2 => { if (Array.isArray(d2.products)) setProducts(d2.products); });
       })
       .catch(() => {});
 
@@ -47,8 +48,11 @@ export default function HeroSection() {
       .catch(() => {});
   }, [router]);
 
-  // Use up to 4 products for the hero lookbook
-  const heroProducts = products.length > 0 ? products.slice(0, 4) : [];
+  // Hero lookbook products (first 4)
+  const heroProducts = products.slice(0, 4);
+  
+  // Featured pieces (all products except the ones in the hero lookbook)
+  const featuredProducts = products.slice(4);
   
   // Auto-advance hero
   useEffect(() => {
@@ -194,7 +198,7 @@ export default function HeroSection() {
       </section>
 
       {/* ══ 3D PRODUCT CAROUSEL ════════════════════════════ */}
-      {products.length > 0 && (
+      {featuredProducts.length > 0 && (
         <section className="py-16 md:py-24 overflow-hidden" style={{ background: 'var(--cream-dark)' }}>
           <div className="max-w-7xl mx-auto px-6 md:px-10">
             <div className="flex items-end justify-between mb-10">
@@ -212,7 +216,7 @@ export default function HeroSection() {
                 View All <ArrowRight size={14} />
               </Link>
             </div>
-            <CoverflowCarousel products={products} />
+            <CoverflowCarousel products={featuredProducts} />
           </div>
         </section>
       )}

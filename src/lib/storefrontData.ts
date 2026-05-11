@@ -109,6 +109,14 @@ function normalizeProduct(p: {
 
   const imageSeed = `${resolvedId}|${p.name}|${p.category}`;
   const safeImages = Array.isArray(p.images) ? p.images.filter(Boolean) : [];
+  
+  // If frontImageUrl or backImageUrl exist but aren't in images array, add them
+  if (p.frontImageUrl && !safeImages.includes(p.frontImageUrl)) {
+    safeImages.unshift(p.frontImageUrl);
+  }
+  if (p.backImageUrl && !safeImages.includes(p.backImageUrl)) {
+    safeImages.push(p.backImageUrl);
+  }
   const sizeChartRows = sanitizeSizeChartRows(p.sizeChartRows);
   const sizes = sanitizeSizes(p.sizes);
   const images = safeImages.length >= 2

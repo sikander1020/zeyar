@@ -80,47 +80,49 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     const { id } = await params;
     const query = findProductQuery(id);
     const body = await req.json();
-    const stock = Number(body.stock) || 0;
-    const sizeChartImageUrl = typeof body.sizeChartImageUrl === 'string' ? body.sizeChartImageUrl.trim() : '';
-    const videoUrl = typeof body.videoUrl === 'string' ? body.videoUrl.trim() : '';
+    
+    // Build update object based on what was actually sent
+    const update: any = {};
+    
+    if (body.name !== undefined) update.name = body.name;
+    if (body.category !== undefined) update.category = body.category;
+    if (body.price !== undefined) update.price = Number(body.price);
+    if (body.originalPrice !== undefined) update.originalPrice = Number(body.originalPrice);
+    if (body.costPrice !== undefined) update.costPrice = Number(body.costPrice);
+    if (body.stock !== undefined) update.stock = Number(body.stock);
+    if (body.images !== undefined) update.images = asStringArray(body.images);
+    if (body.frontImageUrl !== undefined) update.frontImageUrl = String(body.frontImageUrl).trim();
+    if (body.backImageUrl !== undefined) update.backImageUrl = String(body.backImageUrl).trim();
+    if (body.sizeChartImageUrl !== undefined) update.sizeChartImageUrl = String(body.sizeChartImageUrl).trim();
+    if (body.videoUrl !== undefined) update.videoUrl = String(body.videoUrl).trim();
+    if (body.model3dUrl !== undefined) update.model3dUrl = String(body.model3dUrl).trim();
+    if (body.model3dStatus !== undefined) {
+      update.model3dStatus = ['ready', 'pending', 'failed', 'none'].includes(body.model3dStatus) ? body.model3dStatus : 'none';
+    }
+    if (body.model3dError !== undefined) update.model3dError = String(body.model3dError);
+    if (body.description !== undefined) update.description = body.description;
+    if (body.details !== undefined) update.details = asStringArray(body.details);
+    if (body.sizes !== undefined) update.sizes = asSizes(body.sizes);
+    if (body.sizeChartRows !== undefined) update.sizeChartRows = asFilteredSizeChartRows(body.sizeChartRows);
+    if (body.colors !== undefined) update.colors = asColors(body.colors);
+    if (body.rating !== undefined) update.rating = Number(body.rating);
+    if (body.reviewCount !== undefined) update.reviewCount = Number(body.reviewCount);
+    if (body.tags !== undefined) update.tags = asStringArray(body.tags);
+    if (body.isActive !== undefined) update.isActive = body.isActive !== false;
+    if (body.outOfStock !== undefined) update.outOfStock = body.outOfStock === true;
+    if (body.isNewArrival !== undefined) update.isNewArrival = !!body.isNewArrival;
+    if (body.isSale !== undefined) update.isSale = !!body.isSale;
+    if (body.isBestseller !== undefined) update.isBestseller = !!body.isBestseller;
+    if (body.isSignatureDress !== undefined) update.isSignatureDress = body.isSignatureDress === true;
+    if (body.isHomeCarousel !== undefined) update.isHomeCarousel = body.isHomeCarousel === true;
+    if (body.fabric !== undefined) update.fabric = String(body.fabric).trim();
+    if (body.craft !== undefined) update.craft = String(body.craft).trim();
+    if (body.line !== undefined) update.line = String(body.line).trim();
+    if (body.lovedByCount !== undefined) update.lovedByCount = Number(body.lovedByCount);
 
     const product = await Product.findOneAndUpdate(
       query,
-      {
-        name: body.name,
-        category: body.category,
-        price: body.price,
-        originalPrice: body.originalPrice,
-        costPrice: body.costPrice,
-        stock,
-        images: asStringArray(body.images),
-        frontImageUrl: typeof body.frontImageUrl === 'string' ? body.frontImageUrl.trim() : '',
-        backImageUrl: typeof body.backImageUrl === 'string' ? body.backImageUrl.trim() : '',
-        sizeChartImageUrl,
-        videoUrl,
-        model3dUrl: typeof body.model3dUrl === 'string' ? body.model3dUrl.trim() : '',
-        model3dStatus: body.model3dStatus === 'ready' || body.model3dStatus === 'pending' || body.model3dStatus === 'failed' ? body.model3dStatus : 'none',
-        model3dError: typeof body.model3dError === 'string' ? body.model3dError : '',
-        description: body.description || '',
-        details: asStringArray(body.details),
-        sizes: asSizes(body.sizes),
-        sizeChartRows: asFilteredSizeChartRows(body.sizeChartRows),
-        colors: asColors(body.colors),
-        rating: Number(body.rating) || 4.8,
-        reviewCount: Number(body.reviewCount) || 0,
-        tags: asStringArray(body.tags),
-        isActive: body.isActive !== false,
-        outOfStock: body.outOfStock === true,
-        isNewArrival: body.isNewArrival,
-        isSale: body.isSale,
-        isBestseller: body.isBestseller,
-        isSignatureDress: body.isSignatureDress === true,
-        isHomeCarousel: body.isHomeCarousel === true,
-        fabric: typeof body.fabric === 'string' ? body.fabric.trim() : undefined,
-        craft: typeof body.craft === 'string' ? body.craft.trim() : undefined,
-        line: typeof body.line === 'string' ? body.line.trim() : undefined,
-        ...(body.lovedByCount !== undefined && { lovedByCount: Number(body.lovedByCount) || 0 }),
-      },
+      { $set: update },
       { new: true }
     );
 

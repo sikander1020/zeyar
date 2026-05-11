@@ -2,7 +2,8 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import CampaignsTab from '@/components/admin/CampaignsTab';
 import ArticlesTab  from '@/components/admin/ArticlesTab';
 
@@ -1059,49 +1060,61 @@ function CategoriesTab() {
         <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>Loading categories...</p>
       )}
 
-      {showForm && (
-        <form onSubmit={handleSubmit} style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-            <input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Category Name" required
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} placeholder="Slug"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Description"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 8, fontWeight: 600 }}>Category Picture</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleCategoryImageUpload}
-                disabled={uploadingCategoryImage}
-                style={{ display: 'block', width: '100%', padding: '8px 10px', border: '2px dashed #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: CREAM, cursor: uploadingCategoryImage ? 'not-allowed' : 'pointer' }}
-              />
-              {uploadedCategoryImage && (
-                <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <img src={uploadedCategoryImage} alt="Category" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, border: '1px solid #EBD9CC' }} />
-                  <button
-                    type="button"
-                    onClick={() => setUploadedCategoryImage('')}
-                    style={{ padding: '6px 10px', background: '#C0504D', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}
-                  >
-                    Remove
-                  </button>
-                </div>
-              )}
+      <AnimatePresence>
+        {showForm && (
+          <motion.form 
+            initial={{ height: 0, opacity: 0, overflow: 'hidden' }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            onSubmit={handleSubmit} 
+            style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24, marginBottom: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+              <input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Category Name" required
+                style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+              <input value={formData.slug} onChange={(e) => setFormData({ ...formData, slug: e.target.value })} placeholder="Slug"
+                style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+              <input value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Description"
+                style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 8, fontWeight: 600 }}>Category Picture</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleCategoryImageUpload}
+                  disabled={uploadingCategoryImage}
+                  style={{ display: 'block', width: '100%', padding: '8px 10px', border: '2px dashed #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: CREAM, cursor: uploadingCategoryImage ? 'not-allowed' : 'pointer' }}
+                />
+                {uploadedCategoryImage && (
+                  <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <img src={uploadedCategoryImage} alt="Category" style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 8, border: '1px solid #EBD9CC' }} />
+                    <button
+                      type="button"
+                      onClick={() => setUploadedCategoryImage('')}
+                      style={{ padding: '6px 10px', background: '#C0504D', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                )}
+              </div>
+              <input type="number" value={formData.sortOrder === 0 ? '' : formData.sortOrder} onChange={(e) => setFormData({ ...formData, sortOrder: Number(e.target.value) || 0 })} placeholder="Sort Order"
+                style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
             </div>
-            <input type="number" value={formData.sortOrder === 0 ? '' : formData.sortOrder} onChange={(e) => setFormData({ ...formData, sortOrder: Number(e.target.value) || 0 })} placeholder="Sort Order"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-          </div>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN, marginBottom: 16 }}>
-            <input type="checkbox" checked={formData.isActive} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })} style={{ accentColor: ROSE }} />
-            Active
-          </label>
-          <button type="submit" style={{ padding: '10px 20px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-            {editing ? 'Update' : 'Create'} Category
-          </button>
-        </form>
-      )}
+            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN, marginBottom: 16 }}>
+              <input type="checkbox" checked={formData.isActive} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })} style={{ accentColor: ROSE }} />
+              Active
+            </label>
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit" 
+              disabled={loading}
+              style={{ padding: '10px 20px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.7 : 1 }}>
+              {loading ? 'Saving...' : (editing ? 'Update' : 'Create') + ' Category'}
+            </motion.button>
+          </motion.form>
+        )}
+      </AnimatePresence>
 
       <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, overflow: 'hidden' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
@@ -1143,6 +1156,7 @@ function CategoriesTab() {
 function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
   const [products, setProducts] = useState<ProductRow[]>([]);
   const [loading, setLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [lowStockThreshold, setLowStockThreshold] = useState(5);
   const [showLowStockOnly, setShowLowStockOnly] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -1498,6 +1512,7 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setIsSaving(true);
     try {
       const url = editing ? `/api/admin/products/${editing.productId}` : '/api/admin/products';
       const method = editing ? 'PUT' : 'POST';
@@ -1554,6 +1569,8 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
     } catch (err) {
       console.error('Failed to save product:', err);
       alert(err instanceof Error ? err.message : 'Failed to save product');
+    } finally {
+      setIsSaving(false);
     }
   }
 
@@ -1812,483 +1829,460 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
             Replace Catalog
           </button>
           <button onClick={() => { setShowForm(!showForm); setEditing(null); resetForm(); }}
-            style={{ padding: '10px 16px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-            {showForm ? 'Cancel' : '+ Add Product'}
-          </button>
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-        <label style={{ fontSize: 12, color: BROWN }}>Low-stock threshold</label>
-        <input
-          type="number"
-          min={1}
-          value={lowStockThreshold}
-          onChange={(e) => setLowStockThreshold(Math.max(1, Number(e.target.value) || 1))}
-          style={{ width: 80, padding: '8px 10px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: '#fff' }}
-        />
-        <button
-          onClick={() => setShowLowStockOnly((v) => !v)}
-          style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #EBD9CC', background: showLowStockOnly ? '#FBEDE6' : '#fff', color: BROWN, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
-        >
-          {showLowStockOnly ? 'Showing Low Stock Only' : 'Show Low Stock Only'}
-        </button>
-        {inactiveCount > 0 && (
-          <button
-            onClick={activateAllInactive}
-            style={{ padding: '8px 12px', borderRadius: 8, border: '1px solid #3E7B4E', background: '#E8F5E9', color: '#2E5C3E', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
-          >
-            Activate All {inactiveCount} Hidden
-          </button>
-        )}
-      </div>
-
-      {loading && (
-        <p style={{ margin: 0, color: MUTED, fontSize: 12 }}>Loading products...</p>
-      )}
-
-      {showForm && (
-        <form onSubmit={handleSubmit} style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24 }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
-            <input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Product Name" required
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
-            <input value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} placeholder="Category" required
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input type="number" value={formData.price === 0 ? '' : formData.price} onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) || 0 })} placeholder="Price" required
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input type="number" value={formData.originalPrice === 0 ? '' : formData.originalPrice} onChange={(e) => setFormData({ ...formData, originalPrice: Number(e.target.value) || 0 })} placeholder="Original Price (optional)"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input type="number" value={formData.costPrice === 0 ? '' : formData.costPrice} onChange={(e) => setFormData({ ...formData, costPrice: Number(e.target.value) || 0 })} placeholder="Cost Price" required
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <input type="number" value={formData.stock === 0 ? '' : formData.stock} onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) || 0 })} placeholder="Stock" required
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Description"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1', minHeight: 90 }} />
-            <div style={{ border: '1px solid #EBD9CC', borderRadius: 8, padding: 10, background: CREAM }}>
-              <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 6, fontWeight: 600 }}>Front Image (for 3D)</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => void handleFrontBackImageUpload(e, 'frontImageUrl')}
-                style={{ display: 'block', width: '100%', fontSize: 12, color: BROWN }}
-              />
-              {formData.frontImageUrl && (
-                <div style={{ marginTop: 8 }}>
-                  <img src={formData.frontImageUrl} alt="Front preview" style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8, border: '1px solid #EBD9CC' }} />
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setFormData((prev) => ({ ...prev, frontImageUrl: '' }))}
-                      style={{ marginTop: 8, padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12 }}
-                    >
-                      Remove Front
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-            <div style={{ border: '1px solid #EBD9CC', borderRadius: 8, padding: 10, background: CREAM }}>
-              <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 6, fontWeight: 600 }}>Back Image (for 3D)</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => void handleFrontBackImageUpload(e, 'backImageUrl')}
-                style={{ display: 'block', width: '100%', fontSize: 12, color: BROWN }}
-              />
-              {formData.backImageUrl && (
-                <div style={{ marginTop: 8 }}>
-                  <img src={formData.backImageUrl} alt="Back preview" style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8, border: '1px solid #EBD9CC' }} />
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setFormData((prev) => ({ ...prev, backImageUrl: '' }))}
-                      style={{ marginTop: 8, padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12 }}
-                    >
-                      Remove Back
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-            <div style={{ border: '1px solid #EBD9CC', borderRadius: 8, padding: 10, background: CREAM }}>
-              <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 6, fontWeight: 600 }}>Size Chart Image</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => void handleSizeChartImageUpload(e)}
-                disabled={uploadingSizeChartImage}
-                style={{ display: 'block', width: '100%', fontSize: 12, color: BROWN }}
-              />
-              <p style={{ margin: '6px 0 0', fontSize: 11, color: MUTED }}>
-                {uploadingSizeChartImage ? 'Uploading size chart image...' : 'Upload an image version of the size chart for the product page.'}
-              </p>
-              {formData.sizeChartImageUrl && (
-                <div style={{ marginTop: 8 }}>
-                  <img src={formData.sizeChartImageUrl} alt="Size chart preview" style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 8, border: '1px solid #EBD9CC' }} />
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setFormData((prev) => ({ ...prev, sizeChartImageUrl: '' }))}
-                      style={{ marginTop: 8, padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12 }}
-                    >
-                      Remove Size Chart Image
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-            <div style={{ border: '1px solid #EBD9CC', borderRadius: 8, padding: 10, background: CREAM }}>
-              <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 6, fontWeight: 600 }}>Upload Product Video File</label>
-              <input
-                type="file"
-                accept="video/*"
-                onChange={(e) => void handleVideoUpload(e)}
-                disabled={uploadingVideo}
-                style={{ display: 'block', width: '100%', fontSize: 12, color: BROWN }}
-              />
-              <p style={{ margin: '6px 0 0', fontSize: 11, color: MUTED }}>
-                {uploadingVideo ? 'Uploading video...' : 'Choose a video file (MP4/WebM/MOV). No URL needed.'}
-              </p>
-              {formData.videoUrl && (
-                <div style={{ marginTop: 8 }}>
-                  <video
-                    src={formData.videoUrl}
-                    controls
-                    playsInline
-                    style={{ width: '100%', maxWidth: 280, borderRadius: 8, border: '1px solid #EBD9CC', background: '#000' }}
-                  />
-                  <div>
-                    <button
-                      type="button"
-                      onClick={() => setFormData((prev) => ({ ...prev, videoUrl: '' }))}
-                      style={{ marginTop: 8, padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12 }}
-                    >
-                      Remove Video
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-            <input value={formData.model3dUrl} onChange={(e) => setFormData({ ...formData, model3dUrl: e.target.value })} placeholder="3D Model URL (.glb)"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 8, fontWeight: 600 }}>Product Images</label>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageUpload}
-                disabled={uploadingImage}
-                style={{ display: 'block', width: '100%', padding: '8px 10px', border: '2px dashed #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: CREAM, cursor: uploadingImage ? 'not-allowed' : 'pointer' }}
-              />
-              {uploadedImages.length > 0 && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 10, marginTop: 12 }}>
-                  {uploadedImages.map((img, i) => (
-                    <div key={i} style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', border: '1px solid #EBD9CC' }}>
-                      <img src={img} alt={`Product ${i}`} style={{ width: '100%', height: '100px', objectFit: 'cover' }} />
+            style={{ padding: '10px 16px', background:      <AnimatePresence>
+        {showForm && (
+          <motion.form 
+            initial={{ height: 0, opacity: 0, overflow: 'hidden' }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            onSubmit={handleSubmit} 
+            style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, padding: 24, marginBottom: 20 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+              <input value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} placeholder="Product Name" required
+                style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
+              <input value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} placeholder="Category" required
+                style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+              <input type="number" value={formData.price === 0 ? '' : formData.price} onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) || 0 })} placeholder="Price" required
+                style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+              <input type="number" value={formData.originalPrice === 0 ? '' : formData.originalPrice} onChange={(e) => setFormData({ ...formData, originalPrice: Number(e.target.value) || 0 })} placeholder="Original Price (optional)"
+                style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+              <input type="number" value={formData.costPrice === 0 ? '' : formData.costPrice} onChange={(e) => setFormData({ ...formData, costPrice: Number(e.target.value) || 0 })} placeholder="Cost Price" required
+                style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+              <input type="number" value={formData.stock === 0 ? '' : formData.stock} onChange={(e) => setFormData({ ...formData, stock: Number(e.target.value) || 0 })} placeholder="Stock" required
+                style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+              <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} placeholder="Description"
+                style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1', minHeight: 90 }} />
+              <div style={{ border: '1px solid #EBD9CC', borderRadius: 8, padding: 10, background: CREAM }}>
+                <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 6, fontWeight: 600 }}>Front Image (for 3D)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => void handleFrontBackImageUpload(e, 'frontImageUrl')}
+                  style={{ display: 'block', width: '100%', fontSize: 12, color: BROWN }}
+                />
+                {formData.frontImageUrl && (
+                  <div style={{ marginTop: 8 }}>
+                    <img src={formData.frontImageUrl} alt="Front preview" style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8, border: '1px solid #EBD9CC' }} />
+                    <div>
                       <button
                         type="button"
-                        onClick={() => removeUploadedImage(i)}
-                        style={{ position: 'absolute', top: 4, right: 4, background: '#C0504D', color: '#fff', border: 'none', borderRadius: 4, padding: '4px 8px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
+                        onClick={() => setFormData((prev) => ({ ...prev, frontImageUrl: '' }))}
+                        style={{ marginTop: 8, padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12 }}
                       >
-                        ✕
+                        Remove Front
                       </button>
                     </div>
-                  ))}
-                </div>
-              )}
-              {uploadedImages.length === 0 && (
-                <p style={{ fontSize: 12, color: MUTED, marginTop: 8 }}>No images uploaded yet.</p>
-              )}
-
-              <div style={{ marginTop: 14, borderTop: '1px dashed #EBD9CC', paddingTop: 12 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                  <p style={{ margin: 0, fontSize: 12, color: BROWN, fontWeight: 600 }}>Image URLs (dynamic count)</p>
-                  <button
-                    type="button"
-                    onClick={addImageUrlInput}
-                    style={{ padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
-                  >
-                    + Add URL Field
-                  </button>
-                </div>
-
-                <p style={{ margin: '0 0 8px', fontSize: 11, color: MUTED }}>
-                  Add as many image links as you want. Current URL fields: {imageUrlInputs.length}
-                </p>
-
-                <div style={{ display: 'grid', gap: 8 }}>
-                  {imageUrlInputs.map((value, index) => (
-                    <div key={index} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 8 }}>
-                      <input
-                        value={value}
-                        onChange={(e) => updateImageUrlInput(index, e.target.value)}
-                        placeholder={`Image URL #${index + 1}`}
-                        style={{ padding: '8px 10px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: '#fff', outline: 'none' }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => removeImageUrlInput(index)}
-                        style={{ padding: '6px 10px', border: '1px solid #D9BCA8', borderRadius: 8, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
-                      >
-                        Remove
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <p style={{ fontSize: 12, color: MUTED, marginTop: 8 }}>
-                3D generation uses Front/Back uploads above first. If empty, it falls back to Product Images #1 and #2.
-              </p>
-            </div>
-            <textarea value={formData.detailsText} onChange={(e) => setFormData({ ...formData, detailsText: e.target.value })} placeholder="Details & Care instructions (formatting will be preserved)"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 120, gridColumn: '1 / -1' }} />
-            <input value={formData.sizesText} onChange={(e) => setFormData({ ...formData, sizesText: e.target.value })} placeholder="Sizes (e.g. XS,S,M,L)"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
-            <textarea value={formData.sizeChartText} onChange={(e) => setFormData({ ...formData, sizeChartText: e.target.value })} placeholder="Size chart rows: size,chest,waist,hips,length"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 90 }} />
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
-                <p style={{ margin: 0, fontSize: 12, color: BROWN, fontWeight: 600 }}>Select Product Colors</p>
-                {colorPreview.length > 0 && (
-                  <button
-                    type="button"
-                    onClick={() => applySelectedColors([])}
-                    style={{ padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 11, fontWeight: 600 }}
-                  >
-                    Clear
-                  </button>
+                  </div>
                 )}
               </div>
+              <div style={{ border: '1px solid #EBD9CC', borderRadius: 8, padding: 10, background: CREAM }}>
+                <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 6, fontWeight: 600 }}>Back Image (for 3D)</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => void handleFrontBackImageUpload(e, 'backImageUrl')}
+                  style={{ display: 'block', width: '100%', fontSize: 12, color: BROWN }}
+                />
+                {formData.backImageUrl && (
+                  <div style={{ marginTop: 8 }}>
+                    <img src={formData.backImageUrl} alt="Back preview" style={{ width: 96, height: 96, objectFit: 'cover', borderRadius: 8, border: '1px solid #EBD9CC' }} />
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => setFormData((prev) => ({ ...prev, backImageUrl: '' }))}
+                        style={{ marginTop: 8, padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12 }}
+                      >
+                        Remove Back
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div style={{ border: '1px solid #EBD9CC', borderRadius: 8, padding: 10, background: CREAM }}>
+                <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 6, fontWeight: 600 }}>Size Chart Image</label>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => void handleSizeChartImageUpload(e)}
+                  disabled={uploadingSizeChartImage}
+                  style={{ display: 'block', width: '100%', fontSize: 12, color: BROWN }}
+                />
+                <p style={{ margin: '6px 0 0', fontSize: 11, color: MUTED }}>
+                  {uploadingSizeChartImage ? 'Uploading size chart image...' : 'Upload an image version of the size chart for the product page.'}
+                </p>
+                {formData.sizeChartImageUrl && (
+                  <div style={{ marginTop: 8 }}>
+                    <img src={formData.sizeChartImageUrl} alt="Size chart preview" style={{ width: 120, height: 120, objectFit: 'cover', borderRadius: 8, border: '1px solid #EBD9CC' }} />
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => setFormData((prev) => ({ ...prev, sizeChartImageUrl: '' }))}
+                        style={{ marginTop: 8, padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12 }}
+                      >
+                        Remove Size Chart Image
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <div style={{ border: '1px solid #EBD9CC', borderRadius: 8, padding: 10, background: CREAM }}>
+                <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 6, fontWeight: 600 }}>Upload Product Video File</label>
+                <input
+                  type="file"
+                  accept="video/*"
+                  onChange={(e) => void handleVideoUpload(e)}
+                  disabled={uploadingVideo}
+                  style={{ display: 'block', width: '100%', fontSize: 12, color: BROWN }}
+                />
+                <p style={{ margin: '6px 0 0', fontSize: 11, color: MUTED }}>
+                  {uploadingVideo ? 'Uploading video...' : 'Choose a video file (MP4/WebM/MOV). No URL needed.'}
+                </p>
+                {formData.videoUrl && (
+                  <div style={{ marginTop: 8 }}>
+                    <video
+                      src={formData.videoUrl}
+                      controls
+                      playsInline
+                      style={{ width: '100%', maxWidth: 280, borderRadius: 8, border: '1px solid #EBD9CC', background: '#000' }}
+                    />
+                    <div>
+                      <button
+                        type="button"
+                        onClick={() => setFormData((prev) => ({ ...prev, videoUrl: '' }))}
+                        style={{ marginTop: 8, padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12 }}
+                      >
+                        Remove Video
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+              <input value={formData.model3dUrl} onChange={(e) => setFormData({ ...formData, model3dUrl: e.target.value })} placeholder="3D Model URL (.glb)"
+                style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
+              <div style={{ gridColumn: '1 / -1' }}>
+                <label style={{ display: 'block', fontSize: 12, color: BROWN, marginBottom: 8, fontWeight: 600 }}>Product Images</label>
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  disabled={uploadingImage}
+                  style={{ display: 'block', width: '100%', padding: '8px 10px', border: '2px dashed #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: CREAM, cursor: uploadingImage ? 'not-allowed' : 'pointer' }}
+                />
+                {uploadedImages.length > 0 && (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: 10, marginTop: 12 }}>
+                    {uploadedImages.map((img, i) => (
+                      <div key={i} style={{ position: 'relative', borderRadius: 8, overflow: 'hidden', border: '1px solid #EBD9CC' }}>
+                        <img src={img} alt={`Product ${i}`} style={{ width: '100%', height: '100px', objectFit: 'cover' }} />
+                        <button
+                          type="button"
+                          onClick={() => removeUploadedImage(i)}
+                          style={{ position: 'absolute', top: 4, right: 4, background: '#C0504D', color: '#fff', border: 'none', borderRadius: 4, padding: '4px 8px', fontSize: 12, cursor: 'pointer', fontWeight: 600 }}
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {uploadedImages.length === 0 && (
+                  <p style={{ fontSize: 12, color: MUTED, marginTop: 8 }}>No images uploaded yet.</p>
+                )}
 
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))',
-                  gap: 8,
-                  padding: 10,
-                  border: '1px solid #EBD9CC',
-                  borderRadius: 8,
-                  background: CREAM,
-                }}
-              >
-                {PRODUCT_COLOR_PRESETS.map((color) => {
-                  const isSelected = selectedColorHexes.has(color.hex.toUpperCase());
-                  return (
+                <div style={{ marginTop: 14, borderTop: '1px dashed #EBD9CC', paddingTop: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <p style={{ margin: 0, fontSize: 12, color: BROWN, fontWeight: 600 }}>Image URLs (dynamic count)</p>
                     <button
-                      key={`${color.name}-${color.hex}`}
                       type="button"
-                      onClick={() => toggleColorPreset(color)}
-                      title={`${color.name} (${color.hex})`}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: 6,
-                        padding: '8px 4px',
-                        borderRadius: 8,
-                        border: isSelected ? `2px solid ${ROSE}` : '1px solid #EBD9CC',
-                        background: isSelected ? '#FBEDE6' : '#fff',
-                        cursor: 'pointer',
-                      }}
+                      onClick={addImageUrlInput}
+                      style={{ padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
                     >
-                      <span
-                        aria-hidden
-                        style={{
-                          width: 26,
-                          height: 26,
-                          borderRadius: '50%',
-                          background: color.hex,
-                          border: '1px solid rgba(0,0,0,0.2)',
-                          boxShadow: isSelected ? '0 0 0 2px rgba(183,110,121,0.18)' : 'none',
-                        }}
-                      />
-                      <span style={{ fontSize: 10, color: BROWN, fontWeight: 600, textAlign: 'center', lineHeight: 1.2 }}>
-                        {color.name}
-                      </span>
+                      + Add URL Field
                     </button>
-                  );
-                })}
-              </div>
+                  </div>
 
-              {/* Quick Add Color */}
-              <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-                <input
-                  type="text"
-                  value={quickColorName}
-                  onChange={(e) => setQuickColorName(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleQuickAddColor(); } }}
-                  placeholder="Color Name (e.g. Midnight Blue)"
-                  style={{ flex: 1, padding: '8px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: '#fff', outline: 'none' }}
-                />
-                <input
-                  type="text"
-                  value={quickColorHex}
-                  onChange={(e) => setQuickColorHex(e.target.value)}
-                  onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleQuickAddColor(); } }}
-                  placeholder="Hex Code (e.g. #1A1A2E)"
-                  style={{ flex: 1, padding: '8px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: '#fff', outline: 'none' }}
-                />
-                <button
-                  type="button"
-                  onClick={handleQuickAddColor}
-                  style={{ padding: '8px 12px', background: BROWN, color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                  <p style={{ margin: '0 0 8px', fontSize: 11, color: MUTED }}>
+                    Add as many image links as you want. Current URL fields: {imageUrlInputs.length}
+                  </p>
+
+                  <div style={{ display: 'grid', gap: 8 }}>
+                    {imageUrlInputs.map((value, index) => (
+                      <div key={index} style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 8 }}>
+                        <input
+                          value={value}
+                          onChange={(e) => updateImageUrlInput(index, e.target.value)}
+                          placeholder={`Image URL #${index + 1}`}
+                          style={{ padding: '8px 10px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: '#fff', outline: 'none' }}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => removeImageUrlInput(index)}
+                          style={{ padding: '6px 10px', border: '1px solid #D9BCA8', borderRadius: 8, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 12, fontWeight: 600 }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <p style={{ fontSize: 12, color: MUTED, marginTop: 8 }}>
+                  3D generation uses Front/Back uploads above first. If empty, it falls back to Product Images #1 and #2.
+                </p>
+              </div>
+              <textarea value={formData.detailsText} onChange={(e) => setFormData({ ...formData, detailsText: e.target.value })} placeholder="Details & Care instructions (formatting will be preserved)"
+                style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 120, gridColumn: '1 / -1' }} />
+              <input value={formData.sizesText} onChange={(e) => setFormData({ ...formData, sizesText: e.target.value })} placeholder="Sizes (e.g. XS,S,M,L)"
+                style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none' }} />
+              <textarea value={formData.sizeChartText} onChange={(e) => setFormData({ ...formData, sizeChartText: e.target.value })} placeholder="Size chart rows: size,chest,waist,hips,length"
+                style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', minHeight: 90 }} />
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
+                  <p style={{ margin: 0, fontSize: 12, color: BROWN, fontWeight: 600 }}>Select Product Colors</p>
+                  {colorPreview.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => applySelectedColors([])}
+                      style={{ padding: '4px 8px', border: '1px solid #D9BCA8', borderRadius: 6, background: '#fff', color: BROWN, cursor: 'pointer', fontSize: 11, fontWeight: 600 }}
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))',
+                    gap: 8,
+                    padding: 10,
+                    border: '1px solid #EBD9CC',
+                    borderRadius: 8,
+                    background: CREAM,
+                  }}
                 >
-                  Add
-                </button>
-              </div>
-
-              <div style={{ marginTop: 8, minHeight: 24 }}>
-                {colorPreview.length > 0 ? (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-                    {colorPreview.map((c) => (
-                      <span
-                        key={`${c.name}-${c.hex}`}
+                  {PRODUCT_COLOR_PRESETS.map((color) => {
+                    const isSelected = selectedColorHexes.has(color.hex.toUpperCase());
+                    return (
+                      <button
+                        key={`${color.name}-${color.hex}`}
+                        type="button"
+                        onClick={() => toggleColorPreset(color)}
+                        title={`${color.name} (${color.hex})`}
                         style={{
-                          display: 'inline-flex',
+                          display: 'flex',
+                          flexDirection: 'column',
                           alignItems: 'center',
                           gap: 6,
-                          padding: '4px 8px',
-                          borderRadius: 999,
-                          border: '1px solid #EBD9CC',
-                          background: '#fff',
-                          fontSize: 11,
-                          color: BROWN,
+                          padding: '8px 4px',
+                          borderRadius: 8,
+                          border: isSelected ? `2px solid ${ROSE}` : '1px solid #EBD9CC',
+                          background: isSelected ? '#FBEDE6' : '#fff',
+                          cursor: 'pointer',
                         }}
-                        title={`${c.name}: ${c.hex}`}
                       >
                         <span
                           aria-hidden
                           style={{
-                            width: 12,
-                            height: 12,
+                            width: 26,
+                            height: 26,
                             borderRadius: '50%',
-                            background: c.hex,
-                            border: '1px solid rgba(0,0,0,0.15)',
-                            display: 'inline-block',
+                            background: color.hex,
+                            border: '1px solid rgba(0,0,0,0.2)',
+                            boxShadow: isSelected ? '0 0 0 2px rgba(183,110,121,0.18)' : 'none',
                           }}
                         />
-                        {c.name}
-                        <button
-                          type="button"
-                          onClick={() => applySelectedColors(colorPreview.filter((cp) => cp.hex !== c.hex))}
-                          style={{ border: 'none', background: 'transparent', color: MUTED, cursor: 'pointer', padding: '0 0 0 4px', fontSize: 14, display: 'flex', alignItems: 'center' }}
+                        <span style={{ fontSize: 10, color: BROWN, fontWeight: 600, textAlign: 'center', lineHeight: 1.2 }}>
+                          {color.name}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Quick Add Color */}
+                <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+                  <input
+                    type="text"
+                    value={quickColorName}
+                    onChange={(e) => setQuickColorName(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleQuickAddColor(); } }}
+                    placeholder="Color Name (e.g. Midnight Blue)"
+                    style={{ flex: 1, padding: '8px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: '#fff', outline: 'none' }}
+                  />
+                  <input
+                    type="text"
+                    value={quickColorHex}
+                    onChange={(e) => setQuickColorHex(e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleQuickAddColor(); } }}
+                    placeholder="Hex Code (e.g. #1A1A2E)"
+                    style={{ flex: 1, padding: '8px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 12, color: BROWN, background: '#fff', outline: 'none' }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleQuickAddColor}
+                    style={{ padding: '8px 12px', background: BROWN, color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    Add
+                  </button>
+                </div>
+
+                <div style={{ marginTop: 8, minHeight: 24 }}>
+                  {colorPreview.length > 0 ? (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                      {colorPreview.map((c) => (
+                        <span
+                          key={`${c.name}-${c.hex}`}
+                          style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 6,
+                            padding: '4px 8px',
+                            borderRadius: 999,
+                            border: '1px solid #EBD9CC',
+                            background: '#fff',
+                            fontSize: 11,
+                            color: BROWN,
+                          }}
+                          title={`${c.name}: ${c.hex}`}
                         >
-                          ×
-                        </button>
-                      </span>
-                    ))}
-                  </div>
-                ) : (
-                  <p style={{ margin: 0, fontSize: 11, color: MUTED }}>
-                    Pick one or more colors from the grid.
-                  </p>
-                )}
+                          <span
+                            aria-hidden
+                            style={{
+                              width: 12,
+                              height: 12,
+                              borderRadius: '50%',
+                              background: c.hex,
+                              border: '1px solid rgba(0,0,0,0.15)',
+                              display: 'inline-block',
+                            }}
+                          />
+                          {c.name}
+                          <button
+                            type="button"
+                            onClick={() => applySelectedColors(colorPreview.filter((cp) => cp.hex !== c.hex))}
+                            style={{ border: 'none', background: 'transparent', color: MUTED, cursor: 'pointer', padding: '0 0 0 4px', fontSize: 14, display: 'flex', alignItems: 'center' }}
+                          >
+                            ×
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ margin: 0, fontSize: 11, color: MUTED }}>
+                      Pick one or more colors from the grid.
+                    </p>
+                  )}
+                </div>
+              </div>
+              <input value={formData.tagsText} onChange={(e) => setFormData({ ...formData, tagsText: e.target.value })} placeholder="Tags (comma separated)"
+                style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
+            </div>
+
+            {/* ── Attribute Cards ──────────────────────────────────────── */}
+            <div style={{ background: BEIGE, border: '1px solid #EBD9CC', borderRadius: 12, padding: 20, marginBottom: 16 }}>
+              <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: BROWN }}>🏷️ Product Attribute Cards</p>
+              <p style={{ margin: '0 0 16px', fontSize: 11, color: MUTED }}>
+                These appear as info tiles on the product page (Fabric, Craft, Color, Line). Leave blank to auto-detect from tags.
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, color: BROWN, fontWeight: 700, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Fabric
+                  </label>
+                  <input
+                    value={formData.fabric}
+                    onChange={(e) => setFormData({ ...formData, fabric: e.target.value })}
+                    placeholder="e.g. Premium Lawn, Chiffon, Silk…"
+                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: '#fff', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, color: BROWN, fontWeight: 700, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Craft
+                  </label>
+                  <input
+                    value={formData.craft}
+                    onChange={(e) => setFormData({ ...formData, craft: e.target.value })}
+                    placeholder="e.g. Handcrafted, Premium Finish…"
+                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: '#fff', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, color: BROWN, fontWeight: 700, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Line / Collection
+                  </label>
+                  <input
+                    value={formData.line}
+                    onChange={(e) => setFormData({ ...formData, line: e.target.value })}
+                    placeholder="e.g. Limelight Pret, Summer Luxe…"
+                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: '#fff', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: 11, color: BROWN, fontWeight: 700, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    ❤️ Loved By Count
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={formData.lovedByCount === 0 ? '' : formData.lovedByCount}
+                    onChange={(e) => setFormData({ ...formData, lovedByCount: Number(e.target.value) || 0 })}
+                    placeholder="e.g. 401"
+                    style={{ width: '100%', padding: '9px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: '#fff', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                  <p style={{ margin: '4px 0 0', fontSize: 10, color: MUTED }}>Shown as "Loved by X shoppers" (auto-increments with sales if 0)</p>
+                </div>
               </div>
             </div>
-            <input value={formData.tagsText} onChange={(e) => setFormData({ ...formData, tagsText: e.target.value })} placeholder="Tags (comma separated)"
-              style={{ padding: '10px 14px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: CREAM, outline: 'none', gridColumn: '1 / -1' }} />
-          </div>
 
-          {/* ── Attribute Cards ──────────────────────────────────────── */}
-          <div style={{ background: BEIGE, border: '1px solid #EBD9CC', borderRadius: 12, padding: 20, marginBottom: 16 }}>
-            <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: BROWN }}>🏷️ Product Attribute Cards</p>
-            <p style={{ margin: '0 0 16px', fontSize: 11, color: MUTED }}>
-              These appear as info tiles on the product page (Fabric, Craft, Color, Line). Leave blank to auto-detect from tags.
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-              <div>
-                <label style={{ display: 'block', fontSize: 11, color: BROWN, fontWeight: 700, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Fabric
-                </label>
-                <input
-                  value={formData.fabric}
-                  onChange={(e) => setFormData({ ...formData, fabric: e.target.value })}
-                  placeholder="e.g. Premium Lawn, Chiffon, Silk…"
-                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: '#fff', outline: 'none', boxSizing: 'border-box' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: 11, color: BROWN, fontWeight: 700, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Craft
-                </label>
-                <input
-                  value={formData.craft}
-                  onChange={(e) => setFormData({ ...formData, craft: e.target.value })}
-                  placeholder="e.g. Handcrafted, Premium Finish…"
-                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: '#fff', outline: 'none', boxSizing: 'border-box' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: 11, color: BROWN, fontWeight: 700, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  Line / Collection
-                </label>
-                <input
-                  value={formData.line}
-                  onChange={(e) => setFormData({ ...formData, line: e.target.value })}
-                  placeholder="e.g. Limelight Pret, Summer Luxe…"
-                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: '#fff', outline: 'none', boxSizing: 'border-box' }}
-                />
-              </div>
-              <div>
-                <label style={{ display: 'block', fontSize: 11, color: BROWN, fontWeight: 700, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  ❤️ Loved By Count
-                </label>
-                <input
-                  type="number"
-                  min={0}
-                  value={formData.lovedByCount === 0 ? '' : formData.lovedByCount}
-                  onChange={(e) => setFormData({ ...formData, lovedByCount: Number(e.target.value) || 0 })}
-                  placeholder="e.g. 401"
-                  style={{ width: '100%', padding: '9px 12px', border: '1px solid #EBD9CC', borderRadius: 8, fontSize: 13, color: BROWN, background: '#fff', outline: 'none', boxSizing: 'border-box' }}
-                />
-                <p style={{ margin: '4px 0 0', fontSize: 10, color: MUTED }}>Shown as "Loved by X shoppers" (auto-increments with sales if 0)</p>
-              </div>
+            <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
+                <input type="checkbox" checked={formData.isActive} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })} style={{ accentColor: ROSE }} />
+                Active in Store
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
+                <input type="checkbox" checked={formData.outOfStock} onChange={(e) => setFormData({ ...formData, outOfStock: e.target.checked })} style={{ accentColor: ROSE }} />
+                Mark Out of Stock
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
+                <input type="checkbox" checked={formData.isNewArrival} onChange={(e) => setFormData({ ...formData, isNewArrival: e.target.checked })} style={{ accentColor: ROSE }} />
+                New Arrival
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
+                <input type="checkbox" checked={formData.isSale} onChange={(e) => setFormData({ ...formData, isSale: e.target.checked })} style={{ accentColor: ROSE }} />
+                On Sale
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
+                <input type="checkbox" checked={formData.isBestseller} onChange={(e) => setFormData({ ...formData, isBestseller: e.target.checked })} style={{ accentColor: ROSE }} />
+                Bestseller
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
+                <input type="checkbox" checked={formData.isSignatureDress} onChange={(e) => setFormData({ ...formData, isSignatureDress: e.target.checked })} style={{ accentColor: ROSE }} />
+                Signature Dress (Handcrafted)
+              </label>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
+                <input type="checkbox" checked={formData.isHomeCarousel} onChange={(e) => setFormData({ ...formData, isHomeCarousel: e.target.checked })} style={{ accentColor: ROSE }} />
+                Show in Home Carousel
+              </label>
             </div>
-          </div>
-
-          <div style={{ display: 'flex', gap: 16, marginBottom: 16 }}>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
-              <input type="checkbox" checked={formData.isActive} onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })} style={{ accentColor: ROSE }} />
-              Active in Store
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
-              <input type="checkbox" checked={formData.outOfStock} onChange={(e) => setFormData({ ...formData, outOfStock: e.target.checked })} style={{ accentColor: ROSE }} />
-              Mark Out of Stock
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
-              <input type="checkbox" checked={formData.isNewArrival} onChange={(e) => setFormData({ ...formData, isNewArrival: e.target.checked })} style={{ accentColor: ROSE }} />
-              New Arrival
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
-              <input type="checkbox" checked={formData.isSale} onChange={(e) => setFormData({ ...formData, isSale: e.target.checked })} style={{ accentColor: ROSE }} />
-              On Sale
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
-              <input type="checkbox" checked={formData.isBestseller} onChange={(e) => setFormData({ ...formData, isBestseller: e.target.checked })} style={{ accentColor: ROSE }} />
-              Bestseller
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
-              <input type="checkbox" checked={formData.isSignatureDress} onChange={(e) => setFormData({ ...formData, isSignatureDress: e.target.checked })} style={{ accentColor: ROSE }} />
-              Signature Dress (Handcrafted)
-            </label>
-            <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: BROWN }}>
-              <input type="checkbox" checked={formData.isHomeCarousel} onChange={(e) => setFormData({ ...formData, isHomeCarousel: e.target.checked })} style={{ accentColor: ROSE }} />
-              Show in Home Carousel
-            </label>
-          </div>
-          <button type="submit" style={{ padding: '10px 20px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
-            {editing ? 'Update' : 'Create'} Product
-          </button>
-        </form>
-      )}
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              type="submit" 
+              disabled={isSaving}
+              style={{ padding: '10px 24px', background: ROSE, color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 700, cursor: isSaving ? 'default' : 'pointer', opacity: isSaving ? 0.7 : 1, boxShadow: '0 4px 12px rgba(183,110,121,0.2)' }}>
+              {isSaving ? 'Saving Product...' : (editing ? 'Update' : 'Create') + ' Product'}
+            </motion.button>
+          </motion.form>
+        )}
+      </AnimatePresence>
 
       <div style={{ background: '#fff', border: '1px solid #EBD9CC', borderRadius: 12, overflow: 'hidden', overflowX: 'auto' }}>
         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
           <thead>
             <tr style={{ background: ROSE, color: '#fff' }}>
-              {['Name', 'Category', 'Price', 'Cost', 'Stock', 'Sold', 'Status', 'Tags', 'Actions'].map((h) => (
+              {['Image', 'Name', 'Category', 'Price', 'Stock', 'Sold', 'Status', 'Actions'].map((h) => (
                 <th key={h} style={{ padding: '10px 14px', textAlign: 'left', fontWeight: 600, whiteSpace: 'nowrap' }}>{h}</th>
               ))}
             </tr>
@@ -2296,59 +2290,52 @@ function ProductsTab({ signatureOnly = false }: { signatureOnly?: boolean }) {
           <tbody>
             {!loading && filteredProducts.length === 0 && (
               <tr>
-                <td colSpan={9} style={{ padding: 24, textAlign: 'center', color: MUTED }}>No products found.</td>
+                <td colSpan={8} style={{ padding: 24, textAlign: 'center', color: MUTED }}>No products found.</td>
               </tr>
             )}
             {filteredProducts.map((p, i) => (
               <tr key={p.productId} style={{ background: i % 2 === 0 ? '#fff' : BEIGE }}>
-                <td style={{ padding: '10px 14px', fontWeight: 500 }}>{p.name}</td>
-                <td style={{ padding: '10px 14px' }}>{p.category}</td>
-                <td style={{ padding: '10px 14px', fontWeight: 600 }}>{fmt(p.price)}</td>
-                <td style={{ padding: '10px 14px' }}>{fmt(p.costPrice)}</td>
+                <td style={{ padding: '10px 14px' }}>
+                  <img src={p.frontImageUrl || p.images[0] || '/placeholder.png'} alt="" 
+                    style={{ width: 40, height: 40, objectFit: 'contain', borderRadius: 4, border: '1px solid #EBD9CC', background: '#fff' }} 
+                    onError={(e) => (e.currentTarget.src = '/placeholder.png')} />
+                </td>
+                <td style={{ padding: '10px 14px', fontWeight: 600, color: BROWN }}>{p.name}</td>
+                <td style={{ padding: '10px 14px', fontSize: 12 }}>{p.category}</td>
+                <td style={{ padding: '10px 14px', fontWeight: 700, color: ROSE }}>{fmt(p.price)}</td>
                 <td style={{ padding: '10px 14px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontWeight: 700 }}>{p.stock}</span>
                     {p.outOfStock ? (
-                      <span style={{ fontSize: 10, color: '#8A3A38', background: '#FDECEC', border: '1px solid #F3CACA', borderRadius: 999, padding: '2px 6px' }}>
-                        OUT
-                      </span>
-                    ) : p.stock === 0 ? (
-                      <span style={{ fontSize: 10, color: '#8A3A38', background: '#FDECEC', border: '1px solid #F3CACA', borderRadius: 999, padding: '2px 6px' }}>
-                        EMPTY
-                      </span>
-                    ) : p.stock <= lowStockThreshold && p.isActive !== false ? (
-                      <span style={{ fontSize: 10, color: '#A0613E', background: '#FDF3EC', border: '1px solid #F1D9C7', borderRadius: 999, padding: '2px 6px' }}>
-                        {p.stock} left!
-                      </span>
-                    ) : (
-                      <span style={{ fontSize: 10, color: '#3E7B4E', background: '#E8F5E9', border: '1px solid #C3E6CB', borderRadius: 999, padding: '2px 6px' }}>
-                        {p.stock} rem.
-                      </span>
-                    )}
+                      <span style={{ fontSize: 10, color: '#8A3A38', background: '#FDECEC', border: '1px solid #F3CACA', borderRadius: 999, padding: '2px 6px' }}>OOS</span>
+                    ) : p.stock <= lowStockThreshold ? (
+                      <span style={{ fontSize: 10, color: '#A0613E', background: '#FDF3EC', border: '1px solid #F1D9C7', borderRadius: 999, padding: '2px 6px' }}>LOW</span>
+                    ) : null}
                   </div>
                 </td>
                 <td style={{ padding: '10px 14px' }}>{p.sold}</td>
                 <td style={{ padding: '10px 14px' }}>
-                  {!p.isActive ? 'Hidden' : p.outOfStock ? 'Out of stock' : 'In stock'}
-                </td>
-                <td style={{ padding: '10px 14px' }}>
-                  <div style={{ display: 'flex', gap: 4 }}>
-                    {p.isNewArrival && <span className="badge-new">New</span>}
-                    {p.isSale && <span className="badge-sale">Sale</span>}
-                    {p.isBestseller && <span style={{ background: '#6B8E6B', color: '#fff', fontSize: 10, padding: '2px 6px', borderRadius: 4 }}>Best</span>}
-                    {p.isSignatureDress && <span style={{ background: '#3A2E2A', color: '#fff', fontSize: 10, padding: '2px 6px', borderRadius: 4 }}>Signature</span>}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: p.isActive ? '#3E7B4E' : '#8A3A38' }}>
+                      {p.isActive ? '● Active' : '○ Hidden'}
+                    </span>
+                    <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+                      {p.isNewArrival && <span style={{ fontSize: 9, background: '#E0F2F1', color: '#00695C', padding: '1px 4px', borderRadius: 4 }}>New</span>}
+                      {p.isSale && <span style={{ fontSize: 9, background: '#FCE4EC', color: '#C2185B', padding: '1px 4px', borderRadius: 4 }}>Sale</span>}
+                      {p.isSignatureDress && <span style={{ fontSize: 9, background: '#EFEBE9', color: '#4E342E', padding: '1px 4px', borderRadius: 4 }}>Sig</span>}
+                    </div>
                   </div>
                 </td>
                 <td style={{ padding: '10px 14px' }}>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => void generate3D(p)} style={{ padding: '6px 10px', background: '#4A5F8C', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>3D</button>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => void generate3D(p)} style={{ padding: '6px 12px', background: '#4A5F8C', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>3D</motion.button>
+                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => startEdit(p)} style={{ padding: '6px 12px', background: BROWN, color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>Edit</motion.button>
                     {p.outOfStock ? (
-                      <button onClick={() => void quickSetStock(p, Math.max(p.stock, lowStockThreshold, 1), false)} style={{ padding: '6px 10px', background: '#3E7B4E', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Restock</button>
+                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => void quickSetStock(p, Math.max(p.stock, lowStockThreshold + 1, 1), false)} style={{ padding: '6px 12px', background: '#3E7B4E', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>Restock</motion.button>
                     ) : (
-                      <button onClick={() => void quickSetStock(p, p.stock, true)} style={{ padding: '6px 10px', background: '#B37A3B', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Mark OOS</button>
+                      <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => void quickSetStock(p, p.stock, true)} style={{ padding: '6px 12px', background: '#B37A3B', color: '#fff', border: 'none', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>Mark OOS</motion.button>
                     )}
-                    <button onClick={() => startEdit(p)} style={{ padding: '6px 10px', background: '#6B5247', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Edit</button>
-                    <button onClick={() => handleDelete(p.productId)} style={{ padding: '6px 10px', background: '#C0504D', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, cursor: 'pointer' }}>Delete</button>
+                    <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => handleDelete(p.productId)} style={{ padding: '6px 12px', background: '#FDECEC', color: '#C0504D', border: '1px solid #F3CACA', borderRadius: 6, fontSize: 12, cursor: 'pointer' }}>Delete</motion.button>
                   </div>
                 </td>
               </tr>
@@ -3369,22 +3356,32 @@ export default function DashboardPage() {
           </div>
         ) : (
           <>
-            {tab === 'overview'   && <OverviewTab   data={data} />}
-            {tab === 'sales'      && <SalesTab      data={data} />}
-            {tab === 'orders'     && <OrdersTab     data={data} fetchData={() => fetchData()} />}
-            {tab === 'products'   && <ProductsTab />}
-            {tab === 'signature'  && <ProductsTab signatureOnly={true} />}
-            {tab === 'categories' && <CategoriesTab />}
-            {tab === 'inventory'  && <InventoryTab  data={data} />}
-            {tab === 'customers'  && <CustomersTab  data={data} />}
-            {tab === 'signups'    && <SignupsTab />}
-            {tab === 'sales-mgr'  && <SalesMgrTab />}
-            {tab === 'campaigns'  && <CampaignsTab />}
-            {tab === 'articles'   && <ArticlesTab  />}
-            {tab === 'reviews'    && <ReviewsTab />}
-            {tab === 'finance'    && <FinanceTab    data={data} />}
-            {tab === 'locations'  && <LocationsTab  data={data} />}
-            {tab === 'bankProofs' && <BankProofsTab />}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={tab}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.2 }}
+            >
+              {tab === 'overview'   && <OverviewTab   data={data} />}
+              {tab === 'sales'      && <SalesTab      data={data} />}
+              {tab === 'orders'     && <OrdersTab     data={data} fetchData={() => fetchData()} />}
+              {tab === 'products'   && <ProductsTab />}
+              {tab === 'signature'  && <ProductsTab signatureOnly={true} />}
+              {tab === 'categories' && <CategoriesTab />}
+              {tab === 'inventory'  && <InventoryTab  data={data} />}
+              {tab === 'customers'  && <CustomersTab  data={data} />}
+              {tab === 'signups'    && <SignupsTab />}
+              {tab === 'sales-mgr'  && <SalesMgrTab />}
+              {tab === 'campaigns'  && <CampaignsTab />}
+              {tab === 'articles'   && <ArticlesTab  />}
+              {tab === 'reviews'    && <ReviewsTab />}
+              {tab === 'finance'    && <FinanceTab    data={data} />}
+              {tab === 'locations'  && <LocationsTab  data={data} />}
+              {tab === 'bankProofs' && <BankProofsTab />}
+            </motion.div>
+          </AnimatePresence>
           </>
         )}
       </main>
