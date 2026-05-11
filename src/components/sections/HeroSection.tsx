@@ -30,12 +30,11 @@ export default function HeroSection() {
     router.prefetch('/shop');
     router.prefetch('/dresses');
 
-    // Increase limit to ensure we have enough products for both Hero (4) and Featured (remaining)
-    fetch('/api/products?isHomeCarousel=true&limit=20')
+    // Fetch a larger set of products to distribute between sections
+    fetch('/api/products?limit=40')
       .then(r => r.json())
       .then(d => { 
-        if (Array.isArray(d.products) && d.products.length > 0) setProducts(d.products); 
-        else fetch('/api/products?sort=newest&limit=20').then(r2 => r2.json()).then(d2 => { if (Array.isArray(d2.products)) setProducts(d2.products); });
+        if (Array.isArray(d.products)) setProducts(d.products); 
       })
       .catch(() => {});
 
@@ -48,11 +47,11 @@ export default function HeroSection() {
       .catch(() => {});
   }, [router]);
 
-  // Hero lookbook products (first 4)
-  const heroProducts = products.slice(0, 4);
+  // Hero lookbook products: Only those specifically marked in the dashboard
+  const heroProducts = products.filter(p => p.isHomeCarousel);
   
-  // Featured pieces (all products except the ones in the hero lookbook)
-  const featuredProducts = products.slice(4);
+  // Featured pieces: Any products NOT in the hero carousel
+  const featuredProducts = products.filter(p => !p.isHomeCarousel);
   
   // Auto-advance hero
   useEffect(() => {
