@@ -129,7 +129,7 @@ export default function HeroSection() {
         </div>
 
         {/* Right Image Half */}
-        <div className="w-full lg:w-[55%] h-[60vh] lg:h-full relative overflow-hidden bg-beige">
+        <div className="w-full h-[60vh] lg:absolute lg:inset-y-0 lg:right-0 lg:w-[55%] lg:h-auto relative overflow-hidden bg-beige">
           <AnimatePresence mode="wait">
             <motion.div
               key={`img-${activeHeroIdx}`}
