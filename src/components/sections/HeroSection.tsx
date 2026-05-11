@@ -101,7 +101,7 @@ export default function HeroSection() {
               </p>
 
               {/* Discover Button */}
-              <Link href={heroProducts[activeHeroIdx] ? `/product/${heroProducts[activeHeroIdx].id}` : '/shop'}
+              <Link href="/dresses"
                 className="group inline-flex items-center gap-4 bg-brown text-cream px-8 py-4 rounded-full text-xs tracking-[0.15em] uppercase hover:bg-rose-gold transition-colors duration-300">
                 Discover the collection
                 <span className="bg-cream/20 rounded-full p-1.5 group-hover:bg-cream/30 transition-colors">
