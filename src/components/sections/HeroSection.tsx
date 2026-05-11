@@ -139,14 +139,18 @@ export default function HeroSection() {
               transition={{ duration: 0.8, ease: 'easeOut' }}
               className="absolute inset-0 w-full h-full"
             >
-              <Image 
-                src={heroProducts.length > 0 && heroProducts[activeHeroIdx]?.images?.[0] ? heroProducts[activeHeroIdx].images[0] : '/hero-model.png'} 
-                alt="Featured Product"
-                fill 
-                priority 
-                sizes="(max-width: 1024px) 100vw, 55vw" 
-                className="object-cover object-top" 
-              />
+              {heroProducts.length > 0 ? (
+                <Image 
+                  src={heroProducts[activeHeroIdx]?.images?.[0] || '/hero-model.png'} 
+                  alt="Featured Product"
+                  fill 
+                  priority 
+                  sizes="(max-width: 1024px) 100vw, 55vw" 
+                  className="object-cover object-top" 
+                />
+              ) : (
+                <div className="absolute inset-0 bg-beige/30 animate-pulse" />
+              )}
             </motion.div>
           </AnimatePresence>
 
