@@ -35,7 +35,7 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
           scroll('right');
         }
       }
-    }, 3000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [products]);

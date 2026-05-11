@@ -8,6 +8,7 @@ export interface IOrderItem {
   price: number;
   size: string;
   color: string;
+  isPreOrder?: boolean;
 }
 
 export interface IOrder extends Document {
@@ -55,6 +56,7 @@ const OrderItemSchema = new Schema<IOrderItem>({
   price:     { type: Number, required: true },
   size:      { type: String, default: '' },
   color:     { type: String, default: '' },
+  isPreOrder:{ type: Boolean, default: false },
 });
 
 const OrderSchema = new Schema<IOrder>(

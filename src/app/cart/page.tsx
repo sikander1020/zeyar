@@ -60,6 +60,9 @@ export default function CartPage() {
                           </p>
                           <h3 className="text-lg font-playfair text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
                             {item.product.name}
+                            {item.product.isSignatureDress && (
+                              <span className="ml-2 inline-block px-1.5 py-0.5 text-[8px] bg-rose-gold text-white tracking-widest uppercase align-middle">Pre-Order</span>
+                            )}
                           </h3>
                         </div>
                         <button

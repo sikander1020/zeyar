@@ -100,6 +100,9 @@ export default function CartDrawer() {
                           style={{ fontFamily: "'Playfair Display', serif" }}
                         >
                           {item.product.name}
+                          {item.product.isSignatureDress && (
+                            <span className="ml-2 inline-block px-1.5 py-0.5 text-[8px] bg-rose-gold text-white tracking-widest uppercase">Pre-Order</span>
+                          )}
                         </h3>
                         <button
                           onClick={() => removeItem(item.product.id, item.selectedSize, item.selectedColor.name)}

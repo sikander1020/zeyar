@@ -1028,16 +1028,18 @@ export default function ProductPage() {
               className="btn-luxury btn-primary flex-1 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed !px-2 !py-2.5 !text-[10px] sm:!text-xs"
             >
               <ShoppingBag size={14} strokeWidth={2} />
-              {product.outOfStock ? 'Out of Stock' : addingToCart ? 'Adding...' : 'Add to Bag'}
+              {product.outOfStock ? 'Out of Stock' : addingToCart ? 'Adding...' : product.isSignatureDress ? 'Pre Order' : 'Add to Bag'}
             </button>
-            <button
-              type="button"
-              disabled={product.outOfStock || buyingNow}
-              onClick={handleBuyNow}
-              className="btn-luxury btn-outline flex-1 disabled:opacity-60 disabled:cursor-not-allowed !px-2 !py-2.5 !text-[10px] sm:!text-xs"
-            >
-              {buyingNow ? 'Redirecting...' : 'Buy Now'}
-            </button>
+            {!product.isSignatureDress && (
+              <button
+                type="button"
+                disabled={product.outOfStock || buyingNow}
+                onClick={handleBuyNow}
+                className="btn-luxury btn-outline flex-1 disabled:opacity-60 disabled:cursor-not-allowed !px-2 !py-2.5 !text-[10px] sm:!text-xs"
+              >
+                {buyingNow ? 'Redirecting...' : 'Buy Now'}
+              </button>
+            )}
           </div>
         </div>
 
@@ -1057,16 +1059,18 @@ export default function ProductPage() {
               onClick={handleAddToCart}
               className="btn-luxury btn-primary disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              {product.outOfStock ? 'Out of Stock' : addingToCart ? 'Adding...' : 'Add to Bag'}
+              {product.outOfStock ? 'Out of Stock' : addingToCart ? 'Adding...' : product.isSignatureDress ? 'Pre Order' : 'Add to Bag'}
             </button>
-            <button
-              type="button"
-              disabled={product.outOfStock || buyingNow}
-              onClick={handleBuyNow}
-              className="btn-luxury btn-outline disabled:opacity-60 disabled:cursor-not-allowed"
-            >
-              {buyingNow ? 'Redirecting...' : 'Buy Now'}
-            </button>
+            {!product.isSignatureDress && (
+              <button
+                type="button"
+                disabled={product.outOfStock || buyingNow}
+                onClick={handleBuyNow}
+                className="btn-luxury btn-outline disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {buyingNow ? 'Redirecting...' : 'Buy Now'}
+              </button>
+            )}
           </div>
         </div>
 
