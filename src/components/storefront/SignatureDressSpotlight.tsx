@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, useInView, useReducedMotion } from 'framer-motion';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import type { StoreProduct } from '@/types/storefront';
 
@@ -22,6 +22,23 @@ export default function SignatureDressSpotlight({ products }: { products: StoreP
       });
     }
   };
+
+  useEffect(() => {
+    if (!products || products.length <= 1) return;
+
+    const interval = setInterval(() => {
+      if (scrollContainerRef.current) {
+        const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current;
+        if (scrollLeft + clientWidth >= scrollWidth - 10) {
+          scrollContainerRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          scroll('right');
+        }
+      }
+    }, 3000);
+
+    return () => clearInterval(interval);
+  }, [products]);
 
   if (!products || products.length === 0) return null;
 

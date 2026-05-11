@@ -67,6 +67,8 @@ function normalizeProduct(p: {
   isNewArrival?: boolean;
   isSale?: boolean;
   isBestseller?: boolean;
+  isSignatureDress?: boolean;
+  isHomeCarousel?: boolean;
   fabric?: string;
   craft?: string;
   line?: string;
@@ -108,6 +110,8 @@ function normalizeProduct(p: {
     isNew: p.isNewArrival === true,
     isSale: p.isSale === true,
     isBestseller: p.isBestseller === true,
+    isSignatureDress: p.isSignatureDress === true,
+    isHomeCarousel: p.isHomeCarousel === true,
     fabric: typeof p.fabric === 'string' ? p.fabric : '',
     craft: typeof p.craft === 'string' ? p.craft : '',
     line: typeof p.line === 'string' ? p.line : '',
