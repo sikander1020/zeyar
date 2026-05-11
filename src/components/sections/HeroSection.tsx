@@ -3,8 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
-import { ArrowRight, Play, X, ChevronLeft, ChevronRight, ShoppingBag } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Play, X, ChevronRight, ShoppingBag } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import CoverflowCarousel from '@/components/carousel/CoverflowCarousel';
 import type { StoreProduct } from '@/types/storefront';
@@ -14,139 +14,17 @@ interface Article {
   excerpt: string; coverImage: string; readTime: string; publishedAt: string | null;
 }
 
-/* ─── Shop Now Orb ────────────────────────────────────── */
-function ShopOrb() {
-  return (
-    <Link href="/shop" aria-label="Shop Now">
-      <motion.div
-        whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}
-        className="relative w-[88px] h-[88px] cursor-pointer select-none"
-      >
-        {/* Orb body using CSS vars so it adapts to theme */}
-        <div className="w-full h-full rounded-full flex flex-col items-center justify-center glass"
-          style={{
-            boxShadow: '0 8px 32px rgba(183,110,121,0.28), inset 0 1px 0 rgba(255,255,255,0.7)',
-          }}
-        >
-          <span className="text-[10px] font-semibold tracking-[0.18em] uppercase text-center leading-tight text-brown"
-            style={{ fontFamily: "'Inter',sans-serif" }}>
-            SHOP<br />NOW
-          </span>
-        </div>
-        {/* Spinning dashed ring */}
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ duration: 14, repeat: Infinity, ease: 'linear' }}
-          className="absolute pointer-events-none rounded-full"
-          style={{ inset: '-7px', border: '1.5px dashed rgba(183,110,121,0.4)', borderRadius: '50%' }}
-        />
-      </motion.div>
-    </Link>
-  );
-}
-
-/* ─── Article Carousel ────────────────────────────────── */
-function ArticleCarousel({ articles }: { articles: Article[] }) {
-  const [active, setActive] = useState(0);
-  const total = articles.length;
-  if (total === 0) return null;
-
-  const visible = [0, 1, 2].map(i => articles[(active + i) % total]);
-
-  return (
-    <section className="py-20 md:py-28 overflow-hidden" style={{ background: 'var(--cream)' }}>
-      <div className="max-w-7xl mx-auto px-6 md:px-10">
-        {/* Header */}
-        <div className="flex items-end justify-between mb-14 gap-4">
-          <div>
-            <p className="text-xs tracking-[0.3em] uppercase mb-3 text-rose-gold" style={{ fontFamily: "'Inter',sans-serif" }}>
-              From the Journal
-            </p>
-            <h2 className="text-4xl md:text-5xl text-brown" style={{ fontFamily: "'Playfair Display',serif", lineHeight: 1.08 }}>
-              Style &amp; Stories
-            </h2>
-          </div>
-          <div className="flex gap-3 shrink-0">
-            {([['prev', <ChevronLeft key="l" size={18} />, () => setActive(p => (p - 1 + total) % total)],
-               ['next', <ChevronRight key="r" size={18} />, () => setActive(p => (p + 1) % total)]] as const).map(([lbl, icon, fn]) => (
-              <button key={lbl as string} onClick={fn as () => void} aria-label={lbl as string}
-                className="w-11 h-11 rounded-full border border-nude flex items-center justify-center text-brown hover:bg-brown hover:text-cream hover:border-brown transition-all duration-300">
-                {icon}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Cards */}
-        <AnimatePresence mode="wait">
-          <motion.div key={active}
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.42, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="grid grid-cols-1 md:grid-cols-3 gap-8"
-          >
-            {visible.map((art, i) => (
-              <article key={art._id + i} className="group cursor-pointer">
-                <div className="relative aspect-[4/3] overflow-hidden mb-5 bg-beige">
-                  {art.coverImage ? (
-                    <Image src={art.coverImage} alt={art.title} fill
-                      className="object-cover transition-transform duration-700 group-hover:scale-105"
-                      sizes="(max-width:768px) 100vw, 33vw" />
-                  ) : (
-                    // Brand-aligned gradient fallback using CSS vars
-                    <div className="absolute inset-0 gradient-beige" />
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-t from-brown/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                </div>
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-[10px] tracking-[0.18em] uppercase px-2 py-0.5 bg-nude-light text-brown" style={{ fontFamily: "'Inter',sans-serif" }}>
-                    {art.tag}
-                  </span>
-                  <span className="text-[11px] text-brown-muted" style={{ fontFamily: "'Inter',sans-serif" }}>
-                    {art.publishedAt ? new Date(art.publishedAt).toLocaleDateString('en-PK', { month: 'long', year: 'numeric' }) : ''} · {art.readTime}
-                  </span>
-                </div>
-                <h3 className="text-xl leading-snug mb-3 text-brown group-hover:text-rose-gold transition-colors duration-300"
-                  style={{ fontFamily: "'Playfair Display',serif" }}>
-                  {art.title}
-                </h3>
-                <p className="text-sm leading-relaxed mb-4 text-brown-muted line-clamp-3" style={{ fontFamily: "'Inter',sans-serif" }}>
-                  {art.excerpt}
-                </p>
-                <span className="inline-flex items-center gap-2 text-xs tracking-[0.14em] uppercase font-medium text-rose-gold group-hover:gap-3 transition-all duration-300"
-                  style={{ fontFamily: "'Inter',sans-serif" }}>
-                  Read Article <ArrowRight size={12} />
-                </span>
-              </article>
-            ))}
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Dots */}
-        <div className="flex justify-center gap-2 mt-12">
-          {articles.map((_, i) => (
-            <button key={i} onClick={() => setActive(i)} aria-label={`Article ${i + 1}`}
-              className="rounded-full transition-all duration-300"
-              style={{ width: i === active ? '28px' : '8px', height: '8px', background: i === active ? 'var(--rose-gold)' : 'var(--nude)' }} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ─── Main Export ─────────────────────────────────────── */
 export default function HeroSection() {
   const router = useRouter();
-  const heroRef = useRef<HTMLElement>(null);
-  const { scrollYProgress } = useScroll({ target: heroRef, offset: ['start start', 'end start'] });
-  const imgY = useTransform(scrollYProgress, [0, 1], ['0%', '18%']);
 
   const [films, setFilms]       = useState<any[]>([]);
   const [isModal, setIsModal]   = useState(false);
   const [activeFilm, setActiveFilm] = useState(0);
   const [products, setProducts] = useState<StoreProduct[]>([]);
   const [articles, setArticles] = useState<Article[]>([]);
-  const [heroErr, setHeroErr]   = useState(false);
+  
+  // Hero Carousel State
+  const [activeHeroIdx, setActiveHeroIdx] = useState(0);
 
   useEffect(() => {
     router.prefetch('/shop');
@@ -165,104 +43,139 @@ export default function HeroSection() {
       .catch(() => {});
   }, [router]);
 
+  // Use up to 4 products for the hero lookbook
+  const heroProducts = products.length > 0 ? products.slice(0, 4) : [];
+  
+  // Auto-advance hero
+  useEffect(() => {
+    if (heroProducts.length <= 1) return;
+    const interval = setInterval(() => {
+      setActiveHeroIdx(prev => (prev + 1) % heroProducts.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [heroProducts.length]);
+
   return (
     <>
-      {/* ══ HERO ═══════════════════════════════════════════ */}
-      <section ref={heroRef} className="relative w-full overflow-hidden"
-        style={{ minHeight: '100svh', background: 'var(--beige)' }}>
+      {/* ══ DRIBBBLE-INSPIRED SPLIT HERO ═════════════════════════════════ */}
+      <section className="relative w-full min-h-[100svh] flex flex-col lg:flex-row overflow-hidden pt-20 lg:pt-0"
+        style={{ background: 'var(--cream)' }}>
+        
+        {/* Left Content Half */}
+        <div className="w-full lg:w-[45%] flex flex-col justify-center px-6 md:px-12 lg:pl-16 xl:pl-24 pt-12 pb-10 lg:py-0 relative z-10">
+          
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`text-${activeHeroIdx}`}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.6, ease: [0.25, 0.46, 0.45, 0.94] }}
+              className="max-w-xl"
+            >
+              {/* Category / Season */}
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-px w-8 bg-rose-gold"></div>
+                <span className="text-[10px] tracking-[0.25em] uppercase text-rose-gold font-medium" style={{ fontFamily: "'Inter',sans-serif" }}>
+                  {heroProducts[activeHeroIdx]?.category || 'New Season 2026'}
+                </span>
+              </div>
 
-        {/* Parallax image */}
-        <motion.div style={{ y: imgY }} className="absolute inset-0 w-full h-[115%] -top-[5%]">
-          {!heroErr ? (
-            <Image src="/hero-model.png" alt="ZAYBAASH 2026 Summer Collection"
-              fill priority sizes="100vw" className="object-cover object-top"
-              onError={() => setHeroErr(true)} />
-          ) : (
-            <div className="absolute inset-0 gradient-beige" />
-          )}
-          {/* Bottom vignette so text is legible */}
-          <div className="absolute inset-0" style={{
-            background: 'linear-gradient(to bottom, transparent 0%, transparent 45%, rgba(20,12,8,0.55) 100%)'
-          }} />
-        </motion.div>
+              {/* Huge Serif Headline */}
+              <h1 className="text-brown leading-[1.05] mb-6"
+                style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(3.5rem, 6vw, 5.5rem)', fontWeight: 600 }}>
+                {heroProducts.length > 0 ? (
+                  <>
+                    {heroProducts[activeHeroIdx].name.split(' ')[0]}<br />
+                    <span className="italic font-light text-brown-muted">
+                      {heroProducts[activeHeroIdx].name.split(' ').slice(1).join(' ')}
+                    </span>
+                  </>
+                ) : (
+                  <>Summer<br /><span className="italic font-light text-brown-muted">Collection</span></>
+                )}
+              </h1>
 
-        {/* ── Season pill ── top-left */}
-        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3, duration: 0.6 }}
-          className="absolute top-28 left-8 md:left-12 z-10">
-          <span className="text-[10px] tracking-[0.28em] uppercase px-3 py-1.5 rounded-full glass text-brown border-nude/40"
-            style={{ fontFamily: "'Inter',sans-serif" }}>
-            New Season 2026
-          </span>
-        </motion.div>
+              <p className="text-brown-muted text-sm md:text-base leading-relaxed mb-10 max-w-md" style={{ fontFamily: "'Inter',sans-serif" }}>
+                Discover sun-drenched elegance. Premium fabrics crafted for the modern Pakistani woman, featuring timeless silhouettes and luxurious details.
+              </p>
 
-        {/* ── Main headline ── top-left */}
-        <motion.div
-          initial={{ opacity: 0, x: -40 }} animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.85, delay: 0.22, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute left-6 md:left-12 z-10"
-          style={{ top: 'clamp(115px, 20vh, 178px)' }}
-        >
-          <h1 className="text-brown leading-[0.9] max-w-xs md:max-w-lg"
-            style={{ fontFamily: "'Playfair Display',serif", fontSize: 'clamp(3rem,7.5vw,7rem)', fontWeight: 700 }}>
-            Summer<br /><span className="italic font-light">Collection</span>
-          </h1>
-        </motion.div>
+              {/* Discover Button */}
+              <Link href={heroProducts[activeHeroIdx] ? `/product/${heroProducts[activeHeroIdx].id}` : '/shop'}
+                className="group inline-flex items-center gap-4 bg-brown text-cream px-8 py-4 rounded-full text-xs tracking-[0.15em] uppercase hover:bg-rose-gold transition-colors duration-300">
+                Discover the collection
+                <span className="bg-cream/20 rounded-full p-1.5 group-hover:bg-cream/30 transition-colors">
+                  <ArrowRight size={14} className="text-cream" />
+                </span>
+              </Link>
+            </motion.div>
+          </AnimatePresence>
 
-        {/* ── Shop Now orb ── top-right */}
-        <motion.div initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7, delay: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          className="absolute top-28 right-8 md:right-14 z-20">
-          <ShopOrb />
-        </motion.div>
-
-        {/* ── Bottom editorial strip ── */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.9 }}
-          className="absolute bottom-8 left-0 right-0 z-10 px-6 md:px-12 flex flex-col md:flex-row items-center md:items-end justify-between gap-3">
-          <div>
-            <p className="text-cream text-2xl md:text-3xl mb-1" style={{ fontFamily: "'Playfair Display',serif" }}>
-              2026 — Luxury Summer
-            </p>
-            <p className="text-[11px] leading-relaxed" style={{ color: 'rgba(250,247,244,0.7)', fontFamily: "'Inter',sans-serif" }}>
-              Sun-drenched elegance — premium fabrics crafted for the modern Pakistani woman.
-            </p>
-          </div>
-          <div className="flex gap-3">
-            <Link href="/dresses" className="btn-luxury btn-primary text-xs px-5 py-3">
-              Shop Dresses
-            </Link>
-            {films.length > 0 && (
-              <button onClick={() => setIsModal(true)}
-                className="btn-luxury btn-outline text-xs px-5 py-3 inline-flex items-center gap-2"
-                style={{ borderColor: 'rgba(230,183,169,0.5)', color: 'var(--cream)', background: 'rgba(245,237,230,0.12)' }}>
-                <Play size={12} className="fill-current" /> Watch Film
+          {/* Lookbook Thumbnails (Bottom Left) */}
+          <div className="mt-16 lg:absolute lg:bottom-12 flex gap-4">
+            {heroProducts.map((p, i) => (
+              <button
+                key={p.id}
+                onClick={() => setActiveHeroIdx(i)}
+                className={`relative w-16 h-20 md:w-20 md:h-24 overflow-hidden rounded-lg transition-all duration-500 cursor-pointer ${
+                  i === activeHeroIdx ? 'ring-2 ring-rose-gold ring-offset-2 ring-offset-[var(--cream)] scale-105' : 'opacity-60 hover:opacity-100'
+                }`}
+              >
+                <Image src={p.images[0] || '/hero-model.png'} alt={p.name} fill className="object-cover" sizes="80px" />
+                <div className={`absolute inset-0 bg-black/20 transition-opacity ${i === activeHeroIdx ? 'opacity-0' : 'opacity-100'}`} />
               </button>
-            )}
+            ))}
           </div>
-        </motion.div>
+        </div>
 
-        {/* Scroll indicator */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }}
-          className="absolute bottom-8 right-8 z-10 hidden md:flex flex-col items-center gap-1">
-          <motion.div animate={{ y: [0, 8, 0] }} transition={{ repeat: Infinity, duration: 1.9, ease: 'easeInOut' }}
-            className="w-px h-10 bg-nude/60" />
-        </motion.div>
+        {/* Right Image Half */}
+        <div className="w-full lg:w-[55%] h-[60vh] lg:h-full relative overflow-hidden bg-beige">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`img-${activeHeroIdx}`}
+              initial={{ opacity: 0, scale: 1.05, filter: 'blur(10px)' }}
+              animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.8, ease: 'easeOut' }}
+              className="absolute inset-0 w-full h-full"
+            >
+              {heroProducts.length > 0 ? (
+                <Image src={heroProducts[activeHeroIdx].images[0] || '/hero-model.png'} alt="Featured Product"
+                  fill priority sizes="(max-width: 1024px) 100vw, 55vw" className="object-cover object-center" />
+              ) : (
+                <div className="absolute inset-0 gradient-beige" />
+              )}
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Watch Film Floating Button (Right side) */}
+          {films.length > 0 && (
+            <button onClick={() => setIsModal(true)}
+              className="absolute bottom-8 right-8 z-20 flex items-center gap-3 px-6 py-3 rounded-full text-xs tracking-[0.16em] uppercase font-medium transition-all hover:scale-105 glass-dark"
+              style={{ color: 'var(--cream)', fontFamily: "'Inter',sans-serif", border: '1px solid rgba(255,255,255,0.2)' }}>
+              <div className="w-6 h-6 rounded-full bg-cream/20 flex items-center justify-center">
+                <Play size={10} className="fill-current" />
+              </div>
+              Watch Film
+            </button>
+          )}
+        </div>
       </section>
 
       {/* ══ TRUST STRIP ════════════════════════════════════ */}
-      <section className="border-b border-nude/20" style={{ background: 'var(--beige)' }}>
+      <section className="border-b" style={{ background: 'var(--beige)', borderColor: 'rgba(230,183,169,0.2)' }}>
         <div className="max-w-7xl mx-auto px-6 md:px-10">
-          <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-nude/20">
+          <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x" style={{ ['--tw-divide-opacity' as any]: '1', borderColor: 'rgba(230,183,169,0.22)' }}>
             {[
               { icon: '✦', label: 'Curated Collection',   sub: 'Every piece hand-selected'  },
               { icon: '◈', label: '100% Premium Quality', sub: 'Luxurious fabrics only'      },
               { icon: '◎', label: 'Nationwide Delivery',  sub: 'Shipped across Pakistan'     },
             ].map(({ icon, label, sub }) => (
               <div key={label} className="flex items-center gap-4 py-8 md:py-10 md:px-10 first:md:pl-0 last:md:pr-0">
-                <span className="text-2xl shrink-0 text-rose-gold">{icon}</span>
+                <span className="text-2xl shrink-0" style={{ color: 'var(--rose-gold)' }}>{icon}</span>
                 <div>
-                  <p className="text-sm font-semibold text-brown" style={{ fontFamily: "'Inter',sans-serif" }}>{label}</p>
-                  <p className="text-xs mt-0.5 text-brown-muted" style={{ fontFamily: "'Inter',sans-serif" }}>{sub}</p>
+                  <p className="text-sm font-semibold" style={{ color: 'var(--brown)', fontFamily: "'Inter',sans-serif" }}>{label}</p>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--brown-muted)', fontFamily: "'Inter',sans-serif" }}>{sub}</p>
                 </div>
               </div>
             ))}
@@ -276,16 +189,16 @@ export default function HeroSection() {
           <div className="max-w-7xl mx-auto px-6 md:px-10">
             <div className="flex items-end justify-between mb-10">
               <div>
-                <p className="text-xs tracking-[0.3em] uppercase mb-3 text-rose-gold" style={{ fontFamily: "'Inter',sans-serif" }}>
+                <p className="text-xs tracking-[0.3em] uppercase mb-3" style={{ color: 'var(--rose-gold)', fontFamily: "'Inter',sans-serif" }}>
                   New Season
                 </p>
-                <h2 className="text-4xl md:text-5xl text-brown" style={{ fontFamily: "'Playfair Display',serif" }}>
+                <h2 className="text-4xl md:text-5xl" style={{ fontFamily: "'Playfair Display',serif", color: 'var(--brown)' }}>
                   Featured <span className="italic gradient-rose-text">Pieces</span>
                 </h2>
               </div>
               <Link href="/shop"
-                className="hidden md:inline-flex items-center gap-2 text-xs tracking-[0.16em] uppercase font-medium text-rose-gold hover:gap-3 transition-all duration-300"
-                style={{ fontFamily: "'Inter',sans-serif" }}>
+                className="hidden md:inline-flex items-center gap-2 text-xs tracking-[0.16em] uppercase font-medium hover:gap-3 transition-all duration-300"
+                style={{ color: 'var(--rose-gold)', fontFamily: "'Inter',sans-serif" }}>
                 View All <ArrowRight size={14} />
               </Link>
             </div>
@@ -295,19 +208,19 @@ export default function HeroSection() {
       )}
 
       {/* ══ SEO CONTENT BLOCK ══════════════════════════════ */}
-      <section className="py-16 md:py-20 border-t border-b border-nude/20" style={{ background: 'var(--beige)' }}>
+      <section className="py-16 md:py-20 border-t border-b" style={{ background: 'var(--beige)', borderColor: 'rgba(230,183,169,0.18)' }}>
         <div className="max-w-5xl mx-auto px-6 md:px-10 grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
           <div>
-            <p className="text-xs tracking-[0.28em] uppercase mb-4 text-rose-gold" style={{ fontFamily: "'Inter',sans-serif" }}>
+            <p className="text-xs tracking-[0.28em] uppercase mb-4" style={{ color: 'var(--rose-gold)', fontFamily: "'Inter',sans-serif" }}>
               Premium Women's Fashion in Pakistan
             </p>
-            <h2 className="text-3xl md:text-4xl leading-tight mb-6 text-brown" style={{ fontFamily: "'Playfair Display',serif" }}>
+            <h2 className="text-3xl md:text-4xl leading-tight mb-6" style={{ fontFamily: "'Playfair Display',serif", color: 'var(--brown)' }}>
               Buy Women's Dresses<br />Online in Pakistan
             </h2>
-            <p className="text-sm leading-relaxed mb-4 text-brown-muted" style={{ fontFamily: "'Inter',sans-serif" }}>
+            <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--brown-muted)', fontFamily: "'Inter',sans-serif" }}>
               ZAYBAASH is the official destination for premium women's fashion in Pakistan. Explore elegant one-piece dresses, tailored two-piece suits, and signature handcrafted styles designed for the modern Pakistani woman.
             </p>
-            <p className="text-sm leading-relaxed text-brown-muted" style={{ fontFamily: "'Inter',sans-serif" }}>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--brown-muted)', fontFamily: "'Inter',sans-serif" }}>
               Shop with confidence — nationwide delivery, reliable support, and carefully curated seasonal collections.
             </p>
           </div>
@@ -324,7 +237,57 @@ export default function HeroSection() {
       </section>
 
       {/* ══ ARTICLE CAROUSEL (only if articles exist in DB) ═ */}
-      <ArticleCarousel articles={articles} />
+      {articles.length > 0 && (
+        <section className="py-20 md:py-28 overflow-hidden" style={{ background: 'var(--cream)' }}>
+          <div className="max-w-7xl mx-auto px-6 md:px-10">
+            <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-14 gap-6">
+              <div>
+                <p className="text-xs tracking-[0.3em] uppercase mb-3 text-rose-gold" style={{ fontFamily: "'Inter',sans-serif" }}>
+                  From the Journal
+                </p>
+                <h2 className="text-4xl md:text-5xl text-brown" style={{ fontFamily: "'Playfair Display',serif", lineHeight: 1.08 }}>
+                  Style &amp; Stories
+                </h2>
+              </div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {articles.slice(0, 3).map((art, i) => (
+                <article key={art._id + i} className="group cursor-pointer">
+                  <div className="relative aspect-[4/3] overflow-hidden mb-5 bg-beige rounded-xl">
+                    {art.coverImage ? (
+                      <Image src={art.coverImage} alt={art.title} fill
+                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                        sizes="(max-width:768px) 100vw, 33vw" />
+                    ) : (
+                      <div className="absolute inset-0 gradient-beige" />
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 mb-3">
+                    <span className="text-[10px] tracking-[0.18em] uppercase px-2 py-0.5 rounded-sm" style={{ background: 'var(--nude-light)', color: 'var(--brown)', fontFamily: "'Inter',sans-serif" }}>
+                      {art.tag}
+                    </span>
+                    <span className="text-[11px] text-brown-muted" style={{ fontFamily: "'Inter',sans-serif" }}>
+                      {art.readTime}
+                    </span>
+                  </div>
+                  <h3 className="text-xl leading-snug mb-3 text-brown group-hover:text-rose-gold transition-colors duration-300"
+                    style={{ fontFamily: "'Playfair Display',serif" }}>
+                    {art.title}
+                  </h3>
+                  <p className="text-sm leading-relaxed mb-4 text-brown-muted line-clamp-3" style={{ fontFamily: "'Inter',sans-serif" }}>
+                    {art.excerpt}
+                  </p>
+                  <span className="inline-flex items-center gap-2 text-xs tracking-[0.14em] uppercase font-medium text-rose-gold group-hover:gap-3 transition-all duration-300"
+                    style={{ fontFamily: "'Inter',sans-serif" }}>
+                    Read Article <ArrowRight size={12} />
+                  </span>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ══ VIDEO MODAL ════════════════════════════════════ */}
       <AnimatePresence>
