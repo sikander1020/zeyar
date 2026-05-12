@@ -193,7 +193,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
     const names = new Set<string>([
       ...categories
         .map((c) => toDisplayCategory(c.name))
-        .filter((name) => name.toLowerCase() !== 'signature dress'),
+        .filter((name) => !name.toLowerCase().includes('signature')),
     ]);
     if (names.size > 0 && !names.has(activeCategory)) {
       setActiveCategory('All');
@@ -203,7 +203,7 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
   const categoryPills = useMemo(() => {
     const dynamic = categories.map((c) => c.name)
       .map((name) => toDisplayCategory(name))
-      .filter((name) => Boolean(name) && name.toLowerCase() !== 'signature dress');
+      .filter((name) => Boolean(name) && !name.toLowerCase().includes('signature'));
 
     return ['All', ...Array.from(new Set(dynamic))];
   }, [categories]);

@@ -28,7 +28,8 @@ export const metadata: Metadata = {
 export const dynamic = 'force-dynamic';
 
 export default async function DressesPage({ searchParams }: { searchParams?: { category?: string; sort?: string } }) {
-  if ((searchParams?.category ?? '').trim().toLowerCase() === 'one piece') {
+  const requestedCategory = (searchParams?.category ?? '').trim().toLowerCase();
+  if (requestedCategory === 'one piece' || requestedCategory.includes('signature')) {
     redirect('/signature-dress');
   }
 
@@ -38,6 +39,9 @@ export default async function DressesPage({ searchParams }: { searchParams?: { c
   ]);
 
   const regularProducts = products.filter((product) => !product.isSignatureDress);
+  const regularCategories = initialCategories.filter(
+    (category) => !category.name.toLowerCase().includes('signature')
+  );
 
-  return <DressesCatalog initialProducts={regularProducts} initialCategories={initialCategories} />;
+  return <DressesCatalog initialProducts={regularProducts} initialCategories={regularCategories} />;
 }
