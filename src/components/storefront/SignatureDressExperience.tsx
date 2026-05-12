@@ -40,8 +40,8 @@ export default function SignatureDressExperience({ products }: { products: Store
     setActiveIndex(index);
     setActiveImageIndex(0);
     setSelectedTab('story');
-    // On mobile, gently scroll to the showcase section when selecting from the grid
-    if (typeof window !== 'undefined' && window.innerWidth < 1024) {
+    // Scroll smoothly to the immersive spotlight stage on all devices
+    if (typeof window !== 'undefined') {
       const element = document.getElementById('signature-spotlight-stage');
       if (element) {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
