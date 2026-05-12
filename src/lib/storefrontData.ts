@@ -102,6 +102,10 @@ function normalizeProduct(p: {
   isSale?: boolean;
   isBestseller?: boolean;
   isSignatureDress?: boolean;
+  fabric?: string;
+  craft?: string;
+  line?: string;
+  lovedByCount?: number;
 }): StoreProduct {
   const resolvedId = typeof p.productId === 'string' && p.productId.trim().length > 0
     ? p.productId.trim()
@@ -154,6 +158,10 @@ function normalizeProduct(p: {
     isSale: p.isSale === true,
     isBestseller: p.isBestseller === true,
     isSignatureDress: p.isSignatureDress === true || (Array.isArray(p.tags) && p.tags.some((tag) => tag.trim().toLowerCase() === 'signature')),
+    fabric: typeof p.fabric === 'string' ? p.fabric : undefined,
+    craft: typeof p.craft === 'string' ? p.craft : undefined,
+    line: typeof p.line === 'string' ? p.line : undefined,
+    lovedByCount: typeof p.lovedByCount === 'number' ? p.lovedByCount : undefined,
   };
 }
 
