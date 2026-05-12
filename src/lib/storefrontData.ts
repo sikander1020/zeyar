@@ -194,7 +194,7 @@ function normalizeCategory(c: {
 const getRawProducts = unstable_cache(
   async () => {
     await connectDB();
-    const docs = await Product.find({ isActive: { $ne: false } }).lean();
+    const docs = await Product.find({ isActive: { $ne: false } }).sort({ createdAt: -1 }).lean();
     return docs.map((doc) => normalizeProduct(doc as never));
   },
   ['storefront-products'],

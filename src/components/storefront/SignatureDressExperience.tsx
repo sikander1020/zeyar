@@ -124,7 +124,7 @@ export default function SignatureDressExperience({ products }: { products: Store
             </p>
             {/* Using justify-start sm:justify-center to prevent mobile clipping of leftmost element when overflowing */}
             <div className="flex justify-start sm:justify-center gap-2 sm:gap-2.5 overflow-x-auto pb-2 px-2 hide-scrollbar">
-              {products.map((p, idx) => (
+              {products.slice(0, 4).map((p, idx) => (
                 <button
                   key={p.id}
                   onClick={() => handleSelectProduct(idx)}
@@ -498,7 +498,8 @@ export default function SignatureDressExperience({ products }: { products: Store
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, amount: 0.1 }}
               transition={{ duration: 0.4, delay: (idx % 6) * 0.05 }}
-              className={`group rounded-xl sm:rounded-2xl border overflow-hidden transition-all duration-300 flex flex-col ${
+              onClick={() => handleSelectProduct(idx)}
+              className={`group rounded-xl sm:rounded-2xl border overflow-hidden transition-all duration-300 flex flex-col cursor-pointer ${
                 activeIndex === idx
                   ? 'bg-white border-rose-gold shadow-md ring-1 ring-rose-gold/20'
                   : 'bg-white/70 border-nude/40 hover:bg-white hover:border-brown/40 hover:shadow-sm'
@@ -523,14 +524,20 @@ export default function SignatureDressExperience({ products }: { products: Store
                 <div className="absolute bottom-2 inset-x-2 sm:bottom-3 sm:inset-x-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-1.5 sm:gap-2">
                   <button
                     type="button"
-                    onClick={() => handleSelectProduct(idx)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleSelectProduct(idx);
+                    }}
                     className="flex-1 py-1.5 sm:py-2 bg-brown/95 backdrop-blur text-cream text-[9px] sm:text-[10px] tracking-[0.1em] sm:tracking-[0.15em] uppercase font-semibold rounded hover:bg-brown transition-colors text-center font-inter truncate px-1"
                   >
                     {activeIndex === idx ? 'Inspecting' : 'Inspect'}
                   </button>
                   <button
                     type="button"
-                    onClick={() => setQuickViewProduct(p)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setQuickViewProduct(p);
+                    }}
                     className="w-7 h-7 sm:w-8 sm:h-8 bg-white/95 backdrop-blur text-brown rounded flex items-center justify-center hover:bg-rose-gold hover:text-white transition-colors shrink-0"
                     aria-label="Quick View"
                   >
@@ -544,22 +551,18 @@ export default function SignatureDressExperience({ products }: { products: Store
                     {p.category}
                   </p>
                   <h4 className="text-xs sm:text-base font-playfair text-brown font-medium leading-snug group-hover:text-rose-gold transition-colors line-clamp-2">
-                    <button onClick={() => handleSelectProduct(idx)} className="text-left">
+                    <span className="text-left block">
                       {p.name}
-                    </button>
+                    </span>
                   </h4>
                 </div>
                 <div className="pt-2 mt-2 sm:pt-3 sm:mt-3 border-t border-nude/20 flex items-center justify-between gap-1 flex-wrap">
                   <span className="text-xs sm:text-sm font-semibold text-brown font-inter">
                     Rs {p.price.toLocaleString()}
                   </span>
-                  <button
-                    type="button"
-                    onClick={() => handleSelectProduct(idx)}
-                    className="inline-flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs text-rose-gold hover:underline font-inter font-medium"
-                  >
+                  <span className="inline-flex items-center gap-0.5 sm:gap-1 text-[10px] sm:text-xs text-rose-gold group-hover:underline font-inter font-medium">
                     Details <ChevronRight size={12} className="sm:w-3.5 sm:h-3.5" />
-                  </button>
+                  </span>
                 </div>
               </div>
             </motion.article>
