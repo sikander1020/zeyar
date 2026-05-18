@@ -5,7 +5,8 @@ import Product from '@/models/Product';
 
 const FALLBACK_IMAGE = 'https://images.unsplash.com/photo-1594938298603-c8148c4b69c8?w=800&q=80';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // 5 min cache
+
 
 export async function GET() {
   try {
@@ -63,7 +64,10 @@ export async function GET() {
         return b.count - a.count;
       });
 
-    return NextResponse.json({ categories: result });
+    return NextResponse.json(
+      { categories: result },
+      { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' } }
+    );
   } catch (err) {
     console.error('GET /api/categories error:', err);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });

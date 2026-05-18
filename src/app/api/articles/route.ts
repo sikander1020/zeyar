@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import Article from '@/models/Article';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300; // 5 min cache
+
 
 export async function GET(req: NextRequest) {
   try {
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(
       { articles },
-      { headers: { 'Cache-Control': 'public, max-age=60, stale-while-revalidate=300' } }
+      { headers: { 'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600' } }
     );
   } catch (err) {
     console.error('GET /api/articles error:', err);

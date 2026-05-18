@@ -25,7 +25,8 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = 'force-dynamic';
+// ISR: cached at CDN edge, revalidated every 5 min
+export const revalidate = 300;
 
 export default async function SignatureDressPage() {
   const products = await getStorefrontProducts();

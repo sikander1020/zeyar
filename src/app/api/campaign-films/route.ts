@@ -2,9 +2,8 @@ import { NextResponse } from 'next/server';
 import { connectDB } from '@/lib/mongodb';
 import { CampaignFilm } from '@/models/CampaignFilm';
 
-export const revalidate = 60; // 1 min cache
+export const revalidate = 300; // 5 min cache
 
-export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {

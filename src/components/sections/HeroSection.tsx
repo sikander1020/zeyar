@@ -30,21 +30,45 @@ export default function HeroSection() {
     router.prefetch('/shop');
     router.prefetch('/dresses');
 
-    // Fetch a larger set of products to distribute between sections
-    fetch('/api/products?limit=40')
-      .then(r => r.json())
-      .then(d => { 
-        if (Array.isArray(d.products)) setProducts(d.products); 
-      })
-      .catch(() => {});
+    const CACHE_KEY = 'zaybaash-home-data-v2';
+    const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
-    fetch('/api/articles?limit=6')
-      .then(r => r.json()).then(d => { if (Array.isArray(d.articles)) setArticles(d.articles); })
-      .catch(() => {});
+    // Try sessionStorage cache first for instant load on repeat visits
+    try {
+      const cached = sessionStorage.getItem(CACHE_KEY);
+      if (cached) {
+        const { data, ts } = JSON.parse(cached);
+        if (Date.now() - ts < CACHE_TTL) {
+          if (Array.isArray(data.products)) setProducts(data.products);
+          if (Array.isArray(data.articles)) setArticles(data.articles);
+          if (Array.isArray(data.films)) setFilms(data.films);
+          return; // Skip network fetch entirely
+        }
+      }
+    } catch {}
 
-    fetch('/api/campaign-films')
-      .then(r => r.json()).then(d => { if (Array.isArray(d)) setFilms(d); })
-      .catch(() => {});
+    // Fetch all 3 in parallel (not sequentially)
+    Promise.all([
+      fetch('/api/products?limit=20&sort=newest').then(r => r.json()).catch(() => ({ products: [] })),
+      fetch('/api/articles?limit=6').then(r => r.json()).catch(() => ({ articles: [] })),
+      fetch('/api/campaign-films').then(r => r.json()).catch(() => []),
+    ]).then(([prodData, artData, filmsData]) => {
+      const products = Array.isArray(prodData.products) ? prodData.products : [];
+      const articles = Array.isArray(artData.articles) ? artData.articles : [];
+      const films = Array.isArray(filmsData) ? filmsData : [];
+
+      setProducts(products);
+      setArticles(articles);
+      setFilms(films);
+
+      // Cache for next visit
+      try {
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify({
+          data: { products, articles, films },
+          ts: Date.now(),
+        }));
+      } catch {}
+    });
   }, [router]);
 
   // Hero lookbook products: Only those specifically marked in the dashboard

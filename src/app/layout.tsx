@@ -178,8 +178,11 @@ export default function RootLayout({
   return (
     <html lang="en-PK">
       <head>
-        {/* Meta Pixel Code */}
-        <script
+        {/* ====== PERFORMANCE: All third-party scripts loaded after interactive ====== */}
+        {/* Meta Pixel - non-blocking, deferred */}
+        <Script
+          id="fb-pixel"
+          strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
 !function(f,b,e,v,n,t,s)
@@ -192,19 +195,9 @@ s.parentNode.insertBefore(t,s)}(window, document,'script',
 'https://connect.facebook.net/en_US/fbevents.js');
 fbq('init', '2056842505264851');
 fbq('track', 'PageView');
-`
+`,
           }}
         />
-        <noscript>
-          <img
-            height="1"
-            width="1"
-            style={{ display: 'none' }}
-            src="https://www.facebook.com/tr?id=2056842505264851&ev=PageView&noscript=1"
-            alt=""
-          />
-        </noscript>
-        {/* End Meta Pixel Code */}
         <Script
           strategy="afterInteractive"
           src="https://www.googletagmanager.com/gtag/js?id=G-ERQGVY9029"

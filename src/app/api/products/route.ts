@@ -151,27 +151,26 @@ export async function GET(req: NextRequest) {
       q.$or = [{ name: regex }, { tags: regex }, { category: regex }];
     }
 
+    // Build MongoDB sort spec (do it at DB level, not in JS)
+    let sortSpec: Record<string, 1 | -1> = { createdAt: -1 };
+    if (sort === 'price-asc')  sortSpec = { price: 1 };
+    if (sort === 'price-desc') sortSpec = { price: -1 };
+    if (sort === 'rating')     sortSpec = { rating: -1 };
+    if (sort === 'newest')     sortSpec = { createdAt: -1 };
+
     const docs = await Product.find(q)
-      .select('productId name category price originalPrice images frontImageUrl backImageUrl sizeChartImageUrl videoUrl model3dUrl model3dStatus colors sizes sizeChartRows description details rating reviewCount tags stock isActive outOfStock isNewArrival isSale isBestseller isSignatureDress isHomeCarousel fabric craft line lovedByCount')
+      .select('productId name category price originalPrice images frontImageUrl backImageUrl sizeChartImageUrl videoUrl model3dUrl model3dStatus colors sizes sizeChartRows description details rating reviewCount tags stock isActive outOfStock isNewArrival isSale isBestseller isSignatureDress isHomeCarousel fabric craft line lovedByCount createdAt')
+      .sort(sortSpec)
       .limit(limit || 0)
       .lean();
     const products = docs.map((d) => normalizeProduct(d as never));
-
-    if (sort === 'newest') {
-      products.sort((a, b) => Number(b.isNew) - Number(a.isNew));
-    } else if (sort === 'price-asc') {
-      products.sort((a, b) => a.price - b.price);
-    } else if (sort === 'price-desc') {
-      products.sort((a, b) => b.price - a.price);
-    } else if (sort === 'rating') {
-      products.sort((a, b) => b.rating - a.rating);
-    }
 
     return NextResponse.json(
       { products, total: products.length },
       {
         headers: {
-          'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+          // 5 min CDN cache, serve stale up to 10 min while revalidating
+          'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=600',
         },
       }
     );

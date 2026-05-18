@@ -194,11 +194,13 @@ function normalizeCategory(c: {
 const getRawProducts = unstable_cache(
   async () => {
     await connectDB();
-    const docs = await Product.find({ isActive: { $ne: false } }).sort({ createdAt: -1 }).lean();
+    const docs = await Product.find({ isActive: { $ne: false } })
+      .sort({ createdAt: -1 })
+      .lean();
     return docs.map((doc) => normalizeProduct(doc as never));
   },
   ['storefront-products'],
-  { revalidate: 15, tags: ['storefront-products'] },
+  { revalidate: 300, tags: ['storefront-products'] }, // 5 min cache
 );
 
 const getRawCategories = unstable_cache(
@@ -274,7 +276,7 @@ const getRawCategories = unstable_cache(
     return result;
   },
   ['storefront-categories'],
-  { revalidate: 15, tags: ['storefront-categories'] },
+  { revalidate: 600, tags: ['storefront-categories'] }, // 10 min cache
 );
 
 export async function getStorefrontProducts() {

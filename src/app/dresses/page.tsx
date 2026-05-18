@@ -25,7 +25,9 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = 'force-dynamic';
+// ISR: page is statically generated and cached at CDN edge, revalidated every 5 min
+export const revalidate = 300;
+
 
 export default async function DressesPage({ searchParams }: { searchParams?: { category?: string; sort?: string } }) {
   const requestedCategory = (searchParams?.category ?? '').trim().toLowerCase();

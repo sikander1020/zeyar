@@ -104,4 +104,16 @@ const ProductSchema = new Schema<IProduct>(
   { timestamps: true }
 );
 
+// ── Indexes for fast storefront queries ─────────────────────────────────────
+// Main listing: isActive filter + sort by createdAt (most common query)
+ProductSchema.index({ isActive: 1, createdAt: -1 });
+// Category-filtered listing
+ProductSchema.index({ isActive: 1, category: 1, createdAt: -1 });
+// Price sort
+ProductSchema.index({ isActive: 1, price: 1 });
+// Homepage carousel filter
+ProductSchema.index({ isActive: 1, isHomeCarousel: 1 });
+// Text search fields
+ProductSchema.index({ name: 'text', tags: 'text', category: 'text' });
+
 export default mongoose.models.Product ?? mongoose.model<IProduct>('Product', ProductSchema);
