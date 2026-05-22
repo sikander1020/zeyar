@@ -348,7 +348,7 @@ export default function CoverflowCarousel({ products, onSlideChange }: Coverflow
                             <p className="text-xs tracking-widest uppercase font-inter mb-1">{product.category}</p>
                             <h3 className="text-lg font-playfair font-semibold mb-2">{product.name}</h3>
                             <p className="text-base font-semibold">Rs {product.price.toLocaleString()}</p>
-                            {product.originalPrice && (
+                            {product.originalPrice && product.originalPrice > 0 && (
                               <p className="text-xs text-rose-gold line-through">Rs {product.originalPrice.toLocaleString()}</p>
                             )}
                           </div>

@@ -14,6 +14,7 @@ import { useParams, useRouter } from 'next/navigation';
 import type { StoreProduct } from '@/types/storefront';
 import { StockBadge } from '@/components/storefront/StockBadge';
 import { AttributeCard } from '@/components/storefront/AttributeCard';
+import { ttqViewContent, ttqAddToWishlist, ttqIdentify } from '@/lib/tiktok';
 
 const ModelViewer3D = dynamic(() => import('@/components/storefront/ModelViewer3D'), {
   ssr: false,
@@ -273,6 +274,9 @@ export default function ProductPage() {
       size: selectedSize || undefined,
       color: selectedColor.name || undefined,
     });
+
+    // TikTok ViewContent
+    ttqViewContent({ id: product.id, name: product.name, price: product.price });
   }, [product?.id, product?.name, product?.category, product?.price, selectedSize, selectedColor.name]);
 
   const recentlyViewed = useMemo(() => {
@@ -373,6 +377,10 @@ export default function ProductPage() {
   const handleToggleWishlist = () => {
     const wasWishlisted = isWishlisted(product.id);
     toggle(product.id);
+    // Fire TikTok AddToWishlist only when adding (not removing)
+    if (!wasWishlisted) {
+      ttqAddToWishlist({ id: product.id, name: product.name, price: product.price });
+    }
     toast({
       type: 'success',
       title: wasWishlisted ? 'Removed from wishlist' : 'Saved to wishlist',
@@ -634,7 +642,7 @@ export default function ProductPage() {
                 <span className="text-3xl font-playfair font-semibold text-brown" style={{ fontFamily: "'Playfair Display', serif" }}>
                   Rs {product.price.toLocaleString()}
                 </span>
-                {product.originalPrice && (
+                {product.originalPrice && product.originalPrice > 0 && (
                   <>
                     <span className="text-lg text-brown-muted line-through font-inter" style={{ fontFamily: "'Inter', sans-serif" }}>
                       Rs {product.originalPrice.toLocaleString()}

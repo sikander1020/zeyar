@@ -12,6 +12,7 @@ import AppShell from '@/components/layout/AppShell';
 import { useToast } from '@/components/layout/ToastProvider';
 import ProductQuickViewModal from '@/components/storefront/ProductQuickViewModal';
 import type { StoreCategory, StoreProduct } from '@/types/storefront';
+import { ttqSearch } from '@/lib/tiktok';
 
 const sortOptions = [
   { value: 'featured', label: 'Featured' },
@@ -153,7 +154,7 @@ function ProductCard({ product, index, onQuickView }: { product: StoreProduct; i
             {product.outOfStock && (
               <span className="text-xs text-rose-gold font-inter ml-2">Out of stock</span>
             )}
-            {product.originalPrice && (
+            {product.originalPrice && product.originalPrice > 0 && (
               <span className="text-xs text-brown-muted line-through font-inter ml-1">Rs {product.originalPrice.toLocaleString()}</span>
             )}
           </div>
@@ -229,7 +230,9 @@ function DressesCatalogContent({ initialProducts, initialCategories }: { initial
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      setQuery(queryInput.trim());
+      const trimmed = queryInput.trim();
+      setQuery(trimmed);
+      if (trimmed) ttqSearch(trimmed);
     }, 180);
     return () => window.clearTimeout(timer);
   }, [queryInput]);

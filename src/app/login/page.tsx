@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import AppShell from '@/components/layout/AppShell';
 import { useAuthStore } from '@/store/useAuthStore';
 import { Eye, EyeOff } from 'lucide-react';
+import { ttqCompleteRegistration, ttqIdentify } from '@/lib/tiktok';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -40,6 +41,10 @@ export default function LoginPage() {
       
       if (!res.ok) throw new Error(data.error || 'Failed to authenticate');
       
+      // TikTok: identify user and fire registration event if signing up
+      await ttqIdentify({ email: formData.email });
+      if (!isLogin) ttqCompleteRegistration();
+
       await fetchSession(); // Refresh Zustand state
       router.push('/account');
     } catch (err: any) {

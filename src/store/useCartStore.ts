@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { StoreProduct } from '@/types/storefront';
 import * as fbq from '@/lib/fpixel';
+import { ttqAddToCart } from '@/lib/tiktok';
 
 export interface CartItem {
   product: StoreProduct;
@@ -36,6 +37,7 @@ export const useCartStore = create<CartStore>()(
           value: product.price,
           currency: 'PKR',
         });
+        ttqAddToCart({ id: product.id, name: product.name, price: product.price });
         set((state) => {
           const existing = state.items.find(
             (i) => i.product.id === product.id && i.selectedSize === size && i.selectedColor.name === color.name

@@ -7,6 +7,8 @@ import AppShell from '@/components/layout/AppShell';
 import { useCartStore } from '@/store/useCartStore';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
+import { ttqInitiateCheckout, ttqAddPaymentInfo, ttqPlaceAnOrder, ttqPurchase, ttqIdentify } from '@/lib/tiktok';
 
 const steps = ['Shipping', 'Payment', 'Review'];
 
@@ -20,6 +22,15 @@ export default function CheckoutPage() {
   const { items, total, clearCart } = useCartStore();
   const router = useRouter();
   const [submitError, setSubmitError] = useState('');
+
+  // TikTok: fire InitiateCheckout when checkout page loads
+  useEffect(() => {
+    if (items.length === 0) return;
+    ttqInitiateCheckout(
+      items.map((i) => ({ id: i.product.id, name: i.product.name, price: i.product.price, quantity: i.quantity }))
+    );
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const bankName = process.env.NEXT_PUBLIC_BANK_NAME ?? 'JazzCash';
   const bankAccountTitle = process.env.NEXT_PUBLIC_BANK_ACCOUNT_TITLE ?? 'Muhammad Umair';
   const bankAccountNumber = process.env.NEXT_PUBLIC_BANK_ACCOUNT_NUMBER ?? '03219643246';
@@ -70,6 +81,14 @@ export default function CheckoutPage() {
     setStep(1);
   };
 
+  const goToReview = () => {
+    // TikTok: AddPaymentInfo when user reaches payment step
+    ttqAddPaymentInfo(
+      items.map((i) => ({ id: i.product.id, name: i.product.name, price: i.product.price, quantity: i.quantity }))
+    );
+    setStep(2);
+  };
+
   const handlePlaceOrder = useCallback(async () => {
     try {
       setSubmitError('');
@@ -106,6 +125,12 @@ export default function CheckoutPage() {
         setSubmitError(data.error ?? 'Order failed. Please try again.');
         return;
       }
+
+      // TikTok: identify + fire order events
+      await ttqIdentify({ email: form.email, phone: form.phone });
+      const ttqItems = items.map((i) => ({ id: i.product.id, name: i.product.name, price: i.product.price, quantity: i.quantity }));
+      ttqPlaceAnOrder(ttqItems, netTotal);
+      ttqPurchase(ttqItems, netTotal);
 
       // Bank transfer: redirect to secure proof upload page
       if (paymentMethod === 'bank') {
@@ -384,7 +409,7 @@ export default function CheckoutPage() {
                     <button onClick={() => setStep(0)} className="btn-luxury btn-outline">
                       Back
                     </button>
-                    <button onClick={() => setStep(2)} className="btn-luxury btn-primary flex-1">
+                    <button onClick={goToReview} className="btn-luxury btn-primary flex-1">
                       Review Order
                     </button>
                   </div>

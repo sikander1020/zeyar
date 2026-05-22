@@ -156,7 +156,7 @@ function ProductQuickViewModalBody({ product, onClose }: { product: StoreProduct
 
             <div className="mt-3 flex items-baseline gap-2">
               <span className="text-xl font-semibold text-brown">Rs {product.price.toLocaleString()}</span>
-              {product.originalPrice && (
+              {product.originalPrice && product.originalPrice > 0 && (
                 <span className="text-sm text-brown-muted line-through">Rs {product.originalPrice.toLocaleString()}</span>
               )}
             </div>
