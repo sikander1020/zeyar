@@ -198,10 +198,10 @@ fbq('track', 'PageView');
 `,
           }}
         />
-        {/* TikTok Pixel - non-blocking, deferred */}
+        {/* TikTok Pixel - loaded early for pixel detection */}
         <Script
           id="tiktok-pixel"
-          strategy="afterInteractive"
+          strategy="beforeInteractive"
           dangerouslySetInnerHTML={{
             __html: `
 !function (w, d, t) {
