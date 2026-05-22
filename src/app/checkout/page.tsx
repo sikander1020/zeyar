@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
 import { ttqInitiateCheckout, ttqAddPaymentInfo, ttqPlaceAnOrder, ttqPurchase, ttqIdentify } from '@/lib/tiktok';
+import * as fbq from '@/lib/fpixel';
 
 const steps = ['Shipping', 'Payment', 'Review'];
 
@@ -131,6 +132,14 @@ export default function CheckoutPage() {
       const ttqItems = items.map((i) => ({ id: i.product.id, name: i.product.name, price: i.product.price, quantity: i.quantity }));
       ttqPlaceAnOrder(ttqItems, netTotal);
       ttqPurchase(ttqItems, netTotal);
+
+      // Meta Pixel: fire Purchase event (browser-side, pairs with server CAPI)
+      fbq.event('Purchase', {
+        currency: 'PKR',
+        value: netTotal,
+        contents: ttqItems.map((i) => ({ id: i.id, quantity: i.quantity })),
+        content_type: 'product',
+      });
 
       // Bank transfer: redirect to secure proof upload page
       if (paymentMethod === 'bank') {
