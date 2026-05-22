@@ -135,7 +135,7 @@ function normalizeProduct(p: {
     name: p.name,
     category: p.category,
     price: Number(p.price) || 0,
-    originalPrice: p.originalPrice,
+    originalPrice: (p.originalPrice && p.originalPrice > 0) ? p.originalPrice : undefined,
     images,
     frontImageUrl: typeof p.frontImageUrl === 'string' ? p.frontImageUrl : '',
     backImageUrl: typeof p.backImageUrl === 'string' ? p.backImageUrl : '',
