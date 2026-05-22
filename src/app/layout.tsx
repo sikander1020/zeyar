@@ -5,6 +5,7 @@ import { SITE_ORIGIN } from "@/lib/siteUrl";
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
 import { ToastProvider } from '@/components/layout/ToastProvider';
 import FacebookPixel from '@/components/layout/FacebookPixel';
+import TikTokPixel from '@/components/layout/TikTokPixel';
 
 export const viewport = {
   width: 'device-width',
@@ -259,6 +260,7 @@ gtag('config', 'G-ERQGVY9029');`,
           Skip to content
         </a>
         <FacebookPixel />
+        <TikTokPixel />
         <ThemeProvider>
           <ToastProvider>
             {children}

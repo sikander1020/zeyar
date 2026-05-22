@@ -266,7 +266,7 @@ export default function SignatureDressExperience({ products }: { products: Store
                   <span className="text-xl sm:text-2xl font-semibold text-brown font-inter tracking-tight">
                     Rs {currentProduct.price.toLocaleString()}
                   </span>
-                  {currentProduct.originalPrice && (
+                  {currentProduct.originalPrice && currentProduct.originalPrice > 0 && (
                     <span className="text-xs sm:text-sm text-brown-muted line-through font-inter">
                       Rs {currentProduct.originalPrice.toLocaleString()}
                     </span>
