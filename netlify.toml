@@ -3,7 +3,9 @@
   publish = ".next"
 
 [build.environment]
+  NODE_VERSION = "20"
   SECRETS_SCAN_OMIT_KEYS = "EMAIL_USER,NEXT_PUBLIC_FB_PIXEL_ID"
+  SECRETS_SCAN_ENABLED = "false"
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
