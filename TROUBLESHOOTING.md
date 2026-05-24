@@ -104,9 +104,9 @@ node -e "console.log('TOKEN SECRET SET:', !!process.env.ADMIN_TOKEN_SECRET)"
 ### 1. Verify Environment Variables
 Open `.env.local` and make sure it has:
 ```env
-MONGODB_URI=mongodb+srv://sik1020:Sikander1020@cluster0.i2cm3j2.mongodb.net/zaybaash?appName=Cluster0
-ADMIN_PASSWORD_HASH=240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9
-ADMIN_TOKEN_SECRET=zaybaash-admin-secret-key-2024-change-this-in-production
+MONGODB_URI=<your-mongodb-connection-string>
+ADMIN_PASSWORD_HASH=<your-bcrypt-password-hash>
+ADMIN_TOKEN_SECRET=<your-secret-key>
 ```
 
 ### 2. Restart Dev Server
@@ -127,7 +127,7 @@ Your MongoDB URI should be valid and accessible. Test it:
 ```bash
 # Install mongo shell if needed
 # Then test connection:
-mongo "mongodb+srv://sik1020:Sikander1020@cluster0.i2cm3j2.mongodb.net/zaybaash"
+mongo "<your-mongodb-connection-string>"
 ```
 
 ### 5. Check Terminal Output
